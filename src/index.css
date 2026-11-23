@@ -1,35 +1,311 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+  }
+
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+  }
 
   --target-size: 24px;
 
-  /* OLED Soundstage & Spatial Glass Tokens */
-  --bg: #07080d;
-  --surface: rgba(19, 22, 33, 0.64);
-  --surface-solid: #10131d;
-  --surface-2: rgba(255, 255, 255, 0.06);
-  --ink: #f8fafc;
-  --muted: #a3afc4;
-  --border: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.24);
+  /* Light Scheme ("Editorial Vinyl Daylight") */
+  --bg-light: #f6f4ef;
+  --surface-light: rgba(255, 255, 255, 0.78);
+  --surface-solid-light: #ffffff;
+  --surface-2-light: rgba(15, 23, 42, 0.05);
+  --surface-subtle-light: rgba(15, 23, 42, 0.035);
+  --surface-hover-light: rgba(15, 23, 42, 0.09);
+  --pill-bg-light: rgba(15, 23, 42, 0.055);
+  --track-bg-light: rgba(15, 23, 42, 0.07);
+  --header-bg-light: rgba(246, 244, 239, 0.84);
+  --dock-bg-light: rgba(255, 255, 255, 0.88);
+  --dialog-bg-light: rgba(255, 255, 255, 0.94);
+  --dialog-backdrop-light: rgba(15, 23, 42, 0.42);
+  --input-bg-light: rgba(255, 255, 255, 0.88);
+  --placeholder-light: rgba(71, 85, 105, 0.72);
+  --ink-light: #10131d;
+  --muted-light: #4b5568;
+  --border-light: rgba(15, 23, 42, 0.12);
+  --border-strong-light: rgba(15, 23, 42, 0.24);
+  --glass-highlight-light: rgba(255, 255, 255, 0.92);
+  --glass-shadow-light: rgba(15, 23, 42, 0.1);
+  --dock-shadow-light: rgba(15, 23, 42, 0.16);
+  --nav-active-bg-light: rgba(15, 23, 42, 0.09);
+  --jam-light: #d91b4c;
+  --jam-ink-light: #ffffff;
+  --jam-soft-light: rgba(217, 27, 76, 0.12);
+  --gigs-light: #047857;
+  --gigs-ink-light: #ffffff;
+  --gigs-soft-light: rgba(4, 120, 87, 0.12);
+  --ok-light: #15803d;
+  --ok-ink-light: #ffffff;
+  --err-light: #dc2626;
+  --err-bg-light: rgba(220, 38, 38, 0.1);
+  --scrollbar-track-light: #ebe7df;
+  --scrollbar-thumb-light: #7c8496;
+  --orb-jam-light: rgba(217, 27, 76, 0.16);
+  --orb-gigs-light: rgba(4, 120, 87, 0.14);
+  --orb-sec-a-light: rgba(99, 102, 241, 0.14);
+  --orb-sec-b-light: rgba(14, 165, 233, 0.14);
 
-  /* Two-Sided Luminous Accents */
-  --jam: #ff3b6b;
-  --jam-ink: #ffffff;
-  --gigs: #10e88a;
-  --gigs-ink: #041d12;
+  /* Dark Scheme ("OLED Soundstage") */
+  --bg-dark: #07080d;
+  --surface-dark: rgba(19, 22, 33, 0.64);
+  --surface-solid-dark: #10131d;
+  --surface-2-dark: rgba(255, 255, 255, 0.06);
+  --surface-subtle-dark: rgba(255, 255, 255, 0.035);
+  --surface-hover-dark: rgba(255, 255, 255, 0.12);
+  --pill-bg-dark: rgba(255, 255, 255, 0.06);
+  --track-bg-dark: rgba(0, 0, 0, 0.4);
+  --header-bg-dark: rgba(7, 8, 13, 0.8);
+  --dock-bg-dark: rgba(16, 19, 29, 0.8);
+  --dialog-bg-dark: rgba(16, 19, 29, 0.9);
+  --dialog-backdrop-dark: rgba(4, 5, 10, 0.78);
+  --input-bg-dark: rgba(255, 255, 255, 0.05);
+  --placeholder-dark: rgba(163, 175, 196, 0.65);
+  --ink-dark: #f8fafc;
+  --muted-dark: #a3afc4;
+  --border-dark: rgba(255, 255, 255, 0.12);
+  --border-strong-dark: rgba(255, 255, 255, 0.24);
+  --glass-highlight-dark: rgba(255, 255, 255, 0.14);
+  --glass-shadow-dark: rgba(0, 0, 0, 0.45);
+  --dock-shadow-dark: rgba(0, 0, 0, 0.58);
+  --nav-active-bg-dark: rgba(255, 255, 255, 0.14);
+  --jam-dark: #ff3b6b;
+  --jam-ink-dark: #ffffff;
+  --jam-soft-dark: rgba(255, 59, 107, 0.18);
+  --gigs-dark: #10e88a;
+  --gigs-ink-dark: #041d12;
+  --gigs-soft-dark: rgba(16, 232, 138, 0.16);
+  --ok-dark: #22c55e;
+  --ok-ink-dark: #041d12;
+  --err-dark: #ff5c6c;
+  --err-bg-dark: rgba(255, 92, 108, 0.14);
+  --scrollbar-track-dark: #0b0d14;
+  --scrollbar-thumb-dark: #5a6580;
+  --orb-jam-dark: rgba(255, 59, 107, 0.32);
+  --orb-gigs-dark: rgba(16, 232, 138, 0.26);
+  --orb-sec-a-dark: rgba(99, 102, 241, 0.34);
+  --orb-sec-b-dark: rgba(56, 189, 248, 0.26);
 
-  /* Semantic Status */
-  --ok: #22c55e;
-  --err: #ff5c6c;
-  --err-bg: rgba(255, 92, 108, 0.14);
-  --scrollbar-track: #0b0d14;
-  --scrollbar-thumb: #363f57;
   --accent: var(--jam);
+  --accent-ink: var(--jam-ink);
 
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+@supports (color: light-dark(white, black)) {
+  :root {
+    --bg: light-dark(var(--bg-light), var(--bg-dark));
+    --surface: light-dark(var(--surface-light), var(--surface-dark));
+    --surface-solid: light-dark(var(--surface-solid-light), var(--surface-solid-dark));
+    --surface-2: light-dark(var(--surface-2-light), var(--surface-2-dark));
+    --surface-subtle: light-dark(var(--surface-subtle-light), var(--surface-subtle-dark));
+    --surface-hover: light-dark(var(--surface-hover-light), var(--surface-hover-dark));
+    --pill-bg: light-dark(var(--pill-bg-light), var(--pill-bg-dark));
+    --track-bg: light-dark(var(--track-bg-light), var(--track-bg-dark));
+    --header-bg: light-dark(var(--header-bg-light), var(--header-bg-dark));
+    --dock-bg: light-dark(var(--dock-bg-light), var(--dock-bg-dark));
+    --dialog-bg: light-dark(var(--dialog-bg-light), var(--dialog-bg-dark));
+    --dialog-backdrop: light-dark(var(--dialog-backdrop-light), var(--dialog-backdrop-dark));
+    --input-bg: light-dark(var(--input-bg-light), var(--input-bg-dark));
+    --placeholder-ink: light-dark(var(--placeholder-light), var(--placeholder-dark));
+    --ink: light-dark(var(--ink-light), var(--ink-dark));
+    --muted: light-dark(var(--muted-light), var(--muted-dark));
+    --border: light-dark(var(--border-light), var(--border-dark));
+    --border-strong: light-dark(var(--border-strong-light), var(--border-strong-dark));
+    --glass-highlight: light-dark(var(--glass-highlight-light), var(--glass-highlight-dark));
+    --glass-shadow: light-dark(var(--glass-shadow-light), var(--glass-shadow-dark));
+    --dock-shadow: light-dark(var(--dock-shadow-light), var(--dock-shadow-dark));
+    --nav-active-bg: light-dark(var(--nav-active-bg-light), var(--nav-active-bg-dark));
+    --jam: light-dark(var(--jam-light), var(--jam-dark));
+    --jam-ink: light-dark(var(--jam-ink-light), var(--jam-ink-dark));
+    --jam-soft: light-dark(var(--jam-soft-light), var(--jam-soft-dark));
+    --gigs: light-dark(var(--gigs-light), var(--gigs-dark));
+    --gigs-ink: light-dark(var(--gigs-ink-light), var(--gigs-ink-dark));
+    --gigs-soft: light-dark(var(--gigs-soft-light), var(--gigs-soft-dark));
+    --ok: light-dark(var(--ok-light), var(--ok-dark));
+    --ok-ink: light-dark(var(--ok-ink-light), var(--ok-ink-dark));
+    --err: light-dark(var(--err-light), var(--err-dark));
+    --err-bg: light-dark(var(--err-bg-light), var(--err-bg-dark));
+    --scrollbar-track: light-dark(var(--scrollbar-track-light), var(--scrollbar-track-dark));
+    --scrollbar-thumb: light-dark(var(--scrollbar-thumb-light), var(--scrollbar-thumb-dark));
+    --orb-jam: light-dark(var(--orb-jam-light), var(--orb-jam-dark));
+    --orb-gigs: light-dark(var(--orb-gigs-light), var(--orb-gigs-dark));
+    --orb-sec-a: light-dark(var(--orb-sec-a-light), var(--orb-sec-a-dark));
+    --orb-sec-b: light-dark(var(--orb-sec-b-light), var(--orb-sec-b-dark));
+  }
+}
+
+@supports not (color: light-dark(white, black)) {
+  :root {
+    --bg: var(--bg-light);
+    --surface: var(--surface-light);
+    --surface-solid: var(--surface-solid-light);
+    --surface-2: var(--surface-2-light);
+    --surface-subtle: var(--surface-subtle-light);
+    --surface-hover: var(--surface-hover-light);
+    --pill-bg: var(--pill-bg-light);
+    --track-bg: var(--track-bg-light);
+    --header-bg: var(--header-bg-light);
+    --dock-bg: var(--dock-bg-light);
+    --dialog-bg: var(--dialog-bg-light);
+    --dialog-backdrop: var(--dialog-backdrop-light);
+    --input-bg: var(--input-bg-light);
+    --placeholder-ink: var(--placeholder-light);
+    --ink: var(--ink-light);
+    --muted: var(--muted-light);
+    --border: var(--border-light);
+    --border-strong: var(--border-strong-light);
+    --glass-highlight: var(--glass-highlight-light);
+    --glass-shadow: var(--glass-shadow-light);
+    --dock-shadow: var(--dock-shadow-light);
+    --nav-active-bg: var(--nav-active-bg-light);
+    --jam: var(--jam-light);
+    --jam-ink: var(--jam-ink-light);
+    --jam-soft: var(--jam-soft-light);
+    --gigs: var(--gigs-light);
+    --gigs-ink: var(--gigs-ink-light);
+    --gigs-soft: var(--gigs-soft-light);
+    --ok: var(--ok-light);
+    --ok-ink: var(--ok-ink-light);
+    --err: var(--err-light);
+    --err-bg: var(--err-bg-light);
+    --scrollbar-track: var(--scrollbar-track-light);
+    --scrollbar-thumb: var(--scrollbar-thumb-light);
+    --orb-jam: var(--orb-jam-light);
+    --orb-gigs: var(--orb-gigs-light);
+    --orb-sec-a: var(--orb-sec-a-light);
+    --orb-sec-b: var(--orb-sec-b-light);
+
+    @media (prefers-color-scheme: dark) {
+      --bg: var(--bg-dark);
+      --surface: var(--surface-dark);
+      --surface-solid: var(--surface-solid-dark);
+      --surface-2: var(--surface-2-dark);
+      --surface-subtle: var(--surface-subtle-dark);
+      --surface-hover: var(--surface-hover-dark);
+      --pill-bg: var(--pill-bg-dark);
+      --track-bg: var(--track-bg-dark);
+      --header-bg: var(--header-bg-dark);
+      --dock-bg: var(--dock-bg-dark);
+      --dialog-bg: var(--dialog-bg-dark);
+      --dialog-backdrop: var(--dialog-backdrop-dark);
+      --input-bg: var(--input-bg-dark);
+      --placeholder-ink: var(--placeholder-dark);
+      --ink: var(--ink-dark);
+      --muted: var(--muted-dark);
+      --border: var(--border-dark);
+      --border-strong: var(--border-strong-dark);
+      --glass-highlight: var(--glass-highlight-dark);
+      --glass-shadow: var(--glass-shadow-dark);
+      --dock-shadow: var(--dock-shadow-dark);
+      --nav-active-bg: var(--nav-active-bg-dark);
+      --jam: var(--jam-dark);
+      --jam-ink: var(--jam-ink-dark);
+      --jam-soft: var(--jam-soft-dark);
+      --gigs: var(--gigs-dark);
+      --gigs-ink: var(--gigs-ink-dark);
+      --gigs-soft: var(--gigs-soft-dark);
+      --ok: var(--ok-dark);
+      --ok-ink: var(--ok-ink-dark);
+      --err: var(--err-dark);
+      --err-bg: var(--err-bg-dark);
+      --scrollbar-track: var(--scrollbar-track-dark);
+      --scrollbar-thumb: var(--scrollbar-thumb-dark);
+      --orb-jam: var(--orb-jam-dark);
+      --orb-gigs: var(--orb-gigs-dark);
+      --orb-sec-a: var(--orb-sec-a-dark);
+      --orb-sec-b: var(--orb-sec-b-dark);
+    }
+
+    &:has(> head > meta[name="color-scheme"][content="dark"]) {
+      --bg: var(--bg-dark);
+      --surface: var(--surface-dark);
+      --surface-solid: var(--surface-solid-dark);
+      --surface-2: var(--surface-2-dark);
+      --surface-subtle: var(--surface-subtle-dark);
+      --surface-hover: var(--surface-hover-dark);
+      --pill-bg: var(--pill-bg-dark);
+      --track-bg: var(--track-bg-dark);
+      --header-bg: var(--header-bg-dark);
+      --dock-bg: var(--dock-bg-dark);
+      --dialog-bg: var(--dialog-bg-dark);
+      --dialog-backdrop: var(--dialog-backdrop-dark);
+      --input-bg: var(--input-bg-dark);
+      --placeholder-ink: var(--placeholder-dark);
+      --ink: var(--ink-dark);
+      --muted: var(--muted-dark);
+      --border: var(--border-dark);
+      --border-strong: var(--border-strong-dark);
+      --glass-highlight: var(--glass-highlight-dark);
+      --glass-shadow: var(--glass-shadow-dark);
+      --dock-shadow: var(--dock-shadow-dark);
+      --nav-active-bg: var(--nav-active-bg-dark);
+      --jam: var(--jam-dark);
+      --jam-ink: var(--jam-ink-dark);
+      --jam-soft: var(--jam-soft-dark);
+      --gigs: var(--gigs-dark);
+      --gigs-ink: var(--gigs-ink-dark);
+      --gigs-soft: var(--gigs-soft-dark);
+      --ok: var(--ok-dark);
+      --ok-ink: var(--ok-ink-dark);
+      --err: var(--err-dark);
+      --err-bg: var(--err-bg-dark);
+      --scrollbar-track: var(--scrollbar-track-dark);
+      --scrollbar-thumb: var(--scrollbar-thumb-dark);
+      --orb-jam: var(--orb-jam-dark);
+      --orb-gigs: var(--orb-gigs-dark);
+      --orb-sec-a: var(--orb-sec-a-dark);
+      --orb-sec-b: var(--orb-sec-b-dark);
+    }
+
+    &:has(> head > meta[name="color-scheme"][content="light"]) {
+      --bg: var(--bg-light);
+      --surface: var(--surface-light);
+      --surface-solid: var(--surface-solid-light);
+      --surface-2: var(--surface-2-light);
+      --surface-subtle: var(--surface-subtle-light);
+      --surface-hover: var(--surface-hover-light);
+      --pill-bg: var(--pill-bg-light);
+      --track-bg: var(--track-bg-light);
+      --header-bg: var(--header-bg-light);
+      --dock-bg: var(--dock-bg-light);
+      --dialog-bg: var(--dialog-bg-light);
+      --dialog-backdrop: var(--dialog-backdrop-light);
+      --input-bg: var(--input-bg-light);
+      --placeholder-ink: var(--placeholder-light);
+      --ink: var(--ink-light);
+      --muted: var(--muted-light);
+      --border: var(--border-light);
+      --border-strong: var(--border-strong-light);
+      --glass-highlight: var(--glass-highlight-light);
+      --glass-shadow: var(--glass-shadow-light);
+      --dock-shadow: var(--dock-shadow-light);
+      --nav-active-bg: var(--nav-active-bg-light);
+      --jam: var(--jam-light);
+      --jam-ink: var(--jam-ink-light);
+      --jam-soft: var(--jam-soft-light);
+      --gigs: var(--gigs-light);
+      --gigs-ink: var(--gigs-ink-light);
+      --gigs-soft: var(--gigs-soft-light);
+      --ok: var(--ok-light);
+      --ok-ink: var(--ok-ink-light);
+      --err: var(--err-light);
+      --err-bg: var(--err-bg-light);
+      --scrollbar-track: var(--scrollbar-track-light);
+      --scrollbar-thumb: var(--scrollbar-thumb-light);
+      --orb-jam: var(--orb-jam-light);
+      --orb-gigs: var(--orb-gigs-light);
+      --orb-sec-a: var(--orb-sec-a-light);
+      --orb-sec-b: var(--orb-sec-b-light);
+    }
+  }
 }
 
 @media (pointer: coarse) {
@@ -103,6 +379,55 @@ html {
   }
 }
 
+/* CSS-driven scheme visibility (no JS needed after load) */
+@media (prefers-color-scheme: light) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="dark"])) .if-dark {
+    display: none !important;
+  }
+}
+:root:has(> head > meta[name="color-scheme"][content="light"]) .if-dark {
+  display: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .if-light {
+    display: none !important;
+  }
+}
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .if-light {
+  display: none !important;
+}
+
+/* Component-level isolated dark mode for intentionally dark media & artist stages */
+.dark-stage {
+  color-scheme: only dark;
+  color: var(--ink);
+  accent-color: var(--accent);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+@supports not (color: light-dark(white, black)) {
+  .dark-stage {
+    --ink: var(--ink-dark);
+    --muted: var(--muted-dark);
+    --input-bg: var(--input-bg-dark);
+    --placeholder-ink: var(--placeholder-dark);
+    --border: var(--border-dark);
+    --border-strong: var(--border-strong-dark);
+    --surface-solid: var(--surface-solid-dark);
+    --pill-bg: var(--pill-bg-dark);
+    --surface-hover: var(--surface-hover-dark);
+    --jam: var(--jam-dark);
+    --jam-ink: var(--jam-ink-dark);
+    --jam-soft: var(--jam-soft-dark);
+    --gigs: var(--gigs-dark);
+    --gigs-ink: var(--gigs-ink-dark);
+    --gigs-soft: var(--gigs-soft-dark);
+    --err: var(--err-dark);
+    --err-bg: var(--err-bg-dark);
+  }
+}
+
 .font-display {
   font-family: 'Bricolage Grotesque', system-ui, sans-serif;
 }
@@ -131,18 +456,18 @@ html {
   background-color: var(--surface);
   border: 1px solid var(--border);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 24px 60px rgba(0, 0, 0, 0.45);
+    inset 0 1px 0 var(--glass-highlight),
+    0 24px 60px var(--glass-shadow);
   backdrop-filter: blur(22px) saturate(165%);
   -webkit-backdrop-filter: blur(22px) saturate(165%);
 }
 
 .glass-dock {
-  background-color: rgba(16, 19, 29, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: var(--dock-bg);
+  border: 1px solid var(--border-strong);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 18px 48px rgba(0, 0, 0, 0.58);
+    inset 0 1px 0 var(--glass-highlight),
+    0 18px 48px var(--dock-shadow);
   backdrop-filter: blur(26px) saturate(175%);
   -webkit-backdrop-filter: blur(26px) saturate(175%);
 }
@@ -152,7 +477,7 @@ html {
 }
 
 .nav-pill-btn[aria-current='page'] {
-  background-color: rgba(255, 255, 255, 0.14);
+  background-color: var(--nav-active-bg);
   color: var(--ink);
   box-shadow: inset 0 -2px 0 var(--accent);
 }
@@ -247,13 +572,13 @@ dialog.areajam-dialog {
   padding: 0;
   border: 1px solid var(--border-strong);
   border-radius: 1.75rem;
-  background-color: rgba(16, 19, 29, 0.9);
+  background-color: var(--dialog-bg);
   color: var(--ink);
   width: min(calc(100vw - 1.5rem), 34rem);
   max-height: min(88dvh, 50rem);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 32px 90px rgba(0, 0, 0, 0.68);
+    inset 0 1px 0 var(--glass-highlight),
+    0 32px 90px var(--dock-shadow);
   backdrop-filter: blur(28px) saturate(170%);
   -webkit-backdrop-filter: blur(28px) saturate(170%);
 }
@@ -265,7 +590,7 @@ dialog.areajam-dialog:modal {
 dialog.areajam-dialog::backdrop {
   overflow: hidden;
   overscroll-behavior: contain;
-  background-color: rgba(4, 5, 10, 0.78);
+  background-color: var(--dialog-backdrop);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -275,7 +600,7 @@ dialog.areajam-dialog::backdrop {
   width: 100%;
   border-radius: 0.95rem;
   border: 1px solid var(--border);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--input-bg);
   color: var(--ink);
   padding: 0.7rem 0.95rem;
   font-size: 0.95rem;
@@ -283,7 +608,7 @@ dialog.areajam-dialog::backdrop {
 }
 
 .field-control::placeholder {
-  color: rgba(163, 175, 196, 0.65);
+  color: var(--placeholder-ink);
 }
 
 .field-control:focus-visible {

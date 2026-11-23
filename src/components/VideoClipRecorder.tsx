@@ -329,7 +329,7 @@ export function VideoClipRecorder({
   const atLimit = clips.length >= maxClips;
 
   return (
-    <div className="space-y-4 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-4">
+    <div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="font-display text-base font-bold">
@@ -340,7 +340,7 @@ export function VideoClipRecorder({
           </p>
         </div>
 
-        <div className="inline-flex rounded-full border border-[var(--border)] bg-black/30 p-0.5">
+        <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--track-bg)] p-0.5">
           <button
             type="button"
             onClick={() => setStudioTab('webcam')}
@@ -406,7 +406,7 @@ export function VideoClipRecorder({
                 <button
                   type="button"
                   onClick={() => void startCamera()}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-white/5 px-4 py-6 text-sm font-semibold transition hover:bg-white/10"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--pill-bg)] px-4 py-6 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
                 >
                   <Video className="h-5 w-5 text-[var(--accent)]" aria-hidden="true" />
                   <span>Open camera to record 30s intro</span>
@@ -415,7 +415,7 @@ export function VideoClipRecorder({
 
               {cameraActive && (
                 <div className="space-y-3">
-                  <div className="reel-aspect relative mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-white/15 bg-black">
+                  <div className="reel-aspect relative mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-[var(--border)] bg-black">
                     <video
                       ref={liveVideoRef}
                       autoPlay
@@ -462,7 +462,7 @@ export function VideoClipRecorder({
                     <button
                       type="button"
                       onClick={stopStreamAndMeter}
-                      className="rounded-full border border-[var(--border)] bg-white/5 px-4 py-2.5 text-xs font-semibold"
+                      className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-xs font-semibold hover:bg-[var(--surface-hover)]"
                     >
                       Cancel
                     </button>
@@ -472,7 +472,7 @@ export function VideoClipRecorder({
 
               {recordedPreviewUrl && recordedBlob && (
                 <div className="space-y-3">
-                  <div className="reel-aspect mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-white/15 bg-black">
+                  <div className="reel-aspect mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-[var(--border)] bg-black">
                     <video
                       src={recordedPreviewUrl}
                       controls
@@ -485,7 +485,7 @@ export function VideoClipRecorder({
                     <button
                       type="button"
                       onClick={() => void startCamera()}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white/5 px-4 py-2 text-xs font-semibold"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2 text-xs font-semibold hover:bg-[var(--surface-hover)]"
                     >
                       <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                       <span>Retake</span>
@@ -493,7 +493,7 @@ export function VideoClipRecorder({
                     <button
                       type="button"
                       onClick={() => void saveRecordedClip()}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ok)] px-5 py-2 text-xs font-bold text-[#041d12]"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ok)] px-5 py-2 text-xs font-bold text-[var(--ok-ink)]"
                     >
                       <Check className="h-3.5 w-3.5" aria-hidden="true" />
                       <span>Add to profile</span>
@@ -508,7 +508,7 @@ export function VideoClipRecorder({
             <div className="space-y-3">
               <label
                 htmlFor="clip-upload-input"
-                className="flex w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-[var(--border-strong)] bg-white/5 px-4 py-5 text-center text-xs transition hover:bg-white/10"
+                className="flex w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--pill-bg)] px-4 py-5 text-center text-xs transition hover:bg-[var(--surface-hover)]"
               >
                 <Film className="h-5 w-5 text-[var(--accent)]" aria-hidden="true" />
                 <span className="font-semibold text-[var(--ink)]">
@@ -525,7 +525,7 @@ export function VideoClipRecorder({
               </label>
 
               {uploadPreviewUrl && uploadBlob && (
-                <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-black/30 p-3">
+                <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3">
                   {uploadBlob.kind === 'video' ? (
                     <video
                       src={uploadPreviewUrl}
@@ -539,7 +539,7 @@ export function VideoClipRecorder({
                   <button
                     type="button"
                     onClick={() => void saveUploadedClip()}
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--ok)] px-4 py-2.5 text-xs font-bold text-[#041d12]"
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--ok)] px-4 py-2.5 text-xs font-bold text-[var(--ok-ink)]"
                   >
                     <Check className="h-4 w-4" aria-hidden="true" />
                     <span>Attach uploaded clip ({uploadBlob.duration}s)</span>
@@ -558,7 +558,7 @@ export function VideoClipRecorder({
             return (
               <li
                 key={clip.id}
-                className="flex items-center justify-between gap-2 rounded-xl border bg-black/30 p-2.5"
+                className="flex items-center justify-between gap-2 rounded-xl border bg-[var(--surface-subtle)] p-2.5"
                 style={{ borderColor: isMain ? 'var(--accent)' : 'var(--border)' }}
               >
                 <div className="flex min-w-0 items-center gap-2.5">
@@ -570,7 +570,7 @@ export function VideoClipRecorder({
                       className="h-12 w-9 shrink-0 rounded-lg object-cover"
                     />
                   ) : (
-                    <span className="inline-flex h-12 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[var(--accent)]">
+                    <span className="inline-flex h-12 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--pill-bg)] text-[var(--accent)]">
                       <Film className="h-4 w-4" aria-hidden="true" />
                     </span>
                   )}
@@ -584,7 +584,7 @@ export function VideoClipRecorder({
 
                 <div className="flex shrink-0 items-center gap-1.5">
                   {isMain ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[10px] font-bold text-[var(--accent)]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-2)] px-2 py-1 text-[10px] font-bold text-[var(--accent)]">
                       <Star className="h-3 w-3 fill-current" aria-hidden="true" />
                       <span>Main</span>
                     </span>
@@ -592,7 +592,7 @@ export function VideoClipRecorder({
                     <button
                       type="button"
                       onClick={() => onSetFeaturedClip(clip.id)}
-                      className="rounded-full border border-[var(--border)] bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-[var(--ink)] hover:bg-white/10"
+                      className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-[10px] font-semibold text-[var(--ink)] hover:bg-[var(--surface-hover)]"
                     >
                       Set main
                     </button>
@@ -601,7 +601,7 @@ export function VideoClipRecorder({
                     type="button"
                     onClick={() => void handleDeleteSavedClip(clip)}
                     aria-label={`Remove ${clip.title}`}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-white/5 text-[var(--err)] hover:bg-white/10"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--err)] hover:bg-[var(--surface-hover)]"
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>

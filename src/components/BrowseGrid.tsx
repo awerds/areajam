@@ -80,7 +80,7 @@ export function BrowseGrid({
             <button
               type="button"
               onClick={onWatchInReels}
-              className="shrink-0 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-2.5 text-xs font-semibold transition hover:bg-white/10"
+              className="shrink-0 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
             >
               Open clip reels
             </button>
@@ -162,7 +162,7 @@ export function BrowseGrid({
                     <button
                       type="button"
                       onClick={() => onOpenProfile(item)}
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-white/5 px-3 py-2 text-xs font-semibold transition hover:bg-white/10"
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-2 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
                     >
                       <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
                       <span>View page</span>

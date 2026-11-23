@@ -202,9 +202,10 @@ export function ProfilePage({
     >
       {/* MySpace-inspired custom-themed hero banner */}
       <header
-        className="relative overflow-hidden rounded-[2rem] border p-6 shadow-2xl md:p-8"
+        className="dark-stage relative overflow-hidden rounded-[2rem] border p-6 shadow-2xl md:p-8"
         style={{
-          background: `radial-gradient(circle at 85% 18%, ${theme.glow}, transparent 50%), linear-gradient(135deg, ${theme.bgFrom}, ${theme.bgTo})`,
+          backgroundColor: theme.bgTo,
+          backgroundImage: `radial-gradient(circle at 85% 18%, ${theme.glow}, transparent 50%), linear-gradient(135deg, ${theme.bgFrom}, ${theme.bgTo})`,
           borderColor: theme.borderTint,
         }}
       >
@@ -339,7 +340,7 @@ export function ProfilePage({
                   className="rounded-2xl border p-3 text-left transition"
                   style={{
                     background: `linear-gradient(135deg, ${t.bgFrom}, ${t.bgTo})`,
-                    borderColor: selected ? t.accent : 'rgba(255,255,255,0.14)',
+                    borderColor: selected ? t.accent : 'var(--border-strong)',
                     boxShadow: selected ? `0 0 0 1px ${t.accent}` : undefined,
                   }}
                 >
@@ -404,7 +405,7 @@ export function ProfilePage({
         <div className="space-y-6 lg:col-span-5">
           {/* Featured Video / Audio Reel Player */}
           <div
-            className="relative h-[29rem] overflow-hidden rounded-[2rem] border shadow-2xl sm:h-[33rem]"
+            className="dark-stage relative h-[29rem] overflow-hidden rounded-[2rem] border bg-[#0b0d14] shadow-2xl sm:h-[33rem]"
             style={{ borderColor: theme.borderTint }}
           >
             <ClipPlayer
@@ -421,8 +422,12 @@ export function ProfilePage({
           {/* MySpace Music Playlist */}
           <section
             aria-label="Clips and recordings playlist"
-            className="rounded-3xl border p-5"
-            style={{ backgroundColor: theme.surfaceTint, borderColor: theme.borderTint }}
+            className="dark-stage rounded-3xl border p-5"
+            style={{
+              backgroundColor: '#0c0e15',
+              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
+              borderColor: theme.borderTint,
+            }}
           >
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="font-display text-lg font-bold text-white">Clips &amp; reels</h2>
@@ -499,8 +504,12 @@ export function ProfilePage({
 
           {/* Schedule & Press Link */}
           <section
-            className="space-y-3 rounded-3xl border p-5"
-            style={{ backgroundColor: theme.surfaceTint, borderColor: theme.borderTint }}
+            className="dark-stage space-y-3 rounded-3xl border p-5"
+            style={{
+              backgroundColor: '#0c0e15',
+              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
+              borderColor: theme.borderTint,
+            }}
           >
             <h2 className="font-display text-lg font-bold text-white">Availability &amp; links</h2>
             <div className="flex items-start gap-3 text-sm text-white/90">
@@ -524,8 +533,12 @@ export function ProfilePage({
           {/* Local Scene: "Top 4 in City" (MySpace Top Friends homage) */}
           {localSceneNeighbors.length > 0 && (
             <section
-              className="rounded-3xl border p-5"
-              style={{ backgroundColor: theme.surfaceTint, borderColor: theme.borderTint }}
+              className="dark-stage rounded-3xl border p-5"
+              style={{
+                backgroundColor: '#0c0e15',
+                backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
+                borderColor: theme.borderTint,
+              }}
             >
               <div className="mb-3 flex items-center gap-2">
                 <Users className="h-4 w-4" style={{ color: theme.accent }} aria-hidden="true" />
@@ -562,8 +575,12 @@ export function ProfilePage({
         <div className="space-y-6 lg:col-span-7">
           {/* About & Sounds Like */}
           <section
-            className="space-y-4 rounded-3xl border p-6"
-            style={{ backgroundColor: theme.surfaceTint, borderColor: theme.borderTint }}
+            className="dark-stage space-y-4 rounded-3xl border p-6"
+            style={{
+              backgroundColor: '#0c0e15',
+              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
+              borderColor: theme.borderTint,
+            }}
           >
             <div>
               <h2 className="font-display text-xl font-bold text-white">What I&apos;m looking for</h2>
@@ -604,8 +621,12 @@ export function ProfilePage({
 
           {/* The Gear Locker */}
           <section
-            className="space-y-4 rounded-3xl border p-6"
-            style={{ backgroundColor: theme.surfaceTint, borderColor: theme.borderTint }}
+            className="dark-stage space-y-4 rounded-3xl border p-6"
+            style={{
+              backgroundColor: '#0c0e15',
+              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
+              borderColor: theme.borderTint,
+            }}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
@@ -676,7 +697,7 @@ export function ProfilePage({
                     className="field-control text-xs"
                   >
                     {GEAR_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat} className="bg-[#10131d] text-white">
+                      <option key={cat} value={cat} className="bg-[var(--surface-solid)] text-[var(--ink)]">
                         {cat}
                       </option>
                     ))}
@@ -723,8 +744,12 @@ export function ProfilePage({
 
           {/* MySpace-style Comment Wall */}
           <section
-            className="space-y-4 rounded-3xl border p-6"
-            style={{ backgroundColor: theme.surfaceTint, borderColor: theme.borderTint }}
+            className="dark-stage space-y-4 rounded-3xl border p-6"
+            style={{
+              backgroundColor: '#0c0e15',
+              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
+              borderColor: theme.borderTint,
+            }}
           >
             <div>
               <h2 className="font-display text-xl font-bold text-white">Scene wall</h2>

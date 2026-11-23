@@ -24,8 +24,8 @@ export function HowItWorksDialog({
     >
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
-            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[rgba(255,59,107,0.18)] text-[var(--jam)]">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
+            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--jam-soft)] text-[var(--jam)]">
               <Flame className="h-5 w-5" aria-hidden="true" />
             </div>
             <h3 className="font-display text-base font-bold">Jam side</h3>
@@ -34,8 +34,8 @@ export function HowItWorksDialog({
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
-            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[rgba(16,232,138,0.16)] text-[var(--gigs)]">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
+            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--gigs-soft)] text-[var(--gigs)]">
               <Ticket className="h-5 w-5" aria-hidden="true" />
             </div>
             <h3 className="font-display text-base font-bold">Gigs side</h3>
@@ -46,7 +46,7 @@ export function HowItWorksDialog({
         </div>
 
         <ol className="space-y-2.5 text-sm">
-          <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-3.5">
+          <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <Compass className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <div>
               <p className="font-semibold">Browse free without an account</p>
@@ -55,7 +55,7 @@ export function HowItWorksDialog({
               </p>
             </div>
           </li>
-          <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-3.5">
+          <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <Film className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <div>
               <p className="font-semibold">Record a quick webcam intro or upload cuts</p>
@@ -64,7 +64,7 @@ export function HowItWorksDialog({
               </p>
             </div>
           </li>
-          <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-3.5">
+          <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <div>
               <p className="font-semibold">Local-first by city</p>
@@ -82,7 +82,7 @@ export function HowItWorksDialog({
               onClose();
               onPickRegion();
             }}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm font-semibold transition hover:bg-white/10"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
           >
             <MapPin className="h-4 w-4" aria-hidden="true" />
             <span>Choose city</span>

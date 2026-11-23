@@ -62,7 +62,7 @@ export function MatchDialog({ listing, region, onClose, onOpenChat }: MatchDialo
             <p className="mt-1 text-sm text-[var(--muted)]">
               {listing.subtitle}, {listing.neighborhood}
             </p>
-            <p className="mt-4 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-3.5 text-sm italic text-[var(--ink)]">
+            <p className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3.5 text-sm italic text-[var(--ink)]">
               &ldquo;{listing.autoReply}&rdquo;
             </p>
           </div>
@@ -71,7 +71,7 @@ export function MatchDialog({ listing, region, onClose, onOpenChat }: MatchDialo
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/10"
+              className="flex-1 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
             >
               Keep swiping
             </button>

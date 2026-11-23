@@ -64,7 +64,7 @@ export function DetailDialog({
 
           <p className="text-sm leading-relaxed text-[var(--ink)]/90">{listing.bio}</p>
 
-          <dl className="space-y-3 rounded-2xl border border-[var(--border)] bg-white/5 p-4 text-sm">
+          <dl className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-sm">
             <div className="flex items-start gap-3">
               <Speaker className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
               <div className="min-w-0 flex-1">
@@ -111,7 +111,7 @@ export function DetailDialog({
               href={safeHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--ink)] underline decoration-white/25 underline-offset-4 hover:opacity-80"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--ink)] underline decoration-[var(--border-strong)] underline-offset-4 hover:opacity-80"
             >
               <span>Listen or view press kit ({listing.sampleLink})</span>
               <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
@@ -125,7 +125,7 @@ export function DetailDialog({
                 onClose();
                 onOpenProfile(listing);
               }}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border-strong)] bg-white/10 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/15"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border-strong)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
             >
               <Maximize2 className="h-4 w-4" aria-hidden="true" />
               <span>Open full profile page</span>
@@ -140,7 +140,7 @@ export function DetailDialog({
                   onClose();
                   onSwipe(listing, 'pass');
                 }}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm font-semibold text-[var(--err)] transition hover:bg-white/10"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--err)] transition hover:bg-[var(--surface-hover)]"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
                 <span>Pass</span>

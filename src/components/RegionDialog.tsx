@@ -81,7 +81,7 @@ export function RegionDialog({
       subtitle="Switch regional boards or open a board for your own city"
     >
       <div className="space-y-5">
-        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm">
+        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-sm">
           <div>
             <span className="block font-semibold text-[var(--ink)]">
               Show other cities after local cards
@@ -111,10 +111,10 @@ export function RegionDialog({
                   onSelectRegion(region.id);
                   onClose();
                 }}
-                className="region-tile flex items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-left transition hover:bg-white/10"
+                className="region-tile flex items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-left transition hover:bg-[var(--surface-hover)]"
                 style={{
                   borderColor: active ? 'var(--accent)' : 'var(--border)',
-                  backgroundColor: active ? 'rgba(255, 255, 255, 0.09)' : 'rgba(255, 255, 255, 0.03)',
+                  backgroundColor: active ? 'var(--surface-hover)' : 'var(--surface-subtle)',
                 }}
               >
                 <div className="min-w-0">
@@ -138,7 +138,7 @@ export function RegionDialog({
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="space-y-3 rounded-2xl border border-dashed border-[var(--border)] bg-white/[0.02] p-4"
+          className="space-y-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-subtle)] p-4"
         >
           <h3 className="font-display text-base font-bold">Start a board in your city</h3>
 
@@ -219,7 +219,7 @@ export function RegionDialog({
 
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white/10 px-4 py-2.5 text-sm font-semibold transition hover:bg-white/15"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             <span>Create and switch to city</span>

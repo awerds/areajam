@@ -101,7 +101,7 @@ export function MatchesView({
               type="button"
               onClick={() => onSelectMatch(null)}
               aria-label="Back to matches"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/5 text-[var(--ink)] transition hover:bg-white/10"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -117,7 +117,7 @@ export function MatchesView({
           <button
             type="button"
             onClick={() => onInspectListing(selectedListing)}
-            className="shrink-0 rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-white/10"
+            className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
           >
             View card
           </button>
@@ -125,7 +125,7 @@ export function MatchesView({
 
         <div className="app-scroll flex-1 space-y-3 overflow-y-auto px-5 py-4">
           {selectedMatch.messages.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/[0.03] p-5 text-center">
+            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-subtle)] p-5 text-center">
               <p className="text-sm font-medium text-[var(--ink)]">
                 You matched with {selectedListing.title} in {selectedListing.neighborhood}.
               </p>
@@ -138,7 +138,7 @@ export function MatchesView({
                     key={prompt}
                     type="button"
                     onClick={() => onSendMessage(selectedMatch.id, prompt)}
-                    className="rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:bg-white/10"
+                    className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1.5 text-xs font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:bg-[var(--surface-hover)]"
                   >
                     {prompt}
                   </button>
@@ -159,7 +159,7 @@ export function MatchesView({
                             color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
                           }
                         : {
-                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            backgroundColor: 'var(--surface-2)',
                             color: 'var(--ink)',
                             border: '1px solid var(--border)',
                           }
@@ -177,7 +177,7 @@ export function MatchesView({
         <form
           ref={formRef}
           onSubmit={submitMessage}
-          className="flex items-end gap-2 border-t border-[var(--border)] bg-black/20 p-3.5"
+          className="flex items-end gap-2 border-t border-[var(--border)] bg-[var(--surface-subtle)] p-3.5"
         >
           <label htmlFor="chat-input" className="visually-hidden">
             Message {selectedListing.title}
@@ -291,9 +291,7 @@ export function MatchesView({
                       <span
                         className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
                         style={{
-                          backgroundColor: isJam
-                            ? 'rgba(255, 59, 107, 0.16)'
-                            : 'rgba(16, 232, 138, 0.16)',
+                          backgroundColor: isJam ? 'var(--jam-soft)' : 'var(--gigs-soft)',
                           color: isJam ? 'var(--jam)' : 'var(--gigs)',
                         }}
                       >

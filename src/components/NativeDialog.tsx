@@ -98,7 +98,7 @@ export function NativeDialog({
             type="button"
             onClick={() => dialogRef.current?.close()}
             aria-label="Close"
-            className="icon-btn inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/5 text-[var(--ink)] transition hover:bg-white/15"
+            className="icon-btn inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>

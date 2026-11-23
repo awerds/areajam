@@ -257,7 +257,7 @@ export function SwipeDeck({
   if (!topCard) {
     return (
       <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-14 text-center">
-        <span className="mb-4 rounded-full border border-white/15 bg-white/5 px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
+        <span className="mb-4 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
           {region.city} ({region.areaCode}) — {mode === 'jam' ? 'Jam' : 'Gigs'}
         </span>
         <h2 className="font-display text-2xl font-bold tracking-tight">
@@ -284,7 +284,7 @@ export function SwipeDeck({
           <button
             type="button"
             onClick={onResetPassed}
-            className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/10"
+            className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
           >
             Review passed cards
           </button>
@@ -311,7 +311,7 @@ export function SwipeDeck({
           <article
             ref={nextCardRef}
             aria-hidden="true"
-            className="glass-surface pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem]"
+            className="dark-stage glass-surface pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem] bg-[#0b0d14]"
             style={{
               transform: 'translate3d(0, 14px, 0) scale(0.94)',
               opacity: 0.65,
@@ -338,7 +338,7 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="glass-surface absolute inset-0 flex touch-pan-y cursor-grab flex-col justify-end overflow-hidden rounded-[2rem] active:cursor-grabbing"
+          className="dark-stage glass-surface absolute inset-0 flex touch-pan-y cursor-grab flex-col justify-end overflow-hidden rounded-[2rem] bg-[#0b0d14] active:cursor-grabbing"
           style={{ transformStyle: 'preserve-3d' }}
         >
           <ClipPlayer

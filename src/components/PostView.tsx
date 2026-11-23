@@ -116,7 +116,7 @@ export function PostView({
       <section className="mx-auto w-full max-w-4xl">
         <div className="glass-surface grid grid-cols-1 gap-6 rounded-[2rem] p-6 md:grid-cols-12 md:p-8">
           <div className="space-y-4 md:col-span-7">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
               Account required only when creating a profile
             </span>
@@ -144,14 +144,14 @@ export function PostView({
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:col-span-5">
-            <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
               <Film className="h-5 w-5 text-[var(--jam)]" aria-hidden="true" />
               <h3 className="font-display mt-2 text-base font-bold">Main clip &amp; webcam reels</h3>
               <p className="mt-1 text-xs text-[var(--muted)]">
                 Record 30s vertical intros or upload cuts, and star which clip auto-plays first on your card.
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
               <Palette className="h-5 w-5 text-[var(--gigs)]" aria-hidden="true" />
               <h3 className="font-display mt-2 text-base font-bold">Custom MySpace-style page</h3>
               <p className="mt-1 text-xs text-[var(--muted)]">
@@ -315,7 +315,7 @@ export function PostView({
         <button
           type="button"
           onClick={onSignOut}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)]"
         >
           <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Sign out</span>
@@ -333,7 +333,7 @@ export function PostView({
             </p>
           </div>
 
-          <div className="inline-flex rounded-full border border-[var(--border)] bg-white/5 p-1">
+          <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--track-bg)] p-1">
             <button
               type="button"
               onClick={() => setSide('jam')}
@@ -362,7 +362,7 @@ export function PostView({
         </div>
 
         {justPostedListing && (
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--ok)] bg-white/5 px-4 py-3 text-sm text-[var(--ok)]">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--ok)] bg-[var(--surface-subtle)] px-4 py-3 text-sm text-[var(--ok)]">
             <span className="inline-flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>
@@ -372,7 +372,7 @@ export function PostView({
             <button
               type="button"
               onClick={() => onPreviewListing(justPostedListing)}
-              className="rounded-full bg-[var(--ok)] px-4 py-1.5 text-xs font-bold text-[#041d12]"
+              className="rounded-full bg-[var(--ok)] px-4 py-1.5 text-xs font-bold text-[var(--ok-ink)]"
             >
               Open my page
             </button>
@@ -406,7 +406,7 @@ export function PostView({
                   style={{
                     borderColor: gigSubtype === opt.id ? 'var(--gigs)' : 'var(--border)',
                     backgroundColor:
-                      gigSubtype === opt.id ? 'rgba(16, 232, 138, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                      gigSubtype === opt.id ? 'var(--gigs-soft)' : 'var(--pill-bg)',
                   }}
                 >
                   {opt.label}
@@ -430,7 +430,7 @@ export function PostView({
                     type="button"
                     aria-pressed={selected}
                     onClick={() => toggleInstrument(id)}
-                    className="inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition hover:brightness-110"
+                    className="inline-flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3.5 text-xs font-semibold transition hover:brightness-110"
                     style={
                       selected
                         ? {
@@ -440,17 +440,21 @@ export function PostView({
                             boxShadow: `0 0 0 1px ${meta.color}`,
                           }
                         : {
-                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                            backgroundColor: 'var(--pill-bg)',
                             color: 'var(--ink)',
-                            borderColor: meta.border,
+                            borderColor: 'var(--border)',
                           }
                     }
                   >
-                    <InstrumentIcon
-                      id={id}
-                      size={20}
-                      style={{ color: meta.color }}
-                    />
+                    <span
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full"
+                      style={{
+                        backgroundColor: selected ? 'transparent' : meta.bg,
+                        color: meta.color,
+                      }}
+                    >
+                      <InstrumentIcon id={id} size={20} />
+                    </span>
                     <span>{meta.shortLabel}</span>
                   </button>
                 );
@@ -474,7 +478,7 @@ export function PostView({
                 className="field-control"
               >
                 {roleOptions.map((opt) => (
-                  <option key={opt} value={opt} className="bg-[#10131d] text-white">
+                  <option key={opt} value={opt} className="bg-[var(--surface-solid)] text-[var(--ink)]">
                     {opt}
                   </option>
                 ))}
@@ -633,7 +637,7 @@ export function PostView({
           </div>
 
           {/* Music Nerd Gear Locker Builder */}
-          <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-4">
+          <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
             <div className="flex items-center gap-2">
               <Speaker className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
               <div>
@@ -656,7 +660,7 @@ export function PostView({
                   className="field-control text-xs"
                 >
                   {GEAR_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat} className="bg-[#10131d] text-white">
+                    <option key={cat} value={cat} className="bg-[var(--surface-solid)] text-[var(--ink)]">
                       {cat}
                     </option>
                   ))}
@@ -693,7 +697,7 @@ export function PostView({
                   type="button"
                   onClick={addGearItem}
                   aria-label="Add gear item"
-                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--border-strong)] bg-white/10 hover:bg-white/20"
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--border-strong)] bg-[var(--pill-bg)] hover:bg-[var(--surface-hover)]"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -705,7 +709,7 @@ export function PostView({
                 {gearLocker.map((g) => (
                   <li
                     key={g.id}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-black/30 px-3 py-2 text-xs"
+                    className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-2 text-xs"
                   >
                     <div className="min-w-0">
                       <span className="font-semibold text-[var(--accent)]">{g.category}: </span>
@@ -716,7 +720,7 @@ export function PostView({
                       type="button"
                       onClick={() => setGearLocker((prev) => prev.filter((item) => item.id !== g.id))}
                       aria-label={`Remove ${g.name}`}
-                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--err)] hover:bg-white/10"
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--err)] hover:bg-[var(--surface-hover)]"
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
@@ -727,7 +731,7 @@ export function PostView({
           </div>
 
           {/* MySpace-Inspired Page Customizer */}
-          <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-4">
+          <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
             <div className="flex items-center gap-2">
               <Palette className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
               <div>
@@ -749,7 +753,7 @@ export function PostView({
                     className="rounded-xl border p-2.5 text-left transition"
                     style={{
                       background: `linear-gradient(135deg, ${t.bgFrom}, ${t.bgTo})`,
-                      borderColor: selected ? t.accent : 'rgba(255,255,255,0.12)',
+                      borderColor: selected ? t.accent : 'var(--border-strong)',
                       boxShadow: selected ? `0 0 0 1px ${t.accent}` : undefined,
                     }}
                   >
@@ -918,9 +922,7 @@ export function PostView({
                       className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
                       style={{
                         backgroundColor:
-                          item.side === 'jam'
-                            ? 'rgba(255, 59, 107, 0.16)'
-                            : 'rgba(16, 232, 138, 0.16)',
+                          item.side === 'jam' ? 'var(--jam-soft)' : 'var(--gigs-soft)',
                         color: item.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
                       }}
                     >
@@ -938,7 +940,7 @@ export function PostView({
                     type="button"
                     onClick={() => onPreviewListing(item)}
                     aria-label={`Open full page for ${item.title}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white/5 px-3 py-2 text-xs font-semibold transition hover:bg-white/10"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-2 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
                   >
                     <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Open page</span>
@@ -947,7 +949,7 @@ export function PostView({
                     type="button"
                     onClick={() => onDeleteListing(item.id)}
                     aria-label={`Delete ${item.title}`}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white/5 text-[var(--err)] transition hover:bg-white/10"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--err)] transition hover:bg-[var(--surface-hover)]"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
