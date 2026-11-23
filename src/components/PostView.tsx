@@ -831,9 +831,11 @@ export function PostView({
                                 {isSelected ? selectedIdx + 1 : '+'}
                               </span>
                             </div>
-                            <p className="line-clamp-2 p-2.5 text-xs font-semibold leading-snug text-[var(--ink)]">
-                              {video.title}
-                            </p>
+                            <div className="p-2.5">
+                              <p className="line-clamp-2 min-h-[2rem] text-xs font-semibold leading-snug text-[var(--ink)]">
+                                {video.title}
+                              </p>
+                            </div>
                           </button>
                         );
                       })}
@@ -1476,7 +1478,7 @@ export function PostView({
             <div className="grid items-start gap-6 lg:grid-cols-12">
               <div className="lg:col-span-5">
                 <article className="mx-auto flex w-full max-w-[23rem] flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)]">
-                  <div className="relative h-[16rem] w-full overflow-hidden">
+                  <div className="relative h-[18.5rem] w-full overflow-hidden">
                     <ClipPlayer
                       listing={previewListing}
                       areaCode={region.areaCode}

@@ -131,6 +131,9 @@ function formatYouTubeApiError(status: number, body: unknown): string {
   if (reason === 'quotaExceeded' || reason === 'dailyLimitExceeded') {
     return 'YouTube daily import quota reached — paste individual YouTube links below instead.';
   }
+  if (reason === 'playlistNotFound' || status === 404) {
+    return 'This YouTube channel has no public uploads yet — try the artist’s main @handle or paste a clip link below.';
+  }
   if (
     status === 403 &&
     (reason === 'forbidden' || /referer|referrer/i.test(errObj?.message ?? ''))
@@ -138,7 +141,7 @@ function formatYouTubeApiError(status: number, body: unknown): string {
     return 'YouTube import key is not authorized on this origin — paste clip links directly below.';
   }
   if (errObj?.message) {
-    return errObj.message;
+    return errObj.message.replace(/<[^>]+>/g, '').trim();
   }
   return `YouTube import failed (HTTP ${status}). Try pasting a clip link directly below.`;
 }
