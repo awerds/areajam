@@ -1,4 +1,4 @@
-export const DEFAULT_YOUTUBE_API_KEY = 'AIzaSyCLAxrU4upv-PavGqGVyDUvn1sdQfVA7E8';
+import { readFirebaseConfig } from './firebaseApp';
 
 export interface YouTubeVideoCandidate {
   videoId: string;
@@ -25,7 +25,8 @@ export type ParsedYouTubeChannelQuery =
 
 function readYouTubeApiKey(): string {
   const fromEnv = (import.meta.env.VITE_YOUTUBE_API_KEY as string | undefined)?.trim();
-  return fromEnv || DEFAULT_YOUTUBE_API_KEY;
+  if (fromEnv) return fromEnv;
+  return readFirebaseConfig()?.apiKey?.trim() || '';
 }
 
 export function isYouTubeImportConfigured(): boolean {
