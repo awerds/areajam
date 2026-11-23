@@ -4,6 +4,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= AUSTIN (512) =================
   {
     id: 'atx-jam-1',
+    roleCategory: 'Drummers',
     side: 'jam',
     regionId: 'austin',
     neighborhood: 'East Austin',
@@ -16,6 +17,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: '1976 Ludwig Vistalite 4-pc, Zildjian K Sweet cymbals, Shure beta mics',
     availability: 'Tue / Thu evenings + Sunday afternoons',
     sampleLink: 'soundcloud.com/mayabeats-atx',
+    clips: [
+      { id: 'atx-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atx-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 11,
     autoMatch: true,
     autoReply: 'Hey! Saw we matched in 512 — down to book an hour at Music Lab East this week?',
@@ -23,6 +28,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atx-jam-2',
+    roleCategory: 'Bassists',
     side: 'jam',
     regionId: 'austin',
     neighborhood: 'South Lamar',
@@ -35,6 +41,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Fender P-Bass, Prophet Rev2, Roland Space Echo, 16-ch Mackie PA',
     availability: 'Wednesdays 7–10 PM',
     sampleLink: 'bandcamp.com/tapeloops-atx',
+    clips: [
+      { id: 'atx-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atx-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 22,
     autoMatch: true,
     autoReply: 'Yo! We have the South Lamar room every Wednesday at 7 — bring your rig if you want to sit in.',
@@ -42,6 +52,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atx-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'austin',
@@ -55,6 +66,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Full house PA, sound engineer, Ampeg SVT cab + drum shells shared',
     availability: 'Thursday, Load-in 7:30 PM',
     payOrSplit: '$250 guarantee + 20% bar cut',
+    clips: [
+      { id: 'atx-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atx-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 33,
     autoMatch: true,
     autoReply: 'Appreciate the swipe! Send a 1-minute live clip or Spotify link and let us lock in the 9:30 slot.',
@@ -62,6 +77,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atx-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'austin',
@@ -76,6 +92,10 @@ export const SEED_LISTINGS: Listing[] = [
     availability: 'Fri–Sun evenings across Central TX',
     payOrSplit: '$400 min or fair door split',
     sampleLink: 'sunburnvelvet.bandcamp.com',
+    clips: [
+      { id: 'atx-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atx-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 44,
     autoMatch: true,
     autoReply: 'Thanks for checking us out! What date and set length are you looking to book?',
@@ -85,6 +105,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= NASHVILLE (615) =================
   {
     id: 'bna-jam-1',
+    roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'nashville',
     neighborhood: 'East Nashville',
@@ -96,6 +117,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Moved to Five Points last fall. Looking for writers and rhythm players who care about groove and lyrics over shredding.',
     gearOrBackline: 'Sho-Bud Pro I, 1966 Princeton Reverb, Telecaster',
     availability: 'Mon / Tue nights',
+    clips: [
+      { id: 'bna-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'bna-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 15,
     autoMatch: true,
     autoReply: 'Hey neighbor! Always down to trade charts over coffee or plug in for a run-through.',
@@ -103,6 +128,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'bna-jam-2',
+    roleCategory: 'Vocalists',
     side: 'jam',
     regionId: 'nashville',
     neighborhood: 'Berry Hill',
@@ -114,6 +140,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Have 10 finished demos ready for live rearrangement. Seeking pocket drummer, fretless/5-string bass, and clean guitar.',
     gearOrBackline: 'Nord Electro 6D, Neumann KMS 105',
     availability: 'Weeknights after 6 PM',
+    clips: [
+      { id: 'bna-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'bna-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 26,
     autoMatch: false,
     autoReply: 'Matched! Let me send over two rough voice memos and see if the groove clicks.',
@@ -121,6 +151,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'bna-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'nashville',
@@ -134,6 +165,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Bose/Midas house sound, stage piano, 4 vocal channels',
     availability: 'Fridays, Doors 7 PM',
     payOrSplit: '80/20 door split + $150 floor guarantee',
+    clips: [
+      { id: 'bna-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'bna-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 37,
     autoMatch: true,
     autoReply: 'Glad we matched — drop your links and which Friday next month works best!',
@@ -141,6 +176,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'bna-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'nashville',
@@ -154,6 +190,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'In-ear monitor rig split, compact PA available on request',
     availability: 'Thu–Sun + regional road dates',
     payOrSplit: '$650 band rate (local bar) / $1,200+ private',
+    clips: [
+      { id: 'bna-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'bna-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 48,
     autoMatch: true,
     autoReply: 'Appreciate the booking match! Send venue details & date and we will confirm hold within the hour.',
@@ -163,6 +203,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= NYC / BROOKLYN (718) =================
   {
     id: 'nyc-jam-1',
+    roleCategory: 'Bassists',
     side: 'jam',
     regionId: 'nyc',
     neighborhood: 'Bushwick',
@@ -174,6 +215,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Influenced by Interpol, Dry Cleaning, and Wire. Looking to split a monthly room near Morgan Ave L stop and record an EP by spring.',
     gearOrBackline: 'Rickenbacker 4003, SansAmp, Ampeg PF-500',
     availability: 'Tue / Thu after 7 PM',
+    clips: [
+      { id: 'nyc-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'nyc-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 51,
     autoMatch: true,
     autoReply: 'Yes! Are you near the L or M? Let us book 2 hours at Danbro or Battalion this week.',
@@ -181,6 +226,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'nyc-jam-2',
+    roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'nyc',
     neighborhood: 'Astoria',
@@ -192,6 +238,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'We have 5 recorded instrumentals and rehearsal hours locked at Astoria Soundworks every Sunday.',
     gearOrBackline: 'Jazzmaster, JC-120, Pearl Masters kit',
     availability: 'Sundays 1–5 PM',
+    clips: [
+      { id: 'nyc-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'nyc-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 62,
     autoMatch: true,
     autoReply: 'Awesome match! Want us to send the Google Drive folder of rough instrumentals?',
@@ -199,6 +249,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'nyc-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'nyc',
@@ -212,6 +263,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: '2x12 combo, Ampeg 410, Gretsch house shells (bring breakables)',
     availability: 'Next Saturday, Doors 8 PM',
     payOrSplit: 'Even 3-way door split after $120 sound',
+    clips: [
+      { id: 'nyc-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'nyc-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 73,
     autoMatch: true,
     autoReply: 'Hey! Thanks for hitting book — send your Bandcamp/IG and confirm you can bring breakables.',
@@ -219,6 +274,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'nyc-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'nyc',
@@ -232,6 +288,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Compact battery-ready amps for outdoor rooftops',
     availability: 'All week, NYC / Hudson Valley',
     payOrSplit: '$750–$1,400 depending on set count',
+    clips: [
+      { id: 'nyc-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'nyc-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 84,
     autoMatch: true,
     autoReply: 'Thanks for reaching out! Let us know if you need acoustic jazz or full amplified funk.',
@@ -241,6 +301,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= LOS ANGELES (213) =================
   {
     id: 'la-jam-1',
+    roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'la',
     neighborhood: 'Silver Lake',
@@ -252,6 +313,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'I have a treated garage studio off Sunset with mics and preamps. Want to turn Ableton tracks into a sweaty live 3-piece.',
     gearOrBackline: 'Mustang, Juno-106, Apollo x8, full drum mic kit',
     availability: 'Wed / Sun evenings',
+    clips: [
+      { id: 'la-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'la-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 19,
     autoMatch: true,
     autoReply: 'Dope! Down to send a couple bouncing stems and plan a studio hang in Silver Lake?',
@@ -259,6 +324,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'la-jam-2',
+    roleCategory: 'Vocalists',
     side: 'jam',
     regionId: 'la',
     neighborhood: 'Echo Park',
@@ -270,6 +336,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Tight rhythm section already gigging Zebulon & Gold-Diggers. Looking for a charismatic vocalist (keys or second guitar a bonus).',
     gearOrBackline: 'Shared rehearsal lockout in Cypress Park',
     availability: 'Tue / Thu 7:30 PM',
+    clips: [
+      { id: 'la-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'la-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 28,
     autoMatch: true,
     autoReply: 'Hey! Come belt over a couple tracks with us Tuesday in Cypress Park if you are free.',
@@ -277,6 +347,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'la-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'la',
@@ -290,6 +361,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Full outdoor PA, stage risers, shade tent, sound tech',
     availability: 'First Fridays, Load-in 5 PM',
     payOrSplit: '$400 flat guarantee per band',
+    clips: [
+      { id: 'la-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'la-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 39,
     autoMatch: true,
     autoReply: 'Great match! Reply with your band link and whether 6:30 or 8:15 fits best.',
@@ -297,6 +372,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'la-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'la',
@@ -310,6 +386,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Fender Twin, Vox AC30, compact portable PA optional',
     availability: 'Any evening with 48h notice',
     payOrSplit: '$350+ or strong door bill',
+    clips: [
+      { id: 'la-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'la-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 49,
     autoMatch: true,
     autoReply: 'Stoked to connect! Send over the date and room details.',
@@ -319,6 +399,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= CHICAGO (312) =================
   {
     id: 'chi-jam-1',
+    roleCategory: 'Drummers',
     side: 'jam',
     regionId: 'chicago',
     neighborhood: 'Logan Square',
@@ -330,6 +411,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Two twinkly guitars + bass holding down a Music Garage room. Looking for a drummer into American Football, Delta Sleep, and Toe.',
     gearOrBackline: 'Twin Reverb, Telecaster Deluxe, Music Garage lockout',
     availability: 'Mondays + Saturdays',
+    clips: [
+      { id: 'chi-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'chi-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 55,
     autoMatch: true,
     autoReply: 'Hey! Have you jammed at Music Garage before? We have 4 riffs in 5/4 and 7/8 ready.',
@@ -337,6 +422,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'chi-jam-2',
+    roleCategory: 'Keys & Synth',
     side: 'jam',
     regionId: 'chicago',
     neighborhood: 'Pilsen',
@@ -348,6 +434,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Gigged around West Loop for years, looking for a fresh Saturday afternoon jam with real pocket and zero drama.',
     gearOrBackline: 'Hammond XK-1c + Leslie sim, Roland RD-88',
     availability: 'Thu nights & Sat afternoons',
+    clips: [
+      { id: 'chi-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'chi-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 66,
     autoMatch: true,
     autoReply: 'Lovely match! Always happy to bring the organ rig out for a first session.',
@@ -355,6 +445,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'chi-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'chicago',
@@ -368,6 +459,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'House mixer + 2 powered mains, stage rug, 3 mics',
     availability: 'Wednesdays 9–11 PM',
     payOrSplit: '$300 guarantee + $80 bar tab',
+    clips: [
+      { id: 'chi-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'chi-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 77,
     autoMatch: true,
     autoReply: 'Awesome! Shoot over a live video link and which Wednesday this month you want.',
@@ -375,6 +470,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'chi-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'chicago',
@@ -388,6 +484,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Acoustic roaming or full clip-on wireless mic pack',
     availability: 'Weekends across Chicagoland',
     payOrSplit: '$800 minimum',
+    clips: [
+      { id: 'chi-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'chi-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 88,
     autoMatch: true,
     autoReply: 'Let us make some noise! Tell us indoor or outdoor and expected crowd size.',
@@ -397,6 +497,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= PORTLAND (503) =================
   {
     id: 'pdx-jam-1',
+    roleCategory: 'Horns & Strings',
     side: 'jam',
     regionId: 'portland',
     neighborhood: 'Alberta Arts',
@@ -408,6 +509,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Looping electric cello through analog delay and fuzz, plus upright/electric bass. Looking for thoughtful songwriters in NE/SE.',
     gearOrBackline: 'NS Design NXT5 cello, Fender Mustang Bass, pedalboard',
     availability: 'Tue / Wed evenings',
+    clips: [
+      { id: 'pdx-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'pdx-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 12,
     autoMatch: true,
     autoReply: 'Hi! Excited to connect in 503 — what kind of songs are you working on right now?',
@@ -415,6 +520,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'pdx-jam-2',
+    roleCategory: 'Bassists',
     side: 'jam',
     regionId: 'portland',
     neighborhood: 'SE Division',
@@ -426,6 +532,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Insulated basement off SE 39th with an Ampeg fridge waiting for the right bassist. Earplugs mandatory, good vibes only.',
     gearOrBackline: 'Orange Rockerverb, Tama Starclassic, spare Ampeg 8x10 cab',
     availability: 'Sundays 4–8 PM',
+    clips: [
+      { id: 'pdx-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'pdx-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 24,
     autoMatch: true,
     autoReply: 'Bring a bass head (or use our spare) this Sunday at 4 if you want to rattle some windows!',
@@ -433,6 +543,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'pdx-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'portland',
@@ -446,6 +557,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Compact Fishman PA + 2 vocal mics on site',
     availability: 'Thursdays 7–9 PM',
     payOrSplit: '$200 flat + tips + food/drinks',
+    clips: [
+      { id: 'pdx-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'pdx-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 35,
     autoMatch: true,
     autoReply: 'Thanks for swiping! Send a quick acoustic clip and pick a Thursday.',
@@ -453,6 +568,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'pdx-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'portland',
@@ -466,6 +582,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Self-contained acoustic DI setup, fits small corners',
     availability: 'Fri–Sun across OR / WA',
     payOrSplit: '$300+ or door share',
+    clips: [
+      { id: 'pdx-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'pdx-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 46,
     autoMatch: true,
     autoReply: 'Happy to match! Let us know the room vibe and target dates.',
@@ -475,6 +595,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= SEATTLE (206) =================
   {
     id: 'sea-jam-1',
+    roleCategory: 'Keys & Synth',
     side: 'jam',
     regionId: 'seattle',
     neighborhood: 'Capitol Hill',
@@ -486,6 +607,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Building live hardware sets on Elektron Digitakt + Moog Grandmother. Need organic guitar/bass hooks to lock in with hardware clock.',
     gearOrBackline: 'Digitakt, Moog Grandmother, Roland Jazz Chorus',
     availability: 'Mon / Thu nights at Substation',
+    clips: [
+      { id: 'sea-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'sea-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 57,
     autoMatch: true,
     autoReply: 'Nice match! Down to plug your guitar into my MIDI-synced pedalboard sometime?',
@@ -493,6 +618,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'sea-jam-2',
+    roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'seattle',
     neighborhood: 'Ballard',
@@ -504,6 +630,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Loud-quiet-loud dynamic rock in Ballard. We write fast, record everything on a Zoom H6, and aim for a gig a month.',
     gearOrBackline: 'Cry Baby Studios room, Ludwig kit, Jazz Bass',
     availability: 'Wednesdays 7 PM',
+    clips: [
+      { id: 'sea-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'sea-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 68,
     autoMatch: true,
     autoReply: 'Hey! Come make some racket with us at Cry Baby next Wednesday?',
@@ -511,6 +641,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'sea-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'seattle',
@@ -524,6 +655,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Full PA, soundperson, shared 4x12 and drum shells',
     availability: 'Friday in 3 weeks, Load-in 7 PM',
     payOrSplit: 'Even bill split ($15 door)',
+    clips: [
+      { id: 'sea-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'sea-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 79,
     autoMatch: true,
     autoReply: 'Sweet — drop your music link and confirm you are free that Friday!',
@@ -531,6 +666,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'sea-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'seattle',
@@ -544,6 +680,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Full backline + live spring reverb / siren FX rack',
     availability: 'Thu–Sun across Puget Sound',
     payOrSplit: '$500+ guarantee',
+    clips: [
+      { id: 'sea-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'sea-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 89,
     autoMatch: true,
     autoReply: 'Big respect! Send over the date and stage setup details.',
@@ -553,6 +693,7 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= ATLANTA (404) =================
   {
     id: 'atl-jam-1',
+    roleCategory: 'Drummers',
     side: 'jam',
     regionId: 'atlanta',
     neighborhood: 'East Atlanta Village',
@@ -564,6 +705,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Love J Dilla swing, Robert Glasper chords, and live improvisation. Looking for players around EAV or Little Five to shed weekly.',
     gearOrBackline: 'Gretsch Catalina Club, SPDSX sample pad, in-ears',
     availability: 'Tue / Sun nights',
+    clips: [
+      { id: 'atl-jam-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atl-jam-1-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 14,
     autoMatch: true,
     autoReply: 'Yo! Always down to lock in some Dilla-style grooves — when are you free in EAV?',
@@ -571,6 +716,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atl-jam-2',
+    roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'atlanta',
     neighborhood: 'Little Five Points',
@@ -582,6 +728,10 @@ export const SEED_LISTINGS: Listing[] = [
     bio: 'Two guitarists swapping leads and harmonies. Twelve tight 3-minute songs written and ready for rhythm section energy.',
     gearOrBackline: 'Hot Rod Deluxe, AC15, rehearsal studio near Edgewood',
     availability: 'Wednesdays & Saturdays',
+    clips: [
+      { id: 'atl-jam-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atl-jam-2-c2', title: 'Live room cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 25,
     autoMatch: true,
     autoReply: 'Awesome match! Want us to text you two acoustic demos before setting up a jam?',
@@ -589,6 +739,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atl-gigs-1',
+    roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
     regionId: 'atlanta',
@@ -602,6 +753,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'House JBL line array, 16-ch mixer, stage canopy',
     availability: 'Saturdays 7–9 PM',
     payOrSplit: '$450 guarantee',
+    clips: [
+      { id: 'atl-gigs-1-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atl-gigs-1-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 36,
     autoMatch: true,
     autoReply: 'Glad we matched! Drop your live video link and preferred Saturdays.',
@@ -609,6 +764,7 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atl-gigs-2',
+    roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
     regionId: 'atlanta',
@@ -622,6 +778,10 @@ export const SEED_LISTINGS: Listing[] = [
     gearOrBackline: 'Self-contained PA & stage lighting available',
     availability: 'Year-round across GA & Southeast',
     payOrSplit: '$700+ guarantee',
+    clips: [
+      { id: 'atl-gigs-2-c1', title: 'Intro reel', kind: 'synth-reel', durationSec: 8, clipVariation: 0 },
+      { id: 'atl-gigs-2-c2', title: 'Soundcheck cut', kind: 'synth-reel', durationSec: 8, clipVariation: 1 },
+    ],
     visualSeed: 47,
     autoMatch: true,
     autoReply: 'Thanks for connecting! Tell us the venue, date, and sound setup and we will lock it down.',

@@ -1,29 +1,85 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Compass, Flame, MapPin, MessageCircle, PlusSquare, Ticket } from 'lucide-react';
+import {
+  ChevronDown,
+  Compass,
+  Flame,
+  HelpCircle,
+  LayoutGrid,
+  MapPin,
+  MessageCircle,
+  Navigation,
+  PlusSquare,
+  Ticket,
+  UserCheck,
+  Video,
+  X,
+} from 'lucide-react';
+import { AuthDialog } from './components/AuthDialog';
+import { BrowseGrid } from './components/BrowseGrid';
 import { DetailDialog } from './components/DetailDialog';
+import { HowItWorksDialog } from './components/HowItWorksDialog';
 import { MatchDialog } from './components/MatchDialog';
 import { MatchesView } from './components/MatchesView';
 import { PostView } from './components/PostView';
 import { RegionDialog } from './components/RegionDialog';
 import { SwipeDeck } from './components/SwipeDeck';
-import { STARTER_REGIONS } from './data/regions';
+import { GIGS_PREFERENCES, JAM_PREFERENCES, STARTER_REGIONS } from './data/regions';
 import { SEED_LISTINGS } from './data/seedListings';
 import { stopCardPreview } from './lib/audioPreview';
+import { signOutUser, subscribeAuth } from './lib/auth';
+import { detectLocationByIp } from './lib/location';
 import { loadState, resetPassedSwipes, saveState, syncUrlRegionAndMode } from './lib/storage';
-import type { AppMode, AppState, Listing, NavTab, Region, SwipeDecision } from './types';
+import type {
+  AppMode,
+  AppState,
+  AuthUser,
+  Listing,
+  NavTab,
+  Region,
+  SwipeDecision,
+} from './types';
+
+function matchesPreferences(listing: Listing, selectedPrefs: string[]): boolean {
+  if (selectedPrefs.length === 0) return true;
+
+  return selectedPrefs.some((pref) => {
+    if (listing.roleCategory === pref) return true;
+    const text = `${listing.subtitle} ${listing.seekingOrOffer} ${listing.tags.join(' ')} ${listing.genres.join(' ')} ${listing.payOrSplit ?? ''}`.toLowerCase();
+    if (pref === 'Paid guarantee') return /guarantee|\$[1-9]/.test(text);
+    if (pref === 'Acoustic & patio') return /acoustic|patio|folk|listening/.test(text);
+    if (pref === 'Club & loud bills') return /club|punk|garage|rock|brass|backline/.test(text);
+    return text.includes(pref.toLowerCase());
+  });
+}
 
 export function App() {
   const [state, setState] = useState<AppState>(() => loadState());
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<NavTab>('discover');
   const [chipFilter, setChipFilter] = useState<string>('All');
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
+  const [ipDetecting, setIpDetecting] = useState<boolean>(false);
+
   const [regionModalOpen, setRegionModalOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authReason, setAuthReason] = useState<string | undefined>(undefined);
+  const [pendingMessage, setPendingMessage] = useState<{ matchId: string; text: string } | null>(
+    null
+  );
+
   const [detailListing, setDetailListing] = useState<Listing | null>(null);
   const [matchPopupListing, setMatchPopupListing] = useState<Listing | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
+  const browseSectionRef = useRef<HTMLDivElement>(null);
   const replyTimersRef = useRef<number[]>([]);
   const toastTimerRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    return subscribeAuth(setUser);
+  }, []);
 
   useEffect(() => {
     saveState(state);
@@ -45,7 +101,7 @@ export function App() {
   const showToast = (msg: string) => {
     setToast(msg);
     window.clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = window.setTimeout(() => setToast(null), 2600);
+    toastTimerRef.current = window.setTimeout(() => setToast(null), 2800);
   };
 
   const allRegions = useMemo<Region[]>(
@@ -63,19 +119,61 @@ export function App() {
     [state.userListings]
   );
 
+  const activePrefs = state.mode === 'jam' ? state.lookingForJam : state.lookingForGigs;
+  const prefChoices = state.mode === 'jam' ? JAM_PREFERENCES : GIGS_PREFERENCES;
+
+  const togglePreference = (pref: string) => {
+    setState((prev) => {
+      const key = prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs';
+      const current = prev[key];
+      const next = current.includes(pref)
+        ? current.filter((item) => item !== pref)
+        : [...current, pref];
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const clearPreferences = () => {
+    setState((prev) => ({
+      ...prev,
+      [prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs']: [],
+    }));
+  };
+
+  const handleAllowIpLocation = async () => {
+    setIpDetecting(true);
+    const result = await detectLocationByIp(allRegions);
+    setIpDetecting(false);
+
+    if (!result) {
+      setState((prev) => ({ ...prev, locationConsent: 'declined' }));
+      setRegionModalOpen(true);
+      showToast('Could not auto-detect city from IP — pick your metro board below.');
+      return;
+    }
+
+    setState((prev) => ({
+      ...prev,
+      locationConsent: 'granted',
+      detectedCityLabel: result.detectedLabel,
+      regionId: result.region.id,
+      includeNearbyRegions: result.created ? true : prev.includeNearbyRegions,
+      customRegions:
+        result.created && !prev.customRegions.some((r) => r.id === result.region.id)
+          ? [...prev.customRegions, result.region]
+          : prev.customRegions,
+    }));
+    showToast(`Local board set to ${result.detectedLabel}`);
+  };
+
   const availableFilters = useMemo(() => {
     const modeListings = allListings.filter(
       (l) =>
         l.side === state.mode &&
-        !l.isUserCreated &&
         (state.includeNearbyRegions || l.regionId === state.regionId)
     );
     const counts = new Map<string, number>();
     for (const item of modeListings) {
-      if (state.mode === 'gigs' && item.gigSubtype) {
-        const label = item.gigSubtype === 'open-gig' ? 'Open slots' : 'Bands for hire';
-        counts.set(label, (counts.get(label) ?? 0) + 1);
-      }
       for (const genre of item.genres) {
         counts.set(genre, (counts.get(genre) ?? 0) + 1);
       }
@@ -83,7 +181,7 @@ export function App() {
     const sorted = Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([name]) => name)
-      .slice(0, 7);
+      .slice(0, 6);
     return ['All', ...sorted];
   }, [allListings, state.includeNearbyRegions, state.mode, state.regionId]);
 
@@ -93,29 +191,29 @@ export function App() {
     }
   }, [availableFilters, chipFilter]);
 
-  const deckCards = useMemo(() => {
-    const unswiped = allListings.filter(
-      (l) => !l.isUserCreated && l.side === state.mode && !state.swiped[l.id]
-    );
-
-    const local = unswiped.filter((l) => l.regionId === state.regionId);
+  const regionalPool = useMemo(() => {
+    const sidePool = allListings.filter((l) => l.side === state.mode);
+    const local = sidePool.filter((l) => l.regionId === state.regionId);
     const nearby = state.includeNearbyRegions
-      ? unswiped.filter((l) => l.regionId !== state.regionId)
+      ? sidePool.filter((l) => l.regionId !== state.regionId)
       : [];
-
     const combined = [...local, ...nearby];
-    if (chipFilter === 'All') return combined;
-    if (chipFilter === 'Open slots') return combined.filter((l) => l.gigSubtype === 'open-gig');
-    if (chipFilter === 'Bands for hire') {
-      return combined.filter((l) => l.gigSubtype === 'band-for-hire');
-    }
-    return combined.filter((l) => l.genres.includes(chipFilter) || l.tags.includes(chipFilter));
-  }, [allListings, chipFilter, state.includeNearbyRegions, state.mode, state.regionId, state.swiped]);
+
+    return combined.filter((item) => {
+      if (!matchesPreferences(item, activePrefs)) return false;
+      if (chipFilter === 'All') return true;
+      return item.genres.includes(chipFilter) || item.tags.includes(chipFilter);
+    });
+  }, [activePrefs, allListings, chipFilter, state.includeNearbyRegions, state.mode, state.regionId]);
+
+  const deckCards = useMemo(
+    () => regionalPool.filter((l) => !l.isUserCreated && !state.swiped[l.id]),
+    [regionalPool, state.swiped]
+  );
 
   const handleModeChange = (nextMode: AppMode) => {
     stopCardPreview();
     setState((prev) => ({ ...prev, mode: nextMode }));
-    setActiveTab('discover');
     setChipFilter('All');
   };
 
@@ -162,7 +260,7 @@ export function App() {
     if (createdMatch) {
       setMatchPopupListing(listing);
     } else if (decision === 'like') {
-      showToast(`Sent interest to ${listing.title} — saved to your likes.`);
+      showToast(`Saved interest in ${listing.title}.`);
     }
   };
 
@@ -244,7 +342,7 @@ export function App() {
     showToast(`Created regional board for ${newRegion.label}`);
   };
 
-  const handleSendMessage = (matchId: string, text: string) => {
+  const deliverMessage = (matchId: string, text: string) => {
     let shouldScheduleReply = false;
     let replyText = '';
 
@@ -300,6 +398,16 @@ export function App() {
     }
   };
 
+  const handleSendMessage = (matchId: string, text: string) => {
+    if (!user) {
+      setPendingMessage({ matchId, text });
+      setAuthReason('Sign in with Apple or Google so your match knows who is messaging them.');
+      setAuthModalOpen(true);
+      return;
+    }
+    deliverMessage(matchId, text);
+  };
+
   const handleOpenChatFromMatchPopup = (listing: Listing) => {
     const found = state.matches.find((m) => m.listingId === listing.id);
     setMatchPopupListing(null);
@@ -309,133 +417,510 @@ export function App() {
     }
   };
 
+  const openAuthPrompt = (reason?: string) => {
+    setAuthReason(reason);
+    setAuthModalOpen(true);
+  };
+
   const activeSeed = deckCards[0]?.visualSeed ?? 1;
   const secondaryOrbColor =
-    activeSeed % 2 === 0 ? 'rgba(99, 102, 241, 0.36)' : 'rgba(56, 189, 248, 0.28)';
+    activeSeed % 2 === 0 ? 'rgba(99, 102, 241, 0.34)' : 'rgba(56, 189, 248, 0.26)';
 
   return (
-    <div className="relative min-h-dvh pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))]">
-      {/* Fixed spatial ambient soundstage lighting */}
+    <div className="relative min-h-dvh pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12">
+      {/* Ambient spatial lighting */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
         <div
-          className="ambient-orb -top-28 right-[-8rem] h-[24rem] w-[24rem]"
+          className="ambient-orb -top-32 right-[-6rem] h-[28rem] w-[28rem]"
           style={{
             backgroundColor:
-              state.mode === 'jam' ? 'rgba(255, 59, 107, 0.36)' : 'rgba(16, 232, 138, 0.3)',
+              state.mode === 'jam' ? 'rgba(255, 59, 107, 0.32)' : 'rgba(16, 232, 138, 0.26)',
           }}
         />
         <div
-          className="ambient-orb bottom-[-6rem] left-[-8rem] h-[22rem] w-[22rem]"
+          className="ambient-orb bottom-[-8rem] left-[-6rem] h-[25rem] w-[25rem]"
           style={{ backgroundColor: secondaryOrbColor }}
         />
       </div>
 
-      {/* Floating glass header bar */}
-      <header className="safe-top sticky top-0 z-20 px-4 pb-2">
-        <div className="toolbar glass-dock mx-auto flex max-w-2xl items-center justify-between gap-2 rounded-full px-3 py-2">
-          <div className="flex items-center gap-2.5 pl-1">
-            <img src="./icon.svg" alt="" className="h-8 w-8 rounded-full shadow-sm" />
-            <h1 className="font-display text-base font-bold tracking-tight sm:text-lg">AreaJam</h1>
+      {/* Full-width edge-to-edge sticky header */}
+      <header className="safe-top sticky top-0 z-20 border-b border-[var(--border)] bg-[#07080d]/80 backdrop-blur-xl">
+        <div className="toolbar mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 px-4 pb-3 md:px-6 xl:px-10">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => handleTabChange('discover')}
+              className="flex items-center gap-2.5 text-left"
+            >
+              <img src="./icon.svg" alt="" className="h-9 w-9 rounded-xl shadow-sm" />
+              <div>
+                <span className="font-display block text-lg font-bold leading-none tracking-tight">
+                  AreaJam
+                </span>
+                <span className="mt-0.5 hidden text-[11px] text-[var(--muted)] sm:block">
+                  Local musicians &amp; gigs
+                </span>
+              </div>
+            </button>
+
+            {/* Desktop & tablet inline primary navigation */}
+            <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+              {(
+                [
+                  { id: 'discover', label: 'Discover' },
+                  { id: 'browse', label: 'Browse players' },
+                  {
+                    id: 'matches',
+                    label: state.matches.length > 0 ? `Matches (${state.matches.length})` : 'Matches',
+                  },
+                  { id: 'post', label: 'Profile & studio' },
+                ] as const
+              ).map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-current={activeTab === item.id ? 'page' : undefined}
+                  onClick={() => handleTabChange(item.id)}
+                  className="nav-pill-btn rounded-full px-3.5 py-2 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setRegionModalOpen(true)}
-            aria-label={`Change local region, currently ${currentRegion.label}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold transition hover:bg-white/10"
-          >
-            <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
-            <span>
-              {currentRegion.city}, {currentRegion.areaCode}
-            </span>
-            <ChevronDown className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setRegionModalOpen(true)}
+              aria-label={`Change local region, currently ${currentRegion.label}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold transition hover:bg-white/10"
+            >
+              <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
+              <span>
+                {currentRegion.city}
+                {currentRegion.areaCode !== 'LOC' ? `, ${currentRegion.areaCode}` : ''}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
+            </button>
 
-          <div
-            role="group"
-            aria-label="Switch mode between Jam and Gigs"
-            className="inline-flex rounded-full border border-white/10 bg-black/35 p-0.5"
-          >
+            <div
+              role="group"
+              aria-label="Switch mode between Jam and Gigs"
+              className="inline-flex rounded-full border border-white/15 bg-black/40 p-0.5"
+            >
+              <button
+                type="button"
+                aria-pressed={state.mode === 'jam'}
+                onClick={() => handleModeChange('jam')}
+                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                style={
+                  state.mode === 'jam'
+                    ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
+                    : { color: 'var(--muted)' }
+                }
+              >
+                <Flame className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Jam</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={state.mode === 'gigs'}
+                onClick={() => handleModeChange('gigs')}
+                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                style={
+                  state.mode === 'gigs'
+                    ? { backgroundColor: 'var(--gigs)', color: 'var(--gigs-ink)' }
+                    : { color: 'var(--muted)' }
+                }
+              >
+                <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Gigs</span>
+              </button>
+            </div>
+
             <button
               type="button"
-              aria-pressed={state.mode === 'jam'}
-              onClick={() => handleModeChange('jam')}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition"
-              style={
-                state.mode === 'jam'
-                  ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
-                  : { color: 'var(--muted)' }
-              }
+              onClick={() => setHowItWorksOpen(true)}
+              aria-label="How AreaJam works"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[var(--muted)] transition hover:text-[var(--ink)]"
             >
-              <Flame className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Jam</span>
+              <HelpCircle className="h-4 w-4" aria-hidden="true" />
             </button>
-            <button
-              type="button"
-              aria-pressed={state.mode === 'gigs'}
-              onClick={() => handleModeChange('gigs')}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition"
-              style={
-                state.mode === 'gigs'
-                  ? { backgroundColor: 'var(--gigs)', color: 'var(--gigs-ink)' }
-                  : { color: 'var(--muted)' }
-              }
-            >
-              <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Gigs</span>
-            </button>
+
+            {user ? (
+              <button
+                type="button"
+                onClick={() => handleTabChange('post')}
+                aria-label="Open your profile and studio"
+                className="hidden items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold sm:inline-flex"
+              >
+                <UserCheck className="h-3.5 w-3.5 text-[var(--ok)]" aria-hidden="true" />
+                <span className="max-w-[7rem] truncate">{user.displayName}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openAuthPrompt()}
+                className="hidden rounded-full bg-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 sm:inline-flex"
+              >
+                Sign in
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Unified spatial stage */}
-      <main className="stage-shell relative z-10 mx-auto max-w-2xl px-4 pt-3">
-        {activeTab === 'discover' && (
-          <div className="space-y-4">
-            <div className="no-scrollbar flex items-center justify-start gap-2 overflow-x-auto pb-1 sm:justify-center">
-              {availableFilters.map((filter) => {
-                const active = chipFilter === filter;
-                return (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setChipFilter(filter)}
-                    className="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
-                    style={
-                      active
-                        ? {
-                            backgroundColor: 'var(--ink)',
-                            color: 'var(--bg)',
-                            borderColor: 'var(--ink)',
-                          }
-                        : {
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            color: 'var(--muted)',
-                            borderColor: 'var(--border)',
-                          }
-                    }
-                  >
-                    {filter}
-                  </button>
-                );
-              })}
+      {/* Opt-in IP Geolocation consent bar */}
+      {state.locationConsent === 'unknown' && (
+        <div className="relative z-10 border-b border-[var(--border)] bg-white/[0.04]">
+          <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-xs md:px-6 xl:px-10">
+            <div className="flex items-center gap-2 text-[var(--ink)]">
+              <Navigation className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
+              <span>
+                Use your IP address to jump to musicians and gigs near your city automatically?
+              </span>
             </div>
 
-            <SwipeDeck
-              cards={deckCards}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={ipDetecting}
+                onClick={() => void handleAllowIpLocation()}
+                className="rounded-full bg-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 disabled:opacity-60"
+              >
+                {ipDetecting ? 'Detecting city...' : 'Allow location'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setState((prev) => ({ ...prev, locationConsent: 'declined' }));
+                  setRegionModalOpen(true);
+                }}
+                className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)]"
+              >
+                Pick city
+              </button>
+              <button
+                type="button"
+                aria-label="Dismiss location prompt"
+                onClick={() => setState((prev) => ({ ...prev, locationConsent: 'declined' }))}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)]"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-width main container */}
+      <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-4 pt-4 md:px-6 md:pt-8 xl:px-10">
+        {activeTab === 'discover' && (
+          <div className="space-y-12">
+            {/* Desktop 12-col split: Clear intro + Player intent on left, live 9:16 TikTok/Tinder card stage on right */}
+            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
+              {/* Mobile compact "Looking for" strip */}
+              <div className="space-y-2 md:hidden">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold text-[var(--muted)]">
+                    {state.mode === 'jam'
+                      ? 'Who are you looking to jam with?'
+                      : 'What kind of gigs are you looking for?'}
+                  </p>
+                  {activePrefs.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearPreferences}
+                      className="text-xs font-semibold text-[var(--accent)]"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1">
+                  {prefChoices.map((pref) => {
+                    const selected = activePrefs.includes(pref);
+                    return (
+                      <button
+                        key={pref}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => togglePreference(pref)}
+                        className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                        style={
+                          selected
+                            ? {
+                                backgroundColor: 'var(--accent)',
+                                color: state.mode === 'jam' ? '#ffffff' : '#041d12',
+                                borderColor: 'var(--accent)',
+                              }
+                            : {
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                color: 'var(--muted)',
+                                borderColor: 'var(--border)',
+                              }
+                        }
+                      >
+                        {pref}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Desktop & Tablet Intro + How it Works + Looking For selector */}
+              <div className="hidden space-y-6 md:block lg:col-span-7">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                      {currentRegion.label}
+                      {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
+                    </span>
+                    <span className="text-xs text-[var(--muted)]">
+                      Browse free without an account
+                    </span>
+                  </div>
+
+                  <h1 className="hero-title font-bold text-[var(--ink)]">
+                    {state.mode === 'jam'
+                      ? 'Watch local players. Swipe into a real jam.'
+                      : 'Discover local bands and live venue bills.'}
+                  </h1>
+
+                  <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
+                    {state.mode === 'jam'
+                      ? 'AreaJam combines regional Craigslist clarity with TikTok video clips and Tinder swiping. Filter by the players you need, audition clips automatically, and sign in with Apple or Google only when you want to post or message.'
+                      : 'Switch seamlessly between finding bandmates and booking regional gigs. Preview live band reels and soundcheck cuts across your metro before signing in to lock in a bill.'}
+                  </p>
+                </div>
+
+                {/* 3-step explanation cards */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="glass-surface rounded-2xl p-4">
+                    <p className="text-xs font-bold text-[var(--accent)]">1. Pick your city</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                      Allow IP city detection or pick any metro board to keep sessions local.
+                    </p>
+                  </div>
+                  <div className="glass-surface rounded-2xl p-4">
+                    <p className="text-xs font-bold text-[var(--accent)]">2. Watch live clips</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                      Every card plays intro reels automatically. Tap once for full sound.
+                    </p>
+                  </div>
+                  <div className="glass-surface rounded-2xl p-4">
+                    <p className="text-xs font-bold text-[var(--accent)]">3. Join to post</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                      Sign in with Apple or Google to record 30s webcam clips and chat.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Interactive "What kind of players are you looking for?" multi-select */}
+                <div className="glass-surface space-y-3 rounded-3xl p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="font-display text-base font-bold">
+                      {state.mode === 'jam'
+                        ? 'What kind of players are you looking to match with?'
+                        : 'What kind of gigs or bands are you looking for?'}
+                    </h2>
+                    {activePrefs.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearPreferences}
+                        className="text-xs font-semibold text-[var(--accent)] hover:underline"
+                      >
+                        Show all ({activePrefs.length} selected)
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {prefChoices.map((pref) => {
+                      const selected = activePrefs.includes(pref);
+                      return (
+                        <button
+                          key={pref}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => togglePreference(pref)}
+                          className="rounded-full border px-3.5 py-2 text-xs font-semibold transition"
+                          style={
+                            selected
+                              ? {
+                                  backgroundColor: 'var(--accent)',
+                                  color: state.mode === 'jam' ? '#ffffff' : '#041d12',
+                                  borderColor: 'var(--accent)',
+                                }
+                              : {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                  color: 'var(--ink)',
+                                  borderColor: 'var(--border)',
+                                }
+                          }
+                        >
+                          {pref}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Primary CTAs */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/10"
+                  >
+                    <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+                    <span>Browse all ({regionalPool.length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('post')}
+                    className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition hover:opacity-90"
+                    style={{
+                      backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                      color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                    }}
+                  >
+                    <Video className="h-4 w-4" aria-hidden="true" />
+                    <span>Record intro &amp; join</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Live 9:16 TikTok / Tinder card stage */}
+              <div className="space-y-3 lg:col-span-5">
+                <div className="no-scrollbar flex items-center justify-start gap-2 overflow-x-auto pb-1 lg:justify-center">
+                  {availableFilters.map((filter) => {
+                    const active = chipFilter === filter;
+                    return (
+                      <button
+                        key={filter}
+                        type="button"
+                        onClick={() => setChipFilter(filter)}
+                        className="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition"
+                        style={
+                          active
+                            ? {
+                                backgroundColor: 'var(--ink)',
+                                color: 'var(--bg)',
+                                borderColor: 'var(--ink)',
+                              }
+                            : {
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                color: 'var(--muted)',
+                                borderColor: 'var(--border)',
+                              }
+                        }
+                      >
+                        {filter}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <SwipeDeck
+                  cards={deckCards}
+                  mode={state.mode}
+                  region={currentRegion}
+                  allRegions={allRegions}
+                  canUndo={canUndo}
+                  includeNearbyRegions={state.includeNearbyRegions}
+                  soundEnabled={soundEnabled}
+                  onToggleSound={() => setSoundEnabled((s) => !s)}
+                  onSwipe={handleSwipe}
+                  onUndo={handleUndo}
+                  onOpenDetails={setDetailListing}
+                  onEnableNearby={() =>
+                    setState((prev) => ({ ...prev, includeNearbyRegions: true }))
+                  }
+                  onResetPassed={handleResetPassed}
+                  onGoToPost={() => handleTabChange('post')}
+                />
+              </div>
+            </div>
+
+            {/* Full-width Open Directory below hero on Tablet & Desktop */}
+            <div ref={browseSectionRef} className="hidden border-t border-[var(--border)] pt-10 md:block">
+              <BrowseGrid
+                listings={regionalPool}
+                mode={state.mode}
+                region={currentRegion}
+                allRegions={allRegions}
+                swiped={state.swiped}
+                onInspect={setDetailListing}
+                onSwipe={handleSwipe}
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'browse' && (
+          <div className="space-y-6">
+            <div className="glass-surface space-y-3 rounded-3xl p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-[var(--muted)]">
+                  {state.mode === 'jam'
+                    ? 'Filter by players you want to match with'
+                    : 'Filter by gig or band type'}
+                </p>
+                {activePrefs.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearPreferences}
+                    className="text-xs font-semibold text-[var(--accent)]"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {prefChoices.map((pref) => {
+                  const selected = activePrefs.includes(pref);
+                  return (
+                    <button
+                      key={pref}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => togglePreference(pref)}
+                      className="rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                      style={
+                        selected
+                          ? {
+                              backgroundColor: 'var(--accent)',
+                              color: state.mode === 'jam' ? '#ffffff' : '#041d12',
+                              borderColor: 'var(--accent)',
+                            }
+                          : {
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              color: 'var(--muted)',
+                              borderColor: 'var(--border)',
+                            }
+                      }
+                    >
+                      {pref}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <BrowseGrid
+              listings={regionalPool}
               mode={state.mode}
               region={currentRegion}
               allRegions={allRegions}
-              canUndo={canUndo}
-              includeNearbyRegions={state.includeNearbyRegions}
+              swiped={state.swiped}
+              onInspect={setDetailListing}
               onSwipe={handleSwipe}
-              onUndo={handleUndo}
-              onOpenDetails={setDetailListing}
-              onEnableNearby={() =>
-                setState((prev) => ({ ...prev, includeNearbyRegions: true }))
-              }
-              onResetPassed={handleResetPassed}
-              onGoToPost={() => handleTabChange('post')}
+              onWatchInReels={() => handleTabChange('discover')}
             />
           </div>
         )}
@@ -455,6 +940,9 @@ export function App() {
 
         {activeTab === 'post' && (
           <PostView
+            user={user}
+            onRequireAuth={openAuthPrompt}
+            onSignOut={() => void signOutUser()}
             defaultSide={state.mode}
             region={currentRegion}
             userListings={state.userListings}
@@ -475,63 +963,63 @@ export function App() {
         )}
       </main>
 
-      {/* Floating visionOS/iOS glass bottom navigation dock */}
+      {/* Custom Mobile Phone 4-Tab Bottom Glass Dock */}
       <nav
-        aria-label="Primary navigation"
-        className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4"
+        aria-label="Mobile navigation"
+        className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-3 md:hidden"
       >
-        <div className="glass-dock pointer-events-auto grid w-full max-w-sm grid-cols-3 gap-1 rounded-full p-1.5">
+        <div className="glass-dock pointer-events-auto grid w-full max-w-md grid-cols-4 gap-1 rounded-full p-1.5">
           <button
             type="button"
+            aria-current={activeTab === 'discover' ? 'page' : undefined}
             onClick={() => handleTabChange('discover')}
-            className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition"
-            style={
-              activeTab === 'discover'
-                ? { backgroundColor: 'rgba(255, 255, 255, 0.14)', color: 'var(--ink)' }
-                : { color: 'var(--muted)' }
-            }
+            className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
             <Compass className="h-4 w-4" aria-hidden="true" />
-            <span>Discover</span>
+            <span>Reels</span>
           </button>
 
           <button
             type="button"
-            onClick={() => handleTabChange('matches')}
-            className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition"
-            style={
-              activeTab === 'matches'
-                ? { backgroundColor: 'rgba(255, 255, 255, 0.14)', color: 'var(--ink)' }
-                : { color: 'var(--muted)' }
-            }
+            aria-current={activeTab === 'browse' ? 'page' : undefined}
+            onClick={() => handleTabChange('browse')}
+            className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
-            <MessageCircle className="h-4 w-4" aria-hidden="true" />
-            <span>Matches</span>
-            {state.matches.length > 0 && (
-              <span
-                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold"
-                style={{
-                  backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                  color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                }}
-              >
-                {state.matches.length}
-              </span>
-            )}
+            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+            <span>Browse</span>
           </button>
 
           <button
             type="button"
+            aria-current={activeTab === 'matches' ? 'page' : undefined}
+            onClick={() => handleTabChange('matches')}
+            className="nav-pill-btn relative flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
+          >
+            <span className="relative">
+              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              {state.matches.length > 0 && (
+                <span
+                  className="absolute -right-2.5 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                  style={{
+                    backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                    color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                  }}
+                >
+                  {state.matches.length}
+                </span>
+              )}
+            </span>
+            <span>Matches</span>
+          </button>
+
+          <button
+            type="button"
+            aria-current={activeTab === 'post' ? 'page' : undefined}
             onClick={() => handleTabChange('post')}
-            className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition"
-            style={
-              activeTab === 'post'
-                ? { backgroundColor: 'rgba(255, 255, 255, 0.14)', color: 'var(--ink)' }
-                : { color: 'var(--muted)' }
-            }
+            className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
             <PlusSquare className="h-4 w-4" aria-hidden="true" />
-            <span>Post</span>
+            <span>Profile</span>
           </button>
         </div>
       </nav>
@@ -541,7 +1029,7 @@ export function App() {
         <div
           role="status"
           aria-live="polite"
-          className="glass-dock fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full px-4 py-2 text-xs font-semibold text-[var(--ink)]"
+          className="glass-dock fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full px-4 py-2 text-xs font-semibold text-[var(--ink)] md:bottom-8"
         >
           {toast}
         </div>
@@ -560,6 +1048,29 @@ export function App() {
         onAddCustomRegion={handleAddCustomRegion}
       />
 
+      <HowItWorksDialog
+        open={howItWorksOpen}
+        onClose={() => setHowItWorksOpen(false)}
+        onPickRegion={() => setRegionModalOpen(true)}
+        onGoToStudio={() => handleTabChange('post')}
+      />
+
+      <AuthDialog
+        open={authModalOpen}
+        reason={authReason}
+        onClose={() => {
+          setAuthModalOpen(false);
+          setPendingMessage(null);
+        }}
+        onAuthenticated={(signedUser) => {
+          showToast(`Signed in as ${signedUser.displayName}`);
+          if (pendingMessage) {
+            deliverMessage(pendingMessage.matchId, pendingMessage.text);
+            setPendingMessage(null);
+          }
+        }}
+      />
+
       <DetailDialog
         listing={detailListing}
         region={detailListing ? allRegions.find((r) => r.id === detailListing.regionId) : undefined}
@@ -569,6 +1080,8 @@ export function App() {
               Boolean(detailListing.isUserCreated)
             : false
         }
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled((s) => !s)}
         onClose={() => setDetailListing(null)}
         onSwipe={handleSwipe}
       />

@@ -4,8 +4,8 @@ type GrooveStyle = 'soul-jazz' | 'funk' | 'synth' | 'rock';
 
 let activeCtx: AudioContext | null = null;
 let activeListingId: string | null = null;
-let stopTimerId: number | undefined;
-let activeListeners = new Set<() => void>();
+let loopTimerId: number | undefined;
+const activeListeners = new Set<() => void>();
 
 function notifyListeners(): void {
   activeListeners.forEach((cb) => cb());
@@ -23,8 +23,8 @@ export function getPlayingListingId(): string | null {
 }
 
 export function stopCardPreview(): void {
-  window.clearTimeout(stopTimerId);
-  stopTimerId = undefined;
+  window.clearTimeout(loopTimerId);
+  loopTimerId = undefined;
 
   if (activeCtx) {
     const ctx = activeCtx;
@@ -113,12 +113,90 @@ function scheduleNoiseTick(
   source.start(start);
 }
 
-export async function toggleCardPreview(listing: Listing): Promise<boolean> {
-  if (activeListingId === listing.id) {
-    stopCardPreview();
-    return false;
+function scheduleBarCycle(
+  ctx: AudioContext,
+  master: GainNode,
+  listing: Listing,
+  clipIndex: number
+): number {
+  const style = classifyGroove(listing);
+  const transpose = ((listing.visualSeed % 5) - 2) * 0.5 + (clipIndex % 2 === 1 ? 2 : 0);
+  const shift = (hz: number) => hz * Math.pow(2, transpose / 12);
+
+  if (style === 'soul-jazz') {
+    const chords =
+      clipIndex % 2 === 0
+        ? [
+            [174.61, 220.0, 261.63, 329.63],
+            [164.81, 196.0, 246.94, 293.66],
+            [146.83, 174.61, 220.0, 261.63],
+            [130.81, 164.81, 196.0, 246.94],
+          ]
+        : [
+            [146.83, 174.61, 220.0, 261.63],
+            [196.0, 246.94, 293.66, 349.23],
+            [164.81, 196.0, 246.94, 293.66],
+            [130.81, 164.81, 196.0, 246.94],
+          ];
+    chords.forEach((chord, idx) => {
+      const t = idx * 1.4;
+      scheduleTone(ctx, master, shift(chord[0] * 0.5), t, 1.3, 'triangle', 0.14, 480);
+      chord.forEach((f) => {
+        scheduleTone(ctx, master, shift(f), t, 1.3, 'sine', 0.06, 1600);
+      });
+    });
+    return 5.6;
   }
 
+  if (style === 'funk') {
+    const bass = [98.0, 98.0, 116.54, 130.81, 146.83, 130.81, 116.54, 98.0];
+    for (let step = 0; step < 16; step++) {
+      const t = step * 0.34;
+      if (step % 2 === 0 || step % 7 === 0) {
+        scheduleTone(ctx, master, shift(bass[step % bass.length]), t, 0.24, 'sawtooth', 0.12, 620);
+      }
+      if (step % 4 === 2) {
+        [293.66, 349.23, 440.0].forEach((f) =>
+          scheduleTone(ctx, master, shift(f), t, 0.18, 'triangle', 0.05, 2200)
+        );
+      }
+      scheduleNoiseTick(ctx, master, t, step % 2 === 1 ? 0.055 : 0.025);
+    }
+    return 5.44;
+  }
+
+  if (style === 'synth') {
+    const notes =
+      clipIndex % 2 === 0
+        ? [130.81, 196.0, 246.94, 261.63, 196.0, 164.81]
+        : [164.81, 220.0, 261.63, 329.63, 261.63, 220.0];
+    scheduleTone(ctx, master, shift(65.41), 0, 5.4, 'sawtooth', 0.085, 540);
+    scheduleTone(ctx, master, shift(130.81), 0, 5.4, 'triangle', 0.075, 920);
+    for (let i = 0; i < 18; i++) {
+      const t = i * 0.3;
+      scheduleTone(ctx, master, shift(notes[i % notes.length]), t, 0.28, 'triangle', 0.07, 1900);
+    }
+    return 5.4;
+  }
+
+  const roots =
+    clipIndex % 2 === 0
+      ? [110.0, 110.0, 130.81, 146.83, 110.0, 164.81, 146.83, 130.81]
+      : [130.81, 130.81, 146.83, 164.81, 146.83, 130.81, 98.0, 110.0];
+  for (let step = 0; step < 16; step++) {
+    const t = step * 0.34;
+    const root = shift(roots[step % roots.length]);
+    scheduleTone(ctx, master, root, t, 0.28, 'sawtooth', 0.11, 680);
+    if (step % 4 === 0) {
+      scheduleTone(ctx, master, root * 2, t, 0.55, 'triangle', 0.065, 1700);
+      scheduleTone(ctx, master, root * 3, t, 0.55, 'triangle', 0.04, 1900);
+    }
+    scheduleNoiseTick(ctx, master, t, step % 2 === 1 ? 0.06 : 0.025);
+  }
+  return 5.44;
+}
+
+export async function startListingLoop(listing: Listing, clipIndex = 0): Promise<boolean> {
   stopCardPreview();
 
   const AudioCtx =
@@ -132,78 +210,37 @@ export async function toggleCardPreview(listing: Listing): Promise<boolean> {
     if (ctx.state === 'suspended') {
       await ctx.resume();
     }
+    if (ctx.state !== 'running') {
+      ctx.close().catch(() => {});
+      return false;
+    }
 
     const master = ctx.createGain();
-    master.gain.setValueAtTime(0.7, ctx.currentTime);
+    master.gain.setValueAtTime(0.65, ctx.currentTime);
     master.connect(ctx.destination);
 
     activeCtx = ctx;
     activeListingId = listing.id;
     notifyListeners();
 
-    const style = classifyGroove(listing);
-    const transpose = ((listing.visualSeed % 5) - 2) * 0.5;
-    const shift = (hz: number) => hz * Math.pow(2, transpose / 12);
+    const runCycle = () => {
+      if (activeCtx !== ctx || activeListingId !== listing.id) return;
+      const cycleSeconds = scheduleBarCycle(ctx, master, listing, clipIndex);
+      loopTimerId = window.setTimeout(runCycle, cycleSeconds * 1000);
+    };
 
-    const loopDurationSec = 5.6;
-
-    if (style === 'soul-jazz') {
-      const chords = [
-        [174.61, 220.0, 261.63, 329.63],
-        [164.81, 196.0, 246.94, 293.66],
-        [146.83, 174.61, 220.0, 261.63],
-        [130.81, 164.81, 196.0, 246.94],
-      ];
-      chords.forEach((chord, idx) => {
-        const t = idx * 1.35;
-        scheduleTone(ctx, master, shift(chord[0] * 0.5), t, 1.25, 'triangle', 0.14, 480);
-        chord.forEach((f) => {
-          scheduleTone(ctx, master, shift(f), t, 1.25, 'sine', 0.065, 1600);
-        });
-      });
-    } else if (style === 'funk') {
-      const bass = [98.0, 98.0, 116.54, 130.81, 146.83, 130.81, 116.54, 98.0];
-      for (let step = 0; step < 16; step++) {
-        const t = step * 0.34;
-        if (step % 2 === 0 || step % 7 === 0) {
-          scheduleTone(ctx, master, shift(bass[step % bass.length]), t, 0.24, 'sawtooth', 0.13, 620);
-        }
-        if (step % 4 === 2) {
-          [293.66, 349.23, 440.0].forEach((f) =>
-            scheduleTone(ctx, master, shift(f), t, 0.18, 'triangle', 0.055, 2200)
-          );
-        }
-        scheduleNoiseTick(ctx, master, t, step % 2 === 1 ? 0.06 : 0.03);
-      }
-    } else if (style === 'synth') {
-      const notes = [130.81, 196.0, 246.94, 261.63, 196.0, 164.81];
-      scheduleTone(ctx, master, shift(65.41), 0, 5.4, 'sawtooth', 0.09, 540);
-      scheduleTone(ctx, master, shift(130.81), 0, 5.4, 'triangle', 0.08, 920);
-      for (let i = 0; i < 18; i++) {
-        const t = i * 0.3;
-        scheduleTone(ctx, master, shift(notes[i % notes.length]), t, 0.28, 'triangle', 0.075, 1900);
-      }
-    } else {
-      const roots = [110.0, 110.0, 130.81, 146.83, 110.0, 164.81, 146.83, 130.81];
-      for (let step = 0; step < 16; step++) {
-        const t = step * 0.34;
-        const root = shift(roots[step % roots.length]);
-        scheduleTone(ctx, master, root, t, 0.28, 'sawtooth', 0.12, 680);
-        if (step % 4 === 0) {
-          scheduleTone(ctx, master, root * 2, t, 0.55, 'triangle', 0.07, 1700);
-          scheduleTone(ctx, master, root * 3, t, 0.55, 'triangle', 0.045, 1900);
-        }
-        scheduleNoiseTick(ctx, master, t, step % 2 === 1 ? 0.065 : 0.03);
-      }
-    }
-
-    stopTimerId = window.setTimeout(() => {
-      stopCardPreview();
-    }, loopDurationSec * 1000);
-
+    runCycle();
     return true;
   } catch {
     stopCardPreview();
     return false;
   }
+}
+
+export async function toggleCardPreview(listing: Listing, clipIndex = 0): Promise<boolean> {
+  if (activeListingId === listing.id) {
+    stopCardPreview();
+    return false;
+  }
+  return startListingLoop(listing, clipIndex);
 }

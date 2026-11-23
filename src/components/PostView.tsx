@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, CheckCircle2, Eye, PlusCircle, Trash2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, Film, LogOut, PlusCircle, ShieldCheck, Trash2, Video } from 'lucide-react';
+import { GIGS_PREFERENCES, JAM_PREFERENCES } from '../data/regions';
 import { attachFormValidation } from '../lib/formValidation';
-import type { AppMode, GigSubtype, Listing, Region } from '../types';
+import type { AppMode, AuthUser, GigSubtype, Listing, MediaClip, Region } from '../types';
+import { VideoClipRecorder } from './VideoClipRecorder';
 
 interface PostViewProps {
+  user: AuthUser | null;
+  onRequireAuth: (reason?: string) => void;
+  onSignOut: () => void;
   defaultSide: AppMode;
   region: Region;
   userListings: Listing[];
@@ -13,6 +18,9 @@ interface PostViewProps {
 }
 
 export function PostView({
+  user,
+  onRequireAuth,
+  onSignOut,
   defaultSide,
   region,
   userListings,
@@ -22,6 +30,9 @@ export function PostView({
 }: PostViewProps) {
   const [side, setSide] = useState<AppMode>(defaultSide);
   const [gigSubtype, setGigSubtype] = useState<GigSubtype>('open-gig');
+  const [roleCategory, setRoleCategory] = useState<string>(
+    defaultSide === 'jam' ? JAM_PREFERENCES[0] : GIGS_PREFERENCES[0]
+  );
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
@@ -32,14 +43,78 @@ export function PostView({
   const [availability, setAvailability] = useState('');
   const [sampleLink, setSampleLink] = useState('');
   const [bio, setBio] = useState('');
-  const [justPostedTitle, setJustPostedTitle] = useState<string | null>(null);
+  const [clips, setClips] = useState<MediaClip[]>([]);
+  const [justPostedListing, setJustPostedListing] = useState<Listing | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!formRef.current) return;
+    if (!user || !formRef.current) return;
     return attachFormValidation(formRef.current);
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    setRoleCategory(side === 'jam' ? JAM_PREFERENCES[0] : GIGS_PREFERENCES[0]);
+  }, [side]);
+
+  useEffect(() => {
+    if (user && !title.trim() && side === 'jam') {
+      setTitle(user.displayName);
+    }
+  }, [user]);
+
+  if (!user) {
+    return (
+      <section className="mx-auto w-full max-w-4xl">
+        <div className="glass-surface grid grid-cols-1 gap-6 rounded-[2rem] p-6 md:grid-cols-12 md:p-8">
+          <div className="space-y-4 md:col-span-7">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              Account required only when creating a profile
+            </span>
+            <h2 className="font-display text-3xl font-bold tracking-tight">
+              Record an intro video and join {region.city}
+            </h2>
+            <p className="text-sm leading-relaxed text-[var(--muted)]">
+              Anyone can browse local players and watch clips without an account. Sign in with Apple or Google to build your card, record a 30-second webcam intro or upload cuts, and message matches.
+            </p>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() =>
+                  onRequireAuth(
+                    'Sign in with Apple or Google to create your profile, record video intros, and post to your local board.'
+                  )
+                }
+                className="inline-flex items-center gap-2 rounded-2xl bg-[var(--ink)] px-5 py-3 text-sm font-bold text-[var(--bg)] transition hover:opacity-90"
+              >
+                <Video className="h-4 w-4" aria-hidden="true" />
+                <span>Sign in with Apple or Google</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:col-span-5">
+            <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
+              <Film className="h-5 w-5 text-[var(--jam)]" aria-hidden="true" />
+              <h3 className="font-display mt-2 text-base font-bold">In-browser clip studio</h3>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Record 30s vertical intro clips from your webcam or upload live rehearsal cuts straight from your phone or laptop.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
+              <PlusCircle className="h-5 w-5 text-[var(--gigs)]" aria-hidden="true" />
+              <h3 className="font-display mt-2 text-base font-bold">Auto-playing reel cards</h3>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Your first clip loops automatically when musicians browse or swipe through {region.city}.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,10 +129,25 @@ export function PostView({
       .filter(Boolean)
       .slice(0, 4);
 
+    const id = `user-${Date.now()}`;
+    const finalClips: MediaClip[] =
+      clips.length > 0
+        ? clips
+        : [
+            {
+              id: `${id}-c1`,
+              title: 'Intro reel',
+              kind: 'synth-reel',
+              durationSec: 8,
+              clipVariation: 0,
+            },
+          ];
+
     const newListing: Listing = {
-      id: `user-${Date.now()}`,
+      id,
       side,
       gigSubtype: side === 'gigs' ? gigSubtype : undefined,
+      roleCategory,
       regionId: region.id,
       neighborhood: neighborhood.trim(),
       title: title.trim(),
@@ -74,14 +164,17 @@ export function PostView({
       payOrSplit: side === 'gigs' && payOrSplit.trim() ? payOrSplit.trim() : undefined,
       sampleLink: sampleLink.trim() || undefined,
       visualSeed: Math.floor(Math.random() * 90) + 10,
+      clips: finalClips,
       autoMatch: false,
       autoReply: 'Thanks for connecting on AreaJam!',
       isUserCreated: true,
+      ownerUid: user.uid,
+      ownerName: user.displayName,
       createdAt: Date.now(),
     };
 
     onCreateListing(newListing);
-    setJustPostedTitle(newListing.title);
+    setJustPostedListing(newListing);
     setTitle('');
     setSubtitle('');
     setNeighborhood('');
@@ -92,17 +185,50 @@ export function PostView({
     setAvailability('');
     setSampleLink('');
     setBio('');
+    setClips([]);
     e.currentTarget.reset();
   };
 
+  const roleOptions = side === 'jam' ? JAM_PREFERENCES : GIGS_PREFERENCES;
+
   return (
-    <section className="mx-auto w-full max-w-2xl space-y-6">
+    <section className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="glass-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-3.5">
+        <div className="flex items-center gap-3">
+          {user.photoURL ? (
+            <img src={user.photoURL} alt="" className="h-9 w-9 rounded-full object-cover" />
+          ) : (
+            <span className="font-display inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">
+              {user.displayName.slice(0, 1).toUpperCase()}
+            </span>
+          )}
+          <div>
+            <p className="text-sm font-bold text-[var(--ink)]">{user.displayName}</p>
+            <p className="text-xs text-[var(--muted)]">
+              Signed in via {user.provider === 'apple' ? 'Apple' : 'Google'}
+              {user.isDemoPreview ? ' (local preview)' : ''}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onSignOut}
+          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+        >
+          <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Sign out</span>
+        </button>
+      </div>
+
       <div className="glass-surface rounded-[2rem] p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="font-display text-2xl font-bold tracking-tight">Pin a local card</h2>
+            <h2 className="font-display text-2xl font-bold tracking-tight">
+              Create your profile card and clips
+            </h2>
             <p className="text-sm text-[var(--muted)]">
-              Posting to <span className="font-semibold text-[var(--ink)]">{region.label}</span>
+              Publishing to <span className="font-semibold text-[var(--ink)]">{region.label}</span>
             </p>
           </div>
 
@@ -134,14 +260,31 @@ export function PostView({
           </div>
         </div>
 
-        {justPostedTitle && (
-          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-[var(--ok)] bg-white/5 px-4 py-3 text-sm text-[var(--ok)]">
-            <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>
-              Pinned <strong>{justPostedTitle}</strong> to your {region.city} board.
+        {justPostedListing && (
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--ok)] bg-white/5 px-4 py-3 text-sm text-[var(--ok)]">
+            <span className="inline-flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                Published <strong>{justPostedListing.title}</strong> to {region.city}.
+              </span>
             </span>
+            <button
+              type="button"
+              onClick={() => onPreviewListing(justPostedListing)}
+              className="rounded-full bg-[var(--ok)] px-3.5 py-1 text-xs font-bold text-[#041d12]"
+            >
+              Watch my card
+            </button>
           </div>
         )}
+
+        <div className="mb-6">
+          <VideoClipRecorder
+            clips={clips}
+            onAddClip={(clip) => setClips((prev) => [...prev, clip])}
+            onRemoveClip={(clipId) => setClips((prev) => prev.filter((c) => c.id !== clipId))}
+          />
+        </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           {side === 'gigs' && (
@@ -169,7 +312,29 @@ export function PostView({
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label htmlFor="post-role" className="mb-1 block text-xs font-semibold">
+                {side === 'jam' ? 'Main instrument or role' : 'Gig category'}
+              </label>
+              <span id="post-role-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
+                Matches player filters
+              </span>
+              <select
+                id="post-role"
+                value={roleCategory}
+                onChange={(e) => setRoleCategory(e.target.value)}
+                aria-describedby="post-role-hint"
+                className="field-control"
+              >
+                {roleOptions.map((opt) => (
+                  <option key={opt} value={opt} className="bg-[#10131d] text-white">
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label htmlFor="post-title" className="mb-1 block text-xs font-semibold">
                 {side === 'jam'
@@ -179,7 +344,7 @@ export function PostView({
                     : 'Band name'}
               </label>
               <span id="post-title-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                Shown as the main headline on your card
+                Main headline on your card
               </span>
               <input
                 id="post-title"
@@ -203,10 +368,10 @@ export function PostView({
 
             <div>
               <label htmlFor="post-subtitle" className="mb-1 block text-xs font-semibold">
-                {side === 'jam' ? 'Primary instrument or role' : 'Format or slot label'}
+                {side === 'jam' ? 'Experience or setup' : 'Format or slot label'}
               </label>
               <span id="post-subtitle-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                {side === 'jam' ? 'e.g. Drummer, 6 yrs' : 'e.g. 4-Piece Band or Thu 9 PM Slot'}
+                {side === 'jam' ? 'e.g. Drummer, 6 yrs' : 'e.g. 4-Piece Band or Thu 9 PM'}
               </span>
               <input
                 id="post-subtitle"
@@ -224,7 +389,7 @@ export function PostView({
                 <span role="img" aria-label="Error" className="inline-flex shrink-0">
                   <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
-                <span>Enter your instrument, role, or slot label.</span>
+                <span>Enter your role or slot label.</span>
               </div>
             </div>
           </div>
@@ -287,7 +452,7 @@ export function PostView({
 
           <div>
             <label htmlFor="post-seeking" className="mb-1 block text-xs font-semibold">
-              {side === 'jam' ? 'What are you looking for?' : 'Gig or booking headline'}
+              {side === 'jam' ? 'Who are you looking to play with?' : 'Gig or booking headline'}
             </label>
             <span id="post-seeking-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
               One punchy sentence shown right below your title
@@ -428,7 +593,9 @@ export function PostView({
             }}
           >
             <PlusCircle className="h-4 w-4" aria-hidden="true" />
-            <span>Pin flyer to {region.city}</span>
+            <span>
+              Publish profile to {region.city} ({clips.length} {clips.length === 1 ? 'clip' : 'clips'})
+            </span>
           </button>
         </form>
       </div>
@@ -436,9 +603,9 @@ export function PostView({
       {userListings.length > 0 && (
         <div className="space-y-3">
           <h3 className="font-display text-lg font-bold">
-            Your posted cards ({userListings.length})
+            Your published cards ({userListings.length})
           </h3>
-          <ul className="space-y-2.5">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {userListings.map((item) => (
               <li
                 key={item.id}
@@ -458,7 +625,9 @@ export function PostView({
                     >
                       {item.side === 'jam' ? 'Jam' : 'Gigs'}
                     </span>
-                    <span className="text-xs text-[var(--muted)]">{item.neighborhood}</span>
+                    <span className="truncate text-xs text-[var(--muted)]">
+                      {item.neighborhood}, {item.clips.length} clips
+                    </span>
                   </div>
                   <p className="font-display mt-1 truncate font-bold">{item.title}</p>
                 </div>

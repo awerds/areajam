@@ -1,14 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Flame, Info, MapPin, Pause, Play, RotateCcw, Ticket, X } from 'lucide-react';
-import {
-  getPlayingListingId,
-  stopCardPreview,
-  subscribeAudioState,
-  toggleCardPreview,
-} from '../lib/audioPreview';
+import { Flame, Info, MapPin, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
 import type { AppMode, Listing, Region, SwipeDecision } from '../types';
-import { CardArtwork } from './CardArtwork';
+import { ClipPlayer } from './ClipPlayer';
 
 interface SwipeDeckProps {
   cards: Listing[];
@@ -17,6 +11,8 @@ interface SwipeDeckProps {
   allRegions: Region[];
   canUndo: boolean;
   includeNearbyRegions: boolean;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
   onSwipe: (listing: Listing, decision: SwipeDecision) => void;
   onUndo: () => void;
   onOpenDetails: (listing: Listing) => void;
@@ -32,6 +28,8 @@ export function SwipeDeck({
   allRegions,
   canUndo,
   includeNearbyRegions,
+  soundEnabled,
+  onToggleSound,
   onSwipe,
   onUndo,
   onOpenDetails,
@@ -41,7 +39,6 @@ export function SwipeDeck({
 }: SwipeDeckProps) {
   const [dragState, setDragState] = useState({ x: 0, dragging: false });
   const [flyDir, setFlyDir] = useState<SwipeDecision | null>(null);
-  const [playingId, setPlayingId] = useState<string | null>(() => getPlayingListingId());
 
   const cardRef = useRef<HTMLElement>(null);
   const nextCardRef = useRef<HTMLElement>(null);
@@ -56,16 +53,9 @@ export function SwipeDeck({
   const nextCard = cards[1];
 
   useEffect(() => {
-    return subscribeAudioState(() => {
-      setPlayingId(getPlayingListingId());
-    });
-  }, []);
-
-  useEffect(() => {
     setDragState({ x: 0, dragging: false });
     setFlyDir(null);
     startRef.current = null;
-    stopCardPreview();
   }, [topCard?.id]);
 
   useLayoutEffect(() => {
@@ -109,7 +99,6 @@ export function SwipeDeck({
 
   const triggerSwipe = (decision: SwipeDecision) => {
     if (!topCard || flyDir) return;
-    stopCardPreview();
     setFlyDir(decision);
 
     const el = cardRef.current;
@@ -153,9 +142,12 @@ export function SwipeDeck({
       } else if (e.key === 'ArrowUp' && topCard) {
         e.preventDefault();
         onOpenDetails(topCard);
+      } else if ((e.key === 'm' || e.key === 'M') && topCard) {
+        e.preventDefault();
+        onToggleSound();
       } else if (e.key === ' ' && topCard && !(target && target.closest('button, a'))) {
         e.preventDefault();
-        void toggleCardPreview(topCard);
+        onToggleSound();
       } else if ((e.key === 'z' || e.key === 'Z') && !e.metaKey && !e.ctrlKey && canUndo) {
         e.preventDefault();
         onUndo();
@@ -197,7 +189,6 @@ export function SwipeDeck({
       return;
     }
 
-    // Fine-pointer desktop 3D tilt & specular glare
     if (!dragState.dragging && tiltQuickToRef.current && e.pointerType === 'mouse') {
       const rect = el.getBoundingClientRect();
       const px = (e.clientX - rect.left) / rect.width;
@@ -262,15 +253,15 @@ export function SwipeDeck({
 
   if (!topCard) {
     return (
-      <div className="deck-frame glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-14 text-center">
+      <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-14 text-center">
         <span className="mb-4 rounded-full border border-white/15 bg-white/5 px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
-          {region.city} {region.areaCode} — {mode === 'jam' ? 'Jam' : 'Gigs'}
+          {region.city} ({region.areaCode}) — {mode === 'jam' ? 'Jam' : 'Gigs'}
         </span>
         <h2 className="font-display text-2xl font-bold tracking-tight">
-          You have seen every local {mode === 'jam' ? 'player' : 'gig'} here
+          You have seen every matching {mode === 'jam' ? 'player' : 'gig'} here
         </h2>
         <p className="mt-2.5 max-w-xs text-sm leading-relaxed text-[var(--muted)]">
-          Expand to nearby cities, bring back cards you skipped, or pin your own flyer in {region.city}.
+          Expand to nearby cities, bring back passed cards, or pin your own video flyer in {region.city}.
         </p>
 
         <div className="mt-7 flex w-full max-w-xs flex-col gap-2.5">
@@ -299,7 +290,7 @@ export function SwipeDeck({
             onClick={onGoToPost}
             className="rounded-2xl border border-transparent px-4 py-3 text-sm font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
           >
-            Pin your flyer
+            Record intro and post card
           </button>
         </div>
       </div>
@@ -310,11 +301,10 @@ export function SwipeDeck({
   const passOpacity = flyDir === 'pass' ? 1 : Math.min(1, Math.max(0, (-dragState.x - 24) / 80));
   const positiveLabel = mode === 'jam' ? 'Jam' : 'Book';
   const topRegion = allRegions.find((r) => r.id === topCard.regionId);
-  const isPlaying = playingId === topCard.id;
 
   return (
-    <div className="deck-frame mx-auto flex w-full max-w-[25rem] flex-col items-center">
-      <div className="deck-perspective relative h-[min(64dvh,34rem)] w-full select-none">
+    <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
+      <div className="deck-perspective relative h-[min(68dvh,36rem)] w-full select-none md:h-[min(64dvh,34rem)]">
         {nextCard && (
           <article
             ref={nextCardRef}
@@ -325,7 +315,13 @@ export function SwipeDeck({
               opacity: 0.65,
             }}
           >
-            <CardArtwork listing={nextCard} areaCode={getRegionAreaCode(nextCard.regionId)} />
+            <ClipPlayer
+              listing={nextCard}
+              areaCode={getRegionAreaCode(nextCard.regionId)}
+              isActive={false}
+              soundEnabled={false}
+              showMetadataOverlay={false}
+            />
             <div className="absolute inset-x-0 bottom-0 p-5">
               <h3 className="font-display text-2xl font-bold text-white">{nextCard.title}</h3>
               <p className="mt-1 text-sm text-white/75">{nextCard.subtitle}</p>
@@ -343,15 +339,20 @@ export function SwipeDeck({
           className="glass-surface absolute inset-0 flex touch-pan-y cursor-grab flex-col justify-end overflow-hidden rounded-[2rem] active:cursor-grabbing"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <CardArtwork listing={topCard} areaCode={getRegionAreaCode(topCard.regionId)} />
+          <ClipPlayer
+            listing={topCard}
+            areaCode={getRegionAreaCode(topCard.regionId)}
+            isActive={!flyDir}
+            soundEnabled={soundEnabled}
+            onToggleSound={onToggleSound}
+          />
 
-          {/* Interactive desktop specular glare */}
           <div ref={glareRef} className="card-glare absolute inset-0 opacity-0" aria-hidden="true" />
 
           {/* Floating glass swipe decision badges */}
           <div
             aria-hidden="true"
-            className="font-display pointer-events-none absolute left-5 top-16 -rotate-12 rounded-2xl border px-4 py-1.5 text-2xl font-bold backdrop-blur-md"
+            className="font-display pointer-events-none absolute left-5 top-20 -rotate-12 rounded-2xl border px-4 py-1.5 text-2xl font-bold backdrop-blur-md"
             style={{
               opacity: likeOpacity,
               borderColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
@@ -367,40 +368,90 @@ export function SwipeDeck({
           </div>
           <div
             aria-hidden="true"
-            className="font-display pointer-events-none absolute right-5 top-16 rotate-12 rounded-2xl border border-[var(--err)] bg-[#07080d]/75 px-4 py-1.5 text-2xl font-bold text-[var(--err)] backdrop-blur-md"
+            className="font-display pointer-events-none absolute right-5 top-20 rotate-12 rounded-2xl border border-[var(--err)] bg-[#07080d]/75 px-4 py-1.5 text-2xl font-bold text-[var(--err)] backdrop-blur-md"
             style={{ opacity: passOpacity }}
           >
             Pass
           </div>
 
-          {/* Foreground card info anchored to lower glass stage */}
-          <div className="relative z-10 flex flex-col gap-3 p-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void toggleCardPreview(topCard)}
-                aria-pressed={isPlaying}
-                aria-label={isPlaying ? `Pause groove preview for ${topCard.title}` : `Listen to groove preview for ${topCard.title}`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
-              >
-                {isPlaying ? (
-                  <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                ) : (
-                  <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                )}
-                <span>{isPlaying ? 'Playing groove' : 'Preview groove'}</span>
-                {isPlaying && (
-                  <span className="flex h-3 items-end gap-0.5" aria-hidden="true">
-                    <span className="eq-bar w-0.5 rounded-full bg-current" style={{ height: '100%', animationDelay: '0ms' }} />
-                    <span className="eq-bar w-0.5 rounded-full bg-current" style={{ height: '75%', animationDelay: '120ms' }} />
-                    <span className="eq-bar w-0.5 rounded-full bg-current" style={{ height: '95%', animationDelay: '240ms' }} />
-                    <span className="eq-bar w-0.5 rounded-full bg-current" style={{ height: '65%', animationDelay: '80ms' }} />
-                  </span>
-                )}
-              </button>
+          {/* Mobile TikTok right-edge vertical action rail */}
+          <div
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute bottom-24 right-3 z-20 flex flex-col items-center gap-2.5 md:hidden"
+          >
+            <button
+              type="button"
+              onClick={() => triggerSwipe('like')}
+              aria-label={mode === 'jam' ? `Jam with ${topCard.title}` : `Book ${topCard.title}`}
+              className="inline-flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition active:scale-90"
+              style={{
+                backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+              }}
+            >
+              {mode === 'jam' ? (
+                <Flame className="h-6 w-6 fill-current" aria-hidden="true" />
+              ) : (
+                <Ticket className="h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
 
+            <button
+              type="button"
+              onClick={() => triggerSwipe('pass')}
+              aria-label={`Pass on ${topCard.title}`}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-[var(--err)] backdrop-blur-md active:scale-90"
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onOpenDetails(topCard)}
+              aria-label={`Inspect details for ${topCard.title}`}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md active:scale-90"
+            >
+              <Info className="h-5 w-5" aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              onClick={onToggleSound}
+              aria-pressed={soundEnabled}
+              aria-label={soundEnabled ? 'Mute sound' : 'Turn sound on'}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md active:scale-90"
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-5 w-5 text-[var(--accent)]" aria-hidden="true" />
+              ) : (
+                <VolumeX className="h-5 w-5" aria-hidden="true" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={onUndo}
+              disabled={!canUndo}
+              aria-label="Undo last swipe"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 backdrop-blur-md disabled:opacity-35"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          {/* Card foreground info */}
+          <div className="relative z-10 flex flex-col gap-2.5 p-5 pr-16 md:pr-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-xs">
+                {topCard.roleCategory}
+              </span>
+              {topCard.payOrSplit && (
+                <span className="rounded-full border border-white/15 bg-black/45 px-2.5 py-0.5 text-[11px] font-medium text-white backdrop-blur-xs">
+                  {topCard.payOrSplit}
+                </span>
+              )}
               {topRegion && topRegion.id !== region.id && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-xs text-white/90 backdrop-blur-md">
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/45 px-2.5 py-0.5 text-[11px] text-white/90 backdrop-blur-xs">
                   <MapPin className="h-3 w-3" aria-hidden="true" />
                   {topRegion.city}
                 </span>
@@ -420,7 +471,7 @@ export function SwipeDeck({
               {topCard.seekingOrOffer}
             </p>
 
-            <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="flex items-center justify-between gap-2 pt-0.5">
               <div className="flex flex-wrap gap-1.5">
                 {topCard.genres.slice(0, 3).map((genre) => (
                   <span
@@ -435,7 +486,7 @@ export function SwipeDeck({
               <button
                 type="button"
                 onClick={() => onOpenDetails(topCard)}
-                className="shrink-0 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+                className="hidden shrink-0 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20 md:inline-flex"
               >
                 Details
               </button>
@@ -444,8 +495,8 @@ export function SwipeDeck({
         </article>
       </div>
 
-      {/* Floating glass thumb controls */}
-      <div className="mt-5 flex items-center justify-center gap-4">
+      {/* Tablet & Desktop floating action orbs */}
+      <div className="mt-5 hidden items-center justify-center gap-4 md:flex">
         <button
           type="button"
           onClick={onUndo}
@@ -460,7 +511,7 @@ export function SwipeDeck({
           type="button"
           onClick={() => triggerSwipe('pass')}
           aria-label={`Pass on ${topCard.title}`}
-          className="glass-surface inline-flex h-15 w-15 items-center justify-center rounded-full text-[var(--err)] transition hover:scale-105 active:scale-95"
+          className="glass-surface inline-flex h-14 w-14 items-center justify-center rounded-full text-[var(--err)] transition hover:scale-105 active:scale-95"
         >
           <X className="h-7 w-7 stroke-[2.25]" aria-hidden="true" />
         </button>
@@ -478,7 +529,7 @@ export function SwipeDeck({
           type="button"
           onClick={() => triggerSwipe('like')}
           aria-label={mode === 'jam' ? `Jam with ${topCard.title}` : `Book ${topCard.title}`}
-          className="inline-flex h-15 w-15 items-center justify-center rounded-full transition hover:scale-105 active:scale-95"
+          className="inline-flex h-14 w-14 items-center justify-center rounded-full transition hover:scale-105 active:scale-95"
           style={{
             backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
             color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
@@ -497,7 +548,7 @@ export function SwipeDeck({
       </div>
 
       <p className="mt-3 hidden text-xs text-[var(--muted)] md:block">
-        Arrow keys to swipe or inspect, Space to preview groove, Z to undo
+        Arrow keys to swipe or inspect, Space or M for sound, Z to undo
       </p>
     </div>
   );

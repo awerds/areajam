@@ -1,5 +1,5 @@
 import { STARTER_REGIONS } from '../data/regions';
-import type { AppMode, AppState, Region } from '../types';
+import type { AppMode, AppState, Listing, LocationConsent, Region } from '../types';
 
 const STORAGE_KEY = 'areajam_v1_state';
 
@@ -32,11 +32,42 @@ export function getDefaultState(): AppState {
     regionId: 'austin',
     mode: 'jam',
     includeNearbyRegions: false,
+    locationConsent: 'unknown',
+    detectedCityLabel: undefined,
+    lookingForJam: [],
+    lookingForGigs: [],
     customRegions: [],
     userListings: [],
     swiped: {},
     history: [],
     matches: [],
+  };
+}
+
+function normalizeListing(raw: Listing): Listing {
+  const fallbackRole =
+    raw.side === 'jam'
+      ? 'Songwriters'
+      : raw.gigSubtype === 'open-gig'
+        ? 'Open venue slots'
+        : 'Bands for hire';
+  const fallbackClips =
+    Array.isArray(raw.clips) && raw.clips.length > 0
+      ? raw.clips
+      : [
+          {
+            id: `${raw.id}-c1`,
+            title: 'Intro reel',
+            kind: 'synth-reel' as const,
+            durationSec: 8,
+            clipVariation: 0,
+          },
+        ];
+
+  return {
+    ...raw,
+    roleCategory: raw.roleCategory || fallbackRole,
+    clips: fallbackClips,
   };
 }
 
@@ -67,12 +98,24 @@ export function loadState(): AppState {
           ? parsed.regionId
           : fallback.regionId;
 
+    const consent: LocationConsent =
+      parsed.locationConsent === 'granted' || parsed.locationConsent === 'declined'
+        ? parsed.locationConsent
+        : 'unknown';
+
     return {
       regionId: resolvedRegionId,
       mode: urlOverride.mode ?? (parsed.mode === 'gigs' ? 'gigs' : 'jam'),
       includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
+      locationConsent: consent,
+      detectedCityLabel:
+        typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,
+      lookingForJam: Array.isArray(parsed.lookingForJam) ? parsed.lookingForJam : [],
+      lookingForGigs: Array.isArray(parsed.lookingForGigs) ? parsed.lookingForGigs : [],
       customRegions: Array.isArray(parsed.customRegions) ? parsed.customRegions : [],
-      userListings: Array.isArray(parsed.userListings) ? parsed.userListings : [],
+      userListings: Array.isArray(parsed.userListings)
+        ? parsed.userListings.map(normalizeListing)
+        : [],
       swiped: parsed.swiped && typeof parsed.swiped === 'object' ? parsed.swiped : {},
       history: Array.isArray(parsed.history) ? parsed.history : [],
       matches: Array.isArray(parsed.matches) ? parsed.matches : [],
@@ -104,6 +147,8 @@ export function resetPassedSwipes(state: AppState, listingIdsToKeepPassedClear: 
   return {
     ...state,
     swiped: nextSwiped,
-    history: state.history.filter((h) => h.decision !== 'pass' || !listingIdsToKeepPassedClear.has(h.listingId)),
+    history: state.history.filter(
+      (h) => h.decision !== 'pass' || !listingIdsToKeepPassedClear.has(h.listingId)
+    ),
   };
 }

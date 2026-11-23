@@ -1,18 +1,14 @@
-import { useEffect, useState } from 'react';
-import { Calendar, ExternalLink, Flame, MapPin, Pause, Play, Speaker, Ticket, X } from 'lucide-react';
-import {
-  getPlayingListingId,
-  subscribeAudioState,
-  toggleCardPreview,
-} from '../lib/audioPreview';
+import { Calendar, ExternalLink, Flame, MapPin, Speaker, Ticket, X } from 'lucide-react';
 import type { Listing, Region, SwipeDecision } from '../types';
-import { CardArtwork } from './CardArtwork';
+import { ClipPlayer } from './ClipPlayer';
 import { NativeDialog } from './NativeDialog';
 
 interface DetailDialogProps {
   listing: Listing | null;
   region?: Region;
   alreadyMatched?: boolean;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
   onClose: () => void;
   onSwipe?: (listing: Listing, decision: SwipeDecision) => void;
 }
@@ -21,25 +17,17 @@ export function DetailDialog({
   listing,
   region,
   alreadyMatched = false,
+  soundEnabled,
+  onToggleSound,
   onClose,
   onSwipe,
 }: DetailDialogProps) {
-  const [playingId, setPlayingId] = useState<string | null>(() => getPlayingListingId());
-
-  useEffect(() => {
-    return subscribeAudioState(() => {
-      setPlayingId(getPlayingListingId());
-    });
-  }, []);
-
   const safeHref =
     listing?.sampleLink && /^https?:\/\//i.test(listing.sampleLink)
       ? listing.sampleLink
       : listing?.sampleLink
         ? `https://${listing.sampleLink}`
         : undefined;
-
-  const isPlaying = Boolean(listing && playingId === listing.id);
 
   return (
     <NativeDialog
@@ -55,26 +43,25 @@ export function DetailDialog({
     >
       {listing && (
         <div className="space-y-4">
-          <div className="relative">
-            <CardArtwork listing={listing} areaCode={region?.areaCode} compact />
-            <button
-              type="button"
-              onClick={() => void toggleCardPreview(listing)}
-              aria-pressed={isPlaying}
-              className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
-            >
-              {isPlaying ? (
-                <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-              ) : (
-                <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-              )}
-              <span>{isPlaying ? 'Playing groove' : 'Preview groove'}</span>
-            </button>
+          <div className="h-64 w-full overflow-hidden rounded-2xl border border-[var(--border)]">
+            <ClipPlayer
+              listing={listing}
+              areaCode={region?.areaCode}
+              isActive={Boolean(listing)}
+              soundEnabled={soundEnabled}
+              onToggleSound={onToggleSound}
+              compact
+            />
           </div>
 
           <div>
-            <p className="text-sm font-medium text-[var(--muted)]">{listing.subtitle}</p>
-            <p className="mt-1.5 text-base font-semibold leading-snug text-[var(--ink)]">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)]">
+                {listing.roleCategory}
+              </span>
+              <span className="text-sm font-medium text-[var(--muted)]">{listing.subtitle}</span>
+            </div>
+            <p className="mt-2 text-base font-semibold leading-snug text-[var(--ink)]">
               {listing.seekingOrOffer}
             </p>
           </div>

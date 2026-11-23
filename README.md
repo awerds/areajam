@@ -1,10 +1,9 @@
 # AreaJam (`areajam.com`)
 
-Regional, two-sided music matching PWA:
-- **Jam Side:** Swipe locally to find musicians to jam with or form a band.
-- **Gigs Side:** Swipe locally to pitch open venue slots or book gig-ready bands.
-
-Built to host free on **GitHub Pages** and install cleanly to iPhone Home Screens as a PWA before wrapping in Capacitor or native Swift/React Native later.
+Regional, two-sided music matching PWA combining Craigslist-style metro boards, TikTok auto-playing video/audio reels, and Tinder swipe discovery:
+- **Jam Side:** Find local drummers, guitarists, bassists, vocalists, keys, and songwriters to jam or form a band.
+- **Gigs Side:** Discover open local venue bills or browse gig-ready bands with live clips and rates.
+- **Browse Free, Sign In to Join:** Anyone can filter by players, watch clips, and browse without an account. Creating a profile, recording 30-second webcam intros or uploading clips (stored locally in IndexedDB), and messaging matches uses Google or Apple Auth.
 
 ## Local Development
 
@@ -19,19 +18,20 @@ Type-check and build production static output (`dist/`):
 npm run typecheck && npm run build
 ```
 
+## Enabling Live Google & Apple Sign-In (Firebase Auth)
+
+1. Copy `.env.example` to `.env.local` (or inject `VITE_FIREBASE_*` secrets in GitHub Actions) and set:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_APP_ID`
+2. In **Firebase Console → Authentication → Sign-in method**, enable **Google** and **Apple**.
+3. In **Firebase Console → Authentication → Settings → Authorized domains**, add `areajam.com`, `www.areajam.com`, and `localhost` (domain names only, no protocol or port).
+
+*(Without `VITE_FIREBASE_*` keys configured, AreaJam cleanly runs an instant local Apple/Google preview sign-in so profile creation and webcam clip uploads can be tested immediately.)*
+
 ## Free Hosting via GitHub Pages + Namecheap (`areajam.com`)
 
 1. The static production bundle (`dist/`, including `public/CNAME`) is published on the `gh-pages` branch for zero-cost GitHub Pages hosting.
 2. Optional auto-deploy: move `docs/deploy-workflow.yml` to `.github/workflows/deploy.yml` via the GitHub web UI (or after running `gh auth refresh -s workflow`) to rebuild and deploy automatically on every push to `main`.
-3. In **GitHub → Repo Settings → Pages**, verify **Source** is set to **Deploy from a branch** (`gh-pages` / `/ (root)`) and check **Enforce HTTPS** once DNS finishes propagating.
-4. In **Namecheap → Domain List → Manage → Advanced DNS**, set:
-   - `A` record `@` → `185.199.108.153`
-   - `A` record `@` → `185.199.109.153`
-   - `A` record `@` → `185.199.110.153`
-   - `A` record `@` → `185.199.111.153`
-   - `CNAME` record `www` → `awerds.github.io.`
-
-## Next Stage (Live Backend & Native iPhone App)
-
-- **Backend:** Swap `src/lib/storage.ts` from `localStorage` to a free-tier **Supabase** or **Firebase** adapter for shared regional boards, auth, and realtime chat.
-- **iOS App:** Wrap `dist/` with **Capacitor** (`@capacitor/ios`) once local traction is ready for the App Store.
+3. In **GitHub → Repo Settings → Pages**, verify **Source** is set to **Deploy from a branch** (`gh-pages` / `/ (root)`) and **Enforce HTTPS** is enabled.
