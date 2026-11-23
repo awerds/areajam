@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Flame, Info, Instagram, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
+import { Flame, Info, Instagram, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
 import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { getProfileActionState } from '../lib/firestorePilot';
+import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import { AreaJamMark } from './BrandLogo';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
@@ -14,6 +15,7 @@ interface SwipeDeckProps {
   allRegions: Region[];
   canUndo: boolean;
   includeNearbyRegions: boolean;
+  showingNearestFallback?: boolean;
   showSampleCards: boolean;
   soundEnabled: boolean;
   currentUserUid?: string;
@@ -43,6 +45,7 @@ export function SwipeDeck({
   allRegions,
   canUndo,
   includeNearbyRegions,
+  showingNearestFallback = false,
   showSampleCards,
   soundEnabled,
   currentUserUid,
@@ -355,6 +358,19 @@ export function SwipeDeck({
   }
 
   const topAction = getProfileActionState(topCard, currentUserUid, inviteByTargetUid);
+  const topCardRegion = allRegions.find((r) => r.id === topCard.regionId);
+  const topDistanceMiles =
+    topCard.regionId !== region.id
+      ? estimateRoughDistanceMiles(region, topCardRegion)
+      : null;
+  const topRoughDistanceCompact =
+    topCard.regionId !== region.id
+      ? formatRoughDistance(topDistanceMiles, region, topCardRegion, 'compact')
+      : null;
+  const topRoughDistanceVerbose =
+    topCard.regionId !== region.id
+      ? formatRoughDistance(topDistanceMiles, region, topCardRegion, 'verbose')
+      : null;
 
   const likeOpacity = flyDir === 'like' ? 1 : Math.min(1, Math.max(0, (dragState.x - 24) / 80));
   const passOpacity = flyDir === 'pass' ? 1 : Math.min(1, Math.max(0, (-dragState.x - 24) / 80));
@@ -362,6 +378,21 @@ export function SwipeDeck({
 
   return (
     <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
+      {showingNearestFallback && (
+        <div className="mb-3 flex w-full items-center justify-between gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md">
+          <span className="flex min-w-0 items-center gap-1.5 font-medium text-[var(--ink)]">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
+            <span className="truncate">No players in {region.city} yet — showing nearest</span>
+          </span>
+          <button
+            type="button"
+            onClick={onGoToPost}
+            className="shrink-0 font-bold text-[var(--accent-text)] hover:underline"
+          >
+            Post in {region.city}
+          </button>
+        </div>
+      )}
       <div className="deck-perspective relative h-auto w-full select-none md:h-[min(68dvh,37rem)]">
         {nextCard && (
           <article
@@ -526,8 +557,21 @@ export function SwipeDeck({
                   </a>
                 )}
               </div>
-              <span className="truncate font-medium text-[var(--muted)]">
-                {topCard.neighborhood}, {getRegionAreaCode(topCard.regionId)}
+              <span className="flex min-w-0 items-center justify-end gap-1.5 truncate font-medium text-[var(--muted)]">
+                <span className="truncate">
+                  {topCard.regionId !== region.id && topCardRegion
+                    ? `${topCardRegion.city}${topCardRegion.state ? `, ${topCardRegion.state}` : ''}`
+                    : `${topCard.neighborhood}, ${getRegionAreaCode(topCard.regionId)}`}
+                </span>
+                {topRoughDistanceCompact && (
+                  <span
+                    title={topRoughDistanceVerbose ?? undefined}
+                    aria-label={topRoughDistanceVerbose ?? topRoughDistanceCompact}
+                    className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2 py-0.5 text-[10px] font-bold text-[var(--accent-text)]"
+                  >
+                    {topRoughDistanceCompact}
+                  </span>
+                )}
               </span>
             </div>
 

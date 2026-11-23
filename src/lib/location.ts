@@ -1,3 +1,4 @@
+import { US_STATE_CENTROIDS } from '../data/regions';
 import type { Region } from '../types';
 
 interface IpLookupResult {
@@ -7,7 +8,7 @@ interface IpLookupResult {
   lng: number;
 }
 
-function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const R = 3958.8;
   const dLat = toRad(lat2 - lat1);
@@ -16,6 +17,76 @@ function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: number):
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+export function getRegionCoords(
+  region?: Region
+): { lat: number; lng: number; approxStateOnly: boolean } | null {
+  if (!region) return null;
+  if (typeof region.lat === 'number' && Number.isFinite(region.lat) && typeof region.lng === 'number' && Number.isFinite(region.lng)) {
+    return { lat: region.lat, lng: region.lng, approxStateOnly: false };
+  }
+  const stateKey = region.state?.trim().toUpperCase();
+  const centroid = stateKey ? US_STATE_CENTROIDS[stateKey] : undefined;
+  if (centroid) {
+    return { lat: centroid.lat, lng: centroid.lng, approxStateOnly: true };
+  }
+  return null;
+}
+
+export function estimateRoughDistanceMiles(fromRegion?: Region, toRegion?: Region): number | null {
+  if (!fromRegion || !toRegion) return null;
+  if (fromRegion.id === toRegion.id) return 0;
+
+  const fromCoords = getRegionCoords(fromRegion);
+  const toCoords = getRegionCoords(toRegion);
+  if (!fromCoords || !toCoords) return null;
+
+  const sameState =
+    Boolean(fromRegion.state && toRegion.state) &&
+    fromRegion.state.trim().toUpperCase() === toRegion.state.trim().toUpperCase();
+  if ((fromCoords.approxStateOnly || toCoords.approxStateOnly) && sameState) {
+    return null;
+  }
+
+  return haversineMiles(fromCoords.lat, fromCoords.lng, toCoords.lat, toCoords.lng);
+}
+
+export function formatRoughDistance(
+  miles: number | null,
+  fromRegion?: Region,
+  toRegion?: Region,
+  style: 'compact' | 'verbose' = 'compact'
+): string | null {
+  if (fromRegion && toRegion && fromRegion.id === toRegion.id) return null;
+
+  if (miles === null) {
+    const sameState =
+      Boolean(fromRegion?.state && toRegion?.state) &&
+      fromRegion!.state.trim().toUpperCase() === toRegion!.state.trim().toUpperCase();
+    if (sameState && toRegion?.state) {
+      return style === 'verbose'
+        ? `Same state (${toRegion.state.trim().toUpperCase()})`
+        : `In ${toRegion.state.trim().toUpperCase()}`;
+    }
+    return style === 'verbose'
+      ? `Outside ${fromRegion?.city ?? 'selected area'}`
+      : 'Other US city';
+  }
+
+  let rounded: number;
+  if (miles < 25) {
+    rounded = Math.max(10, Math.round(miles / 5) * 5);
+  } else if (miles < 100) {
+    rounded = Math.round(miles / 5) * 5;
+  } else {
+    rounded = Math.round(miles / 10) * 10;
+  }
+  const formatted = rounded.toLocaleString();
+
+  return style === 'verbose'
+    ? `~${formatted} mi from ${fromRegion?.city ?? 'your area'}`
+    : `~${formatted} mi`;
 }
 
 async function fetchJsonWithTimeout(url: string, timeoutMs = 4000): Promise<unknown> {

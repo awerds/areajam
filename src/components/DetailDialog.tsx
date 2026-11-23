@@ -1,6 +1,7 @@
 import { Calendar, ExternalLink, Flame, Instagram, MapPin, Maximize2, MessageCircle, Speaker, X } from 'lucide-react';
 import { safeHttpsUrl } from '../data/themes';
 import { getProfileActionState } from '../lib/firestorePilot';
+import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import type { JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
@@ -9,6 +10,7 @@ import { NativeDialog } from './NativeDialog';
 interface DetailDialogProps {
   listing: Listing | null;
   region?: Region;
+  selectedRegion?: Region;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
   soundEnabled: boolean;
@@ -23,6 +25,7 @@ interface DetailDialogProps {
 export function DetailDialog({
   listing,
   region,
+  selectedRegion,
   currentUserUid,
   inviteByTargetUid,
   soundEnabled,
@@ -37,6 +40,15 @@ export function DetailDialog({
   const action = listing
     ? getProfileActionState(listing, currentUserUid, inviteByTargetUid)
     : null;
+  const verboseDistance =
+    listing && selectedRegion && listing.regionId !== selectedRegion.id
+      ? formatRoughDistance(
+          estimateRoughDistanceMiles(selectedRegion, region),
+          selectedRegion,
+          region,
+          'verbose'
+        )
+      : null;
 
   return (
     <NativeDialog
@@ -46,7 +58,7 @@ export function DetailDialog({
       title={listing ? listing.title : 'Listing details'}
       subtitle={
         listing
-          ? `${listing.isSample ? 'Sample preview card' : 'Live profile'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}`
+          ? `${listing.isSample ? 'Sample preview card' : 'Live profile'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}${verboseDistance ? ` (${verboseDistance})` : ''}`
           : undefined
       }
     >
@@ -108,9 +120,16 @@ export function DetailDialog({
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
               <div>
                 <dt className="text-xs font-semibold text-[var(--muted)]">Local area</dt>
-                <dd className="mt-0.5 text-[var(--ink)]">
-                  {listing.neighborhood}
-                  {region ? `, ${region.label}` : ''}
+                <dd className="mt-0.5 flex flex-wrap items-center gap-2 text-[var(--ink)]">
+                  <span>
+                    {listing.neighborhood}
+                    {region ? `, ${region.label}` : ''}
+                  </span>
+                  {verboseDistance && (
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--accent-text)]">
+                      {verboseDistance}
+                    </span>
+                  )}
                 </dd>
               </div>
             </div>

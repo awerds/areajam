@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Flame, Instagram, MapPin, Maximize2, MessageCircle, Pause, Play, Search } from 'lucide-react';
 import { getPlayingListingId, subscribeAudioState, toggleCardPreview } from '../lib/audioPreview';
 import { getProfileActionState } from '../lib/firestorePilot';
+import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { CardArtwork } from './CardArtwork';
 import { InstrumentBadgeRow } from './InstrumentIcons';
@@ -12,6 +13,7 @@ interface BrowseGridProps {
   region: Region;
   allRegions: Region[];
   swiped: Record<string, SwipeDecision>;
+  showingNearestFallback?: boolean;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
   onInspect: (listing: Listing) => void;
@@ -20,6 +22,7 @@ interface BrowseGridProps {
   onInvite: (listing: Listing) => void;
   onOpenInvites: (threadId?: string) => void;
   onWatchInReels?: () => void;
+  onGoToPost?: () => void;
 }
 
 export function BrowseGrid({
@@ -27,12 +30,14 @@ export function BrowseGrid({
   mode,
   region,
   allRegions,
+  showingNearestFallback = false,
   currentUserUid,
   inviteByTargetUid,
   onOpenProfile,
   onInvite,
   onOpenInvites,
   onWatchInReels,
+  onGoToPost,
 }: BrowseGridProps) {
   const [query, setQuery] = useState('');
   const [playingId, setPlayingId] = useState<string | null>(() => getPlayingListingId());
@@ -57,10 +62,29 @@ export function BrowseGrid({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-display text-2xl font-bold tracking-tight">
-            {mode === 'jam' ? `Browse players around ${region.city}` : `Browse gigs and bands in ${region.city}`}
+            {showingNearestFallback
+              ? `Nearest players to ${region.city}`
+              : mode === 'jam'
+                ? `Browse players around ${region.city}`
+                : `Browse gigs and bands in ${region.city}`}
           </h2>
           <p className="text-sm text-[var(--muted)]">
-            Open directory — inspect instruments, gear lockers, and full pages before signing in
+            {showingNearestFallback ? (
+              <>
+                No players in {region.city} yet — sorted closest first by rough distance.{' '}
+                {onGoToPost && (
+                  <button
+                    type="button"
+                    onClick={onGoToPost}
+                    className="font-semibold text-[var(--accent-text)] underline underline-offset-2"
+                  >
+                    Be first to post in {region.city}
+                  </button>
+                )}
+              </>
+            ) : (
+              'Open directory — inspect instruments, gear lockers, and full pages before signing in'
+            )}
           </p>
         </div>
 
@@ -109,6 +133,16 @@ export function BrowseGrid({
             const isPlaying = playingId === item.id;
             const action = getProfileActionState(item, currentUserUid, inviteByTargetUid);
             const hasEmbed = item.clips.some((c) => c.kind === 'embed');
+            const distMiles =
+              item.regionId !== region.id ? estimateRoughDistanceMiles(region, itemRegion) : null;
+            const roughDistance =
+              item.regionId !== region.id
+                ? formatRoughDistance(distMiles, region, itemRegion, 'compact')
+                : null;
+            const roughDistanceTitle =
+              item.regionId !== region.id
+                ? formatRoughDistance(distMiles, region, itemRegion, 'verbose')
+                : null;
 
             return (
               <article
@@ -158,7 +192,22 @@ export function BrowseGrid({
                       </span>
                       <span className="inline-flex shrink-0 items-center gap-1">
                         <MapPin className="h-3 w-3" aria-hidden="true" />
-                        {itemRegion?.city ?? item.regionLabel ?? item.regionId}
+                        <span>
+                          {itemRegion
+                            ? item.regionId !== region.id && itemRegion.state
+                              ? `${itemRegion.city}, ${itemRegion.state}`
+                              : itemRegion.city
+                            : (item.regionLabel ?? item.regionId)}
+                        </span>
+                        {roughDistance && (
+                          <span
+                            title={roughDistanceTitle ?? undefined}
+                            aria-label={roughDistanceTitle ?? roughDistance}
+                            className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--accent-text)]"
+                          >
+                            {roughDistance}
+                          </span>
+                        )}
                       </span>
                     </div>
 

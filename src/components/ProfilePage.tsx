@@ -28,6 +28,7 @@ import {
 } from '../data/themes';
 import { embedProviderLabel } from '../lib/embedMedia';
 import { getProfileActionState } from '../lib/firestorePilot';
+import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import type {
   AuthUser,
   GearCategory,
@@ -45,6 +46,7 @@ import type { SafetyTarget } from './SafetyDialog';
 interface ProfilePageProps {
   listing: Listing;
   region?: Region;
+  selectedRegion?: Region;
   allListings: Listing[];
   allRegions: Region[];
   user: AuthUser | null;
@@ -66,6 +68,7 @@ interface ProfilePageProps {
 export function ProfilePage({
   listing,
   region,
+  selectedRegion,
   allListings,
   allRegions,
   user,
@@ -309,6 +312,22 @@ export function ProfilePage({
                 />
                 {listing.neighborhood}, {region?.label ?? listing.regionLabel ?? listing.regionId}
               </span>
+              {selectedRegion && listing.regionId !== selectedRegion.id && (() => {
+                const distanceText = formatRoughDistance(
+                  estimateRoughDistanceMiles(selectedRegion, region),
+                  selectedRegion,
+                  region,
+                  'verbose'
+                );
+                return distanceText ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-bold"
+                    style={{ color: 'var(--pt-accent)' }}
+                  >
+                    {distanceText}
+                  </span>
+                ) : null;
+              })()}
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
                 {listing.isSample ? 'Sample profile (demo)' : 'Live profile (Firestore)'}
               </span>

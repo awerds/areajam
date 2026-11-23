@@ -55,7 +55,7 @@ import { SEED_LISTINGS } from './data/seedListings';
 import { stopCardPreview } from './lib/audioPreview';
 import { signOutUser, subscribeAuth } from './lib/auth';
 import { subscribeColorScheme, toggleColorScheme } from './lib/colorScheme';
-import { detectLocationByIp } from './lib/location';
+import { detectLocationByIp, estimateRoughDistanceMiles } from './lib/location';
 import {
   loadState,
   parseUrlState,
@@ -423,12 +423,51 @@ export function App() {
     showToast(`Local board set to ${result.detectedLabel}`);
   };
 
+  const regionById = useMemo(
+    () => new Map(allRegions.map((r) => [r.id, r])),
+    [allRegions]
+  );
+
+  const sidePool = useMemo(
+    () => allListings.filter((l) => l.side === state.mode),
+    [allListings, state.mode]
+  );
+
+  const localUnfiltered = useMemo(
+    () => sidePool.filter((l) => l.regionId === state.regionId),
+    [sidePool, state.regionId]
+  );
+
+  const otherUnfiltered = useMemo(() => {
+    const distanceCache = new Map<string, number | null>();
+    const getDist = (regionId: string): number | null => {
+      if (!distanceCache.has(regionId)) {
+        distanceCache.set(
+          regionId,
+          estimateRoughDistanceMiles(currentRegion, regionById.get(regionId))
+        );
+      }
+      return distanceCache.get(regionId) ?? null;
+    };
+
+    return sidePool
+      .filter((l) => l.regionId !== state.regionId)
+      .sort((a, b) => {
+        const distA = getDist(a.regionId);
+        const distB = getDist(b.regionId);
+        if (distA !== null && distB !== null && distA !== distB) return distA - distB;
+        if (distA !== null && distB === null) return -1;
+        if (distA === null && distB !== null) return 1;
+        const aSample = Boolean(a.isSample);
+        const bSample = Boolean(b.isSample);
+        if (aSample !== bSample) return aSample ? 1 : -1;
+        return b.createdAt - a.createdAt;
+      });
+  }, [sidePool, state.regionId, currentRegion, regionById]);
+
   const availableFilters = useMemo(() => {
-    const modeListings = allListings.filter(
-      (l) =>
-        l.side === state.mode &&
-        (state.includeNearbyRegions || l.regionId === state.regionId)
-    );
+    const modeListings =
+      localUnfiltered.length === 0 || state.includeNearbyRegions ? sidePool : localUnfiltered;
     const counts = new Map<string, number>();
     for (const item of modeListings) {
       for (const genre of item.genres) {
@@ -440,7 +479,7 @@ export function App() {
       .map(([name]) => name)
       .slice(0, 6);
     return ['All', ...sorted];
-  }, [allListings, state.includeNearbyRegions, state.mode, state.regionId]);
+  }, [localUnfiltered, sidePool, state.includeNearbyRegions]);
 
   useEffect(() => {
     if (!availableFilters.includes(chipFilter)) {
@@ -448,28 +487,53 @@ export function App() {
     }
   }, [availableFilters, chipFilter]);
 
-  const regionalPool = useMemo(() => {
-    const sidePool = allListings.filter((l) => l.side === state.mode);
-    const local = sidePool.filter((l) => l.regionId === state.regionId);
-    const nearby = state.includeNearbyRegions
-      ? sidePool.filter((l) => l.regionId !== state.regionId)
-      : [];
-    const combined = [...local, ...nearby];
-
-    return combined.filter((item) => {
+  const { localFiltered, otherFiltered, showingNearestFallback } = useMemo(() => {
+    const matchesCurrentFilters = (item: Listing) => {
       if (!matchesPreferences(item, activePrefs)) return false;
       if (chipFilter === 'All') return true;
       return item.genres.includes(chipFilter) || item.tags.includes(chipFilter);
-    });
-  }, [activePrefs, allListings, chipFilter, state.includeNearbyRegions, state.mode, state.regionId]);
+    };
+    const nextLocal = localUnfiltered.filter(matchesCurrentFilters);
+    const nextOther = otherUnfiltered.filter(matchesCurrentFilters);
+    return {
+      localFiltered: nextLocal,
+      otherFiltered: nextOther,
+      showingNearestFallback: nextLocal.length === 0 && nextOther.length > 0,
+    };
+  }, [localUnfiltered, otherUnfiltered, activePrefs, chipFilter]);
 
-  const deckCards = useMemo(
-    () =>
-      regionalPool.filter(
-        (l) => (!user || l.ownerUid !== user.uid) && !state.swiped[l.id]
-      ),
-    [regionalPool, state.swiped, user]
-  );
+  const regionalPool = useMemo(() => {
+    if (showingNearestFallback) return otherFiltered;
+    return state.includeNearbyRegions ? [...localFiltered, ...otherFiltered] : localFiltered;
+  }, [showingNearestFallback, state.includeNearbyRegions, localFiltered, otherFiltered]);
+
+  const { deckCards, showingDeckNearestFallback } = useMemo(() => {
+    const isSwipeable = (l: Listing) => (!user || l.ownerUid !== user.uid) && !state.swiped[l.id];
+    const eligibleLocal = localFiltered.filter(isSwipeable);
+    const eligibleOther = otherFiltered.filter(isSwipeable);
+    const localOnlySelf =
+      !showingNearestFallback &&
+      eligibleLocal.length === 0 &&
+      eligibleOther.length > 0 &&
+      localFiltered.every((l) => user && l.ownerUid === user.uid);
+    const useNearestDeck = showingNearestFallback || localOnlySelf;
+
+    return {
+      deckCards: useNearestDeck
+        ? eligibleOther
+        : state.includeNearbyRegions
+          ? [...eligibleLocal, ...eligibleOther]
+          : eligibleLocal,
+      showingDeckNearestFallback: useNearestDeck,
+    };
+  }, [
+    localFiltered,
+    otherFiltered,
+    showingNearestFallback,
+    state.includeNearbyRegions,
+    state.swiped,
+    user,
+  ]);
 
   const handleModeChange = (nextMode: AppMode) => {
     if (nextMode === 'gigs') {
@@ -561,9 +625,11 @@ export function App() {
   );
 
   const handleResetPassed = () => {
+    const includeAll =
+      showingNearestFallback || showingDeckNearestFallback || state.includeNearbyRegions;
     const modePoolIds = new Set(
       allListings
-        .filter((l) => l.side === state.mode && (state.includeNearbyRegions || l.regionId === state.regionId))
+        .filter((l) => l.side === state.mode && (includeAll || l.regionId === state.regionId))
         .map((l) => l.id)
     );
     setState((prev) => resetPassedSwipes(prev, modePoolIds));
@@ -1008,6 +1074,7 @@ export function App() {
           <ProfilePage
             listing={activeProfile}
             region={allRegions.find((r) => r.id === activeProfile.regionId)}
+            selectedRegion={currentRegion}
             allListings={allListings}
             allRegions={allRegions}
             user={user}
@@ -1299,6 +1366,7 @@ export function App() {
                       allRegions={allRegions}
                       canUndo={canUndo}
                       includeNearbyRegions={state.includeNearbyRegions}
+                      showingNearestFallback={showingDeckNearestFallback}
                       showSampleCards={state.showSampleCards}
                       soundEnabled={soundEnabled}
                       currentUserUid={user?.uid}
@@ -1332,6 +1400,7 @@ export function App() {
                     region={currentRegion}
                     allRegions={allRegions}
                     swiped={state.swiped}
+                    showingNearestFallback={showingNearestFallback}
                     currentUserUid={user?.uid}
                     inviteByTargetUid={inviteByTargetUid}
                     onInspect={setDetailListing}
@@ -1339,6 +1408,7 @@ export function App() {
                     onSwipe={handleSwipe}
                     onInvite={handleRequestInvite}
                     onOpenInvites={handleOpenInvites}
+                    onGoToPost={() => handleTabChange('post')}
                   />
                 </div>
               </div>
@@ -1400,6 +1470,7 @@ export function App() {
                   region={currentRegion}
                   allRegions={allRegions}
                   swiped={state.swiped}
+                  showingNearestFallback={showingNearestFallback}
                   currentUserUid={user?.uid}
                   inviteByTargetUid={inviteByTargetUid}
                   onInspect={setDetailListing}
@@ -1408,6 +1479,7 @@ export function App() {
                   onInvite={handleRequestInvite}
                   onOpenInvites={handleOpenInvites}
                   onWatchInReels={() => handleTabChange('discover')}
+                  onGoToPost={() => handleTabChange('post')}
                 />
               </div>
             )}
@@ -1599,6 +1671,7 @@ export function App() {
       <DetailDialog
         listing={detailListing}
         region={detailListing ? allRegions.find((r) => r.id === detailListing.regionId) : undefined}
+        selectedRegion={currentRegion}
         currentUserUid={user?.uid}
         inviteByTargetUid={inviteByTargetUid}
         soundEnabled={soundEnabled}
