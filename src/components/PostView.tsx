@@ -430,22 +430,27 @@ export function PostView({
                     type="button"
                     aria-pressed={selected}
                     onClick={() => toggleInstrument(id)}
-                    className="inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition"
+                    className="inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition hover:brightness-110"
                     style={
                       selected
                         ? {
-                            backgroundColor: 'var(--accent)',
-                            color: side === 'jam' ? '#ffffff' : '#041d12',
-                            borderColor: 'var(--accent)',
+                            backgroundColor: meta.bg,
+                            color: '#ffffff',
+                            borderColor: meta.color,
+                            boxShadow: `0 0 0 1px ${meta.color}`,
                           }
                         : {
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
                             color: 'var(--ink)',
-                            borderColor: 'var(--border)',
+                            borderColor: meta.border,
                           }
                     }
                   >
-                    <InstrumentIcon id={id} size={15} />
+                    <InstrumentIcon
+                      id={id}
+                      size={20}
+                      style={{ color: meta.color }}
+                    />
                     <span>{meta.shortLabel}</span>
                   </button>
                 );
