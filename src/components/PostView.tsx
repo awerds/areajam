@@ -299,7 +299,7 @@ export function PostView({
               className="h-9 w-9 rounded-full object-cover"
             />
           ) : (
-            <span className="font-display inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">
+            <span className="font-display inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-[var(--accent-ink)]">
               {user.displayName.slice(0, 1).toUpperCase()}
             </span>
           )}
@@ -430,14 +430,14 @@ export function PostView({
                     type="button"
                     aria-pressed={selected}
                     onClick={() => toggleInstrument(id)}
-                    className="inline-flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3.5 text-xs font-semibold transition hover:brightness-110"
+                    className={`inst-${id} inline-flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3.5 text-xs font-semibold transition hover:brightness-95`}
                     style={
                       selected
                         ? {
-                            backgroundColor: meta.bg,
-                            color: '#ffffff',
-                            borderColor: meta.color,
-                            boxShadow: `0 0 0 1px ${meta.color}`,
+                            backgroundColor: 'var(--inst-bg)',
+                            color: 'var(--inst-ink)',
+                            borderColor: 'var(--inst-color)',
+                            boxShadow: '0 0 0 1px var(--inst-color)',
                           }
                         : {
                             backgroundColor: 'var(--pill-bg)',
@@ -449,8 +449,8 @@ export function PostView({
                     <span
                       className="inline-flex h-7 w-7 items-center justify-center rounded-full"
                       style={{
-                        backgroundColor: selected ? 'transparent' : meta.bg,
-                        color: meta.color,
+                        backgroundColor: selected ? 'transparent' : 'var(--inst-bg)',
+                        color: 'var(--inst-color)',
                       }}
                     >
                       <InstrumentIcon id={id} size={20} />
@@ -750,18 +750,18 @@ export function PostView({
                     key={t.id}
                     type="button"
                     onClick={() => setThemeId(t.id)}
-                    className="rounded-xl border p-2.5 text-left transition"
+                    className={`profile-theme-${t.id} rounded-xl border p-2.5 text-left transition`}
                     style={{
-                      background: `linear-gradient(135deg, ${t.bgFrom}, ${t.bgTo})`,
-                      borderColor: selected ? t.accent : 'var(--border-strong)',
-                      boxShadow: selected ? `0 0 0 1px ${t.accent}` : undefined,
+                      background: 'linear-gradient(135deg, var(--pt-bg-from), var(--pt-bg-to))',
+                      borderColor: selected ? 'var(--pt-accent)' : 'var(--pt-border)',
+                      boxShadow: selected ? '0 0 0 1px var(--pt-accent)' : undefined,
                     }}
                   >
                     <span
                       className="mb-1.5 block h-2.5 w-7 rounded-full"
-                      style={{ backgroundColor: t.accent }}
+                      style={{ backgroundColor: 'var(--pt-accent)' }}
                     />
-                    <span className="block text-[11px] font-bold text-white">{t.name}</span>
+                    <span className="block text-[11px] font-bold text-[var(--ink)]">{t.name}</span>
                   </button>
                 );
               })}

@@ -197,6 +197,154 @@
     --art-secondary: light-dark(#7e22ce, #a855f7);
     --art-rim: light-dark(#db2777, #fda4af);
   }
+
+  /* Light/Dark Instrument Badge Tokens */
+  .inst-guitar {
+    --inst-color: light-dark(#c2410c, #fb923c);
+    --inst-bg: light-dark(#fff1e0, rgba(38, 22, 12, 0.86));
+    --inst-border: light-dark(rgba(194, 65, 12, 0.28), rgba(251, 146, 60, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-bass {
+    --inst-color: light-dark(#0369a1, #38bdf8);
+    --inst-bg: light-dark(#e5f4ff, rgba(10, 28, 42, 0.86));
+    --inst-border: light-dark(rgba(3, 105, 161, 0.28), rgba(56, 189, 248, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-drums {
+    --inst-color: light-dark(#be123c, #ff4d79);
+    --inst-bg: light-dark(#ffe6ed, rgba(42, 12, 22, 0.86));
+    --inst-border: light-dark(rgba(190, 18, 60, 0.28), rgba(255, 77, 121, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-vocals {
+    --inst-color: light-dark(#be185d, #f472b6);
+    --inst-bg: light-dark(#fce7f3, rgba(40, 14, 30, 0.86));
+    --inst-border: light-dark(rgba(190, 24, 93, 0.28), rgba(244, 114, 182, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-keys {
+    --inst-color: light-dark(#a16207, #facc15);
+    --inst-bg: light-dark(#fef7d6, rgba(36, 30, 10, 0.86));
+    --inst-border: light-dark(rgba(161, 98, 7, 0.3), rgba(250, 204, 21, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-synth {
+    --inst-color: light-dark(#7e22ce, #c084fc);
+    --inst-bg: light-dark(#f3e8ff, rgba(30, 16, 44, 0.86));
+    --inst-border: light-dark(rgba(126, 34, 206, 0.28), rgba(192, 132, 252, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-horns {
+    --inst-color: light-dark(#b45309, #fbbf24);
+    --inst-bg: light-dark(#fef2d6, rgba(38, 28, 10, 0.86));
+    --inst-border: light-dark(rgba(180, 83, 9, 0.3), rgba(251, 191, 36, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-strings {
+    --inst-color: light-dark(#be123c, #fda4af);
+    --inst-bg: light-dark(#ffe8ec, rgba(42, 16, 24, 0.86));
+    --inst-border: light-dark(rgba(190, 18, 60, 0.26), rgba(253, 164, 175, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-producer {
+    --inst-color: light-dark(#0f766e, #2dd4bf);
+    --inst-bg: light-dark(#e3faf6, rgba(10, 34, 32, 0.86));
+    --inst-border: light-dark(rgba(15, 118, 110, 0.28), rgba(45, 212, 191, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+  .inst-band {
+    --inst-color: light-dark(#047857, #34d399);
+    --inst-bg: light-dark(#e4f9ee, rgba(10, 34, 24, 0.86));
+    --inst-border: light-dark(rgba(4, 120, 87, 0.28), rgba(52, 211, 153, 0.45));
+    --inst-ink: light-dark(#10131d, #f8fafc);
+  }
+
+  /* Light/Dark MySpace-Inspired Artist Page Themes */
+  .profile-theme-stage-coral {
+    --pt-bg-from: light-dark(#ffe4ec, #1f0b15);
+    --pt-bg-to: light-dark(#fff6f8, #090a11);
+    --pt-accent: light-dark(#d91b4c, #ff3b6b);
+    --pt-accent-ink: light-dark(#ffffff, #ffffff);
+    --pt-glow: light-dark(rgba(217, 27, 76, 0.16), rgba(255, 59, 107, 0.34));
+    --pt-surface: light-dark(rgba(255, 255, 255, 0.9), rgba(28, 14, 24, 0.88));
+    --pt-surface-inner: light-dark(rgba(217, 27, 76, 0.05), rgba(0, 0, 0, 0.32));
+    --pt-surface-active: light-dark(rgba(217, 27, 76, 0.12), rgba(255, 255, 255, 0.09));
+    --pt-border: light-dark(rgba(217, 27, 76, 0.24), rgba(255, 92, 138, 0.28));
+    --pt-border-subtle: light-dark(rgba(217, 27, 76, 0.14), rgba(255, 255, 255, 0.12));
+    --pt-pill-bg: light-dark(rgba(255, 255, 255, 0.82), rgba(0, 0, 0, 0.38));
+    --pt-pill-hover: light-dark(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.14));
+  }
+  .profile-theme-midnight-vinyl {
+    --pt-bg-from: light-dark(#e3edff, #0a1228);
+    --pt-bg-to: light-dark(#f5f9ff, #06070d);
+    --pt-accent: light-dark(#1d4ed8, #60a5fa);
+    --pt-accent-ink: light-dark(#ffffff, #061124);
+    --pt-glow: light-dark(rgba(29, 78, 216, 0.15), rgba(96, 165, 250, 0.32));
+    --pt-surface: light-dark(rgba(255, 255, 255, 0.9), rgba(13, 21, 42, 0.88));
+    --pt-surface-inner: light-dark(rgba(29, 78, 216, 0.05), rgba(0, 0, 0, 0.32));
+    --pt-surface-active: light-dark(rgba(29, 78, 216, 0.12), rgba(255, 255, 255, 0.09));
+    --pt-border: light-dark(rgba(29, 78, 216, 0.22), rgba(147, 197, 253, 0.25));
+    --pt-border-subtle: light-dark(rgba(29, 78, 216, 0.14), rgba(255, 255, 255, 0.12));
+    --pt-pill-bg: light-dark(rgba(255, 255, 255, 0.82), rgba(0, 0, 0, 0.38));
+    --pt-pill-hover: light-dark(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.14));
+  }
+  .profile-theme-tube-amber {
+    --pt-bg-from: light-dark(#feefd2, #211408);
+    --pt-bg-to: light-dark(#fffaf0, #090807);
+    --pt-accent: light-dark(#b45309, #f59e0b);
+    --pt-accent-ink: light-dark(#ffffff, #1c1002);
+    --pt-glow: light-dark(rgba(180, 83, 9, 0.16), rgba(245, 158, 11, 0.32));
+    --pt-surface: light-dark(rgba(255, 255, 255, 0.9), rgba(31, 21, 11, 0.88));
+    --pt-surface-inner: light-dark(rgba(180, 83, 9, 0.055), rgba(0, 0, 0, 0.32));
+    --pt-surface-active: light-dark(rgba(180, 83, 9, 0.12), rgba(255, 255, 255, 0.09));
+    --pt-border: light-dark(rgba(180, 83, 9, 0.24), rgba(251, 191, 36, 0.25));
+    --pt-border-subtle: light-dark(rgba(180, 83, 9, 0.14), rgba(255, 255, 255, 0.12));
+    --pt-pill-bg: light-dark(rgba(255, 255, 255, 0.82), rgba(0, 0, 0, 0.38));
+    --pt-pill-hover: light-dark(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.14));
+  }
+  .profile-theme-emerald-club {
+    --pt-bg-from: light-dark(#dff8ec, #071f17);
+    --pt-bg-to: light-dark(#f3fcf8, #060a09);
+    --pt-accent: light-dark(#047857, #10e88a);
+    --pt-accent-ink: light-dark(#ffffff, #041d12);
+    --pt-glow: light-dark(rgba(4, 120, 87, 0.15), rgba(16, 232, 138, 0.28));
+    --pt-surface: light-dark(rgba(255, 255, 255, 0.9), rgba(10, 29, 22, 0.88));
+    --pt-surface-inner: light-dark(rgba(4, 120, 87, 0.05), rgba(0, 0, 0, 0.32));
+    --pt-surface-active: light-dark(rgba(4, 120, 87, 0.12), rgba(255, 255, 255, 0.09));
+    --pt-border: light-dark(rgba(4, 120, 87, 0.22), rgba(52, 211, 153, 0.26));
+    --pt-border-subtle: light-dark(rgba(4, 120, 87, 0.14), rgba(255, 255, 255, 0.12));
+    --pt-pill-bg: light-dark(rgba(255, 255, 255, 0.82), rgba(0, 0, 0, 0.38));
+    --pt-pill-hover: light-dark(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.14));
+  }
+  .profile-theme-synth-violet {
+    --pt-bg-from: light-dark(#f0e4ff, #180d29);
+    --pt-bg-to: light-dark(#faf6ff, #07070f);
+    --pt-accent: light-dark(#7e22ce, #c084fc);
+    --pt-accent-ink: light-dark(#ffffff, #19082b);
+    --pt-glow: light-dark(rgba(126, 34, 206, 0.15), rgba(192, 132, 252, 0.32));
+    --pt-surface: light-dark(rgba(255, 255, 255, 0.9), rgba(25, 16, 44, 0.88));
+    --pt-surface-inner: light-dark(rgba(126, 34, 206, 0.05), rgba(0, 0, 0, 0.32));
+    --pt-surface-active: light-dark(rgba(126, 34, 206, 0.12), rgba(255, 255, 255, 0.09));
+    --pt-border: light-dark(rgba(126, 34, 206, 0.22), rgba(216, 180, 254, 0.26));
+    --pt-border-subtle: light-dark(rgba(126, 34, 206, 0.14), rgba(255, 255, 255, 0.12));
+    --pt-pill-bg: light-dark(rgba(255, 255, 255, 0.82), rgba(0, 0, 0, 0.38));
+    --pt-pill-hover: light-dark(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.14));
+  }
+  .profile-theme-zine-mono {
+    --pt-bg-from: light-dark(#ebeef3, #171920);
+    --pt-bg-to: light-dark(#f9fafb, #08090c);
+    --pt-accent: light-dark(#10131d, #f8fafc);
+    --pt-accent-ink: light-dark(#ffffff, #090a0d);
+    --pt-glow: light-dark(rgba(15, 23, 42, 0.08), rgba(226, 232, 240, 0.2));
+    --pt-surface: light-dark(rgba(255, 255, 255, 0.92), rgba(22, 25, 33, 0.88));
+    --pt-surface-inner: light-dark(rgba(15, 23, 42, 0.045), rgba(0, 0, 0, 0.32));
+    --pt-surface-active: light-dark(rgba(15, 23, 42, 0.09), rgba(255, 255, 255, 0.09));
+    --pt-border: light-dark(rgba(15, 23, 42, 0.18), rgba(255, 255, 255, 0.24));
+    --pt-border-subtle: light-dark(rgba(15, 23, 42, 0.12), rgba(255, 255, 255, 0.12));
+    --pt-pill-bg: light-dark(rgba(255, 255, 255, 0.85), rgba(0, 0, 0, 0.38));
+    --pt-pill-hover: light-dark(rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.14));
+  }
 }
 
 @supports not (color: light-dark(white, black)) {
@@ -413,6 +561,176 @@
   :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .card-art-3 { --art-base: #fdf3de; --art-primary: #c2410c; --art-secondary: #d91b4c; --art-rim: #b45309; }
   :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .card-art-4 { --art-base: #e7f2fe; --art-primary: #1d4ed8; --art-secondary: #047857; --art-rim: #7c3aed; }
   :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .card-art-5 { --art-base: #fbeaf2; --art-primary: #be123c; --art-secondary: #7e22ce; --art-rim: #db2777; }
+
+  .inst-guitar { --inst-color: #c2410c; --inst-bg: #fff1e0; --inst-border: rgba(194, 65, 12, 0.28); --inst-ink: #10131d; }
+  .inst-bass { --inst-color: #0369a1; --inst-bg: #e5f4ff; --inst-border: rgba(3, 105, 161, 0.28); --inst-ink: #10131d; }
+  .inst-drums { --inst-color: #be123c; --inst-bg: #ffe6ed; --inst-border: rgba(190, 18, 60, 0.28); --inst-ink: #10131d; }
+  .inst-vocals { --inst-color: #be185d; --inst-bg: #fce7f3; --inst-border: rgba(190, 24, 93, 0.28); --inst-ink: #10131d; }
+  .inst-keys { --inst-color: #a16207; --inst-bg: #fef7d6; --inst-border: rgba(161, 98, 7, 0.3); --inst-ink: #10131d; }
+  .inst-synth { --inst-color: #7e22ce; --inst-bg: #f3e8ff; --inst-border: rgba(126, 34, 206, 0.28); --inst-ink: #10131d; }
+  .inst-horns { --inst-color: #b45309; --inst-bg: #fef2d6; --inst-border: rgba(180, 83, 9, 0.3); --inst-ink: #10131d; }
+  .inst-strings { --inst-color: #be123c; --inst-bg: #ffe8ec; --inst-border: rgba(190, 18, 60, 0.26); --inst-ink: #10131d; }
+  .inst-producer { --inst-color: #0f766e; --inst-bg: #e3faf6; --inst-border: rgba(15, 118, 110, 0.28); --inst-ink: #10131d; }
+  .inst-band { --inst-color: #047857; --inst-bg: #e4f9ee; --inst-border: rgba(4, 120, 87, 0.28); --inst-ink: #10131d; }
+
+  .profile-theme-stage-coral {
+    --pt-bg-from: #ffe4ec; --pt-bg-to: #fff6f8; --pt-accent: #d91b4c; --pt-accent-ink: #ffffff; --pt-glow: rgba(217, 27, 76, 0.16);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(217, 27, 76, 0.05); --pt-surface-active: rgba(217, 27, 76, 0.12);
+    --pt-border: rgba(217, 27, 76, 0.24); --pt-border-subtle: rgba(217, 27, 76, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  .profile-theme-midnight-vinyl {
+    --pt-bg-from: #e3edff; --pt-bg-to: #f5f9ff; --pt-accent: #1d4ed8; --pt-accent-ink: #ffffff; --pt-glow: rgba(29, 78, 216, 0.15);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(29, 78, 216, 0.05); --pt-surface-active: rgba(29, 78, 216, 0.12);
+    --pt-border: rgba(29, 78, 216, 0.22); --pt-border-subtle: rgba(29, 78, 216, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  .profile-theme-tube-amber {
+    --pt-bg-from: #feefd2; --pt-bg-to: #fffaf0; --pt-accent: #b45309; --pt-accent-ink: #ffffff; --pt-glow: rgba(180, 83, 9, 0.16);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(180, 83, 9, 0.055); --pt-surface-active: rgba(180, 83, 9, 0.12);
+    --pt-border: rgba(180, 83, 9, 0.24); --pt-border-subtle: rgba(180, 83, 9, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  .profile-theme-emerald-club {
+    --pt-bg-from: #dff8ec; --pt-bg-to: #f3fcf8; --pt-accent: #047857; --pt-accent-ink: #ffffff; --pt-glow: rgba(4, 120, 87, 0.15);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(4, 120, 87, 0.05); --pt-surface-active: rgba(4, 120, 87, 0.12);
+    --pt-border: rgba(4, 120, 87, 0.22); --pt-border-subtle: rgba(4, 120, 87, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  .profile-theme-synth-violet {
+    --pt-bg-from: #f0e4ff; --pt-bg-to: #faf6ff; --pt-accent: #7e22ce; --pt-accent-ink: #ffffff; --pt-glow: rgba(126, 34, 206, 0.15);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(126, 34, 206, 0.05); --pt-surface-active: rgba(126, 34, 206, 0.12);
+    --pt-border: rgba(126, 34, 206, 0.22); --pt-border-subtle: rgba(126, 34, 206, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  .profile-theme-zine-mono {
+    --pt-bg-from: #ebeef3; --pt-bg-to: #f9fafb; --pt-accent: #10131d; --pt-accent-ink: #ffffff; --pt-glow: rgba(15, 23, 42, 0.08);
+    --pt-surface: rgba(255, 255, 255, 0.92); --pt-surface-inner: rgba(15, 23, 42, 0.045); --pt-surface-active: rgba(15, 23, 42, 0.09);
+    --pt-border: rgba(15, 23, 42, 0.18); --pt-border-subtle: rgba(15, 23, 42, 0.12); --pt-pill-bg: rgba(255, 255, 255, 0.85); --pt-pill-hover: rgba(255, 255, 255, 0.98);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .inst-guitar { --inst-color: #fb923c; --inst-bg: rgba(38, 22, 12, 0.86); --inst-border: rgba(251, 146, 60, 0.45); --inst-ink: #f8fafc; }
+    .inst-bass { --inst-color: #38bdf8; --inst-bg: rgba(10, 28, 42, 0.86); --inst-border: rgba(56, 189, 248, 0.45); --inst-ink: #f8fafc; }
+    .inst-drums { --inst-color: #ff4d79; --inst-bg: rgba(42, 12, 22, 0.86); --inst-border: rgba(255, 77, 121, 0.45); --inst-ink: #f8fafc; }
+    .inst-vocals { --inst-color: #f472b6; --inst-bg: rgba(40, 14, 30, 0.86); --inst-border: rgba(244, 114, 182, 0.45); --inst-ink: #f8fafc; }
+    .inst-keys { --inst-color: #facc15; --inst-bg: rgba(36, 30, 10, 0.86); --inst-border: rgba(250, 204, 21, 0.45); --inst-ink: #f8fafc; }
+    .inst-synth { --inst-color: #c084fc; --inst-bg: rgba(30, 16, 44, 0.86); --inst-border: rgba(192, 132, 252, 0.45); --inst-ink: #f8fafc; }
+    .inst-horns { --inst-color: #fbbf24; --inst-bg: rgba(38, 28, 10, 0.86); --inst-border: rgba(251, 191, 36, 0.45); --inst-ink: #f8fafc; }
+    .inst-strings { --inst-color: #fda4af; --inst-bg: rgba(42, 16, 24, 0.86); --inst-border: rgba(253, 164, 175, 0.45); --inst-ink: #f8fafc; }
+    .inst-producer { --inst-color: #2dd4bf; --inst-bg: rgba(10, 34, 32, 0.86); --inst-border: rgba(45, 212, 191, 0.45); --inst-ink: #f8fafc; }
+    .inst-band { --inst-color: #34d399; --inst-bg: rgba(10, 34, 24, 0.86); --inst-border: rgba(52, 211, 153, 0.45); --inst-ink: #f8fafc; }
+
+    .profile-theme-stage-coral {
+      --pt-bg-from: #1f0b15; --pt-bg-to: #090a11; --pt-accent: #ff3b6b; --pt-accent-ink: #ffffff; --pt-glow: rgba(255, 59, 107, 0.34);
+      --pt-surface: rgba(28, 14, 24, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+      --pt-border: rgba(255, 92, 138, 0.28); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+    }
+    .profile-theme-midnight-vinyl {
+      --pt-bg-from: #0a1228; --pt-bg-to: #06070d; --pt-accent: #60a5fa; --pt-accent-ink: #061124; --pt-glow: rgba(96, 165, 250, 0.32);
+      --pt-surface: rgba(13, 21, 42, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+      --pt-border: rgba(147, 197, 253, 0.25); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+    }
+    .profile-theme-tube-amber {
+      --pt-bg-from: #211408; --pt-bg-to: #090807; --pt-accent: #f59e0b; --pt-accent-ink: #1c1002; --pt-glow: rgba(245, 158, 11, 0.32);
+      --pt-surface: rgba(31, 21, 11, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+      --pt-border: rgba(251, 191, 36, 0.25); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+    }
+    .profile-theme-emerald-club {
+      --pt-bg-from: #071f17; --pt-bg-to: #060a09; --pt-accent: #10e88a; --pt-accent-ink: #041d12; --pt-glow: rgba(16, 232, 138, 0.28);
+      --pt-surface: rgba(10, 29, 22, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+      --pt-border: rgba(52, 211, 153, 0.26); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+    }
+    .profile-theme-synth-violet {
+      --pt-bg-from: #180d29; --pt-bg-to: #07070f; --pt-accent: #c084fc; --pt-accent-ink: #19082b; --pt-glow: rgba(192, 132, 252, 0.32);
+      --pt-surface: rgba(25, 16, 44, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+      --pt-border: rgba(216, 180, 254, 0.26); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+    }
+    .profile-theme-zine-mono {
+      --pt-bg-from: #171920; --pt-bg-to: #08090c; --pt-accent: #f8fafc; --pt-accent-ink: #090a0d; --pt-glow: rgba(226, 232, 240, 0.2);
+      --pt-surface: rgba(22, 25, 33, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+      --pt-border: rgba(255, 255, 255, 0.24); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+    }
+  }
+
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-guitar { --inst-color: #fb923c; --inst-bg: rgba(38, 22, 12, 0.86); --inst-border: rgba(251, 146, 60, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-bass { --inst-color: #38bdf8; --inst-bg: rgba(10, 28, 42, 0.86); --inst-border: rgba(56, 189, 248, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-drums { --inst-color: #ff4d79; --inst-bg: rgba(42, 12, 22, 0.86); --inst-border: rgba(255, 77, 121, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-vocals { --inst-color: #f472b6; --inst-bg: rgba(40, 14, 30, 0.86); --inst-border: rgba(244, 114, 182, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-keys { --inst-color: #facc15; --inst-bg: rgba(36, 30, 10, 0.86); --inst-border: rgba(250, 204, 21, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-synth { --inst-color: #c084fc; --inst-bg: rgba(30, 16, 44, 0.86); --inst-border: rgba(192, 132, 252, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-horns { --inst-color: #fbbf24; --inst-bg: rgba(38, 28, 10, 0.86); --inst-border: rgba(251, 191, 36, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-strings { --inst-color: #fda4af; --inst-bg: rgba(42, 16, 24, 0.86); --inst-border: rgba(253, 164, 175, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-producer { --inst-color: #2dd4bf; --inst-bg: rgba(10, 34, 32, 0.86); --inst-border: rgba(45, 212, 191, 0.45); --inst-ink: #f8fafc; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .inst-band { --inst-color: #34d399; --inst-bg: rgba(10, 34, 24, 0.86); --inst-border: rgba(52, 211, 153, 0.45); --inst-ink: #f8fafc; }
+
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .profile-theme-stage-coral {
+    --pt-bg-from: #1f0b15; --pt-bg-to: #090a11; --pt-accent: #ff3b6b; --pt-accent-ink: #ffffff; --pt-glow: rgba(255, 59, 107, 0.34);
+    --pt-surface: rgba(28, 14, 24, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+    --pt-border: rgba(255, 92, 138, 0.28); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .profile-theme-midnight-vinyl {
+    --pt-bg-from: #0a1228; --pt-bg-to: #06070d; --pt-accent: #60a5fa; --pt-accent-ink: #061124; --pt-glow: rgba(96, 165, 250, 0.32);
+    --pt-surface: rgba(13, 21, 42, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+    --pt-border: rgba(147, 197, 253, 0.25); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .profile-theme-tube-amber {
+    --pt-bg-from: #211408; --pt-bg-to: #090807; --pt-accent: #f59e0b; --pt-accent-ink: #1c1002; --pt-glow: rgba(245, 158, 11, 0.32);
+    --pt-surface: rgba(31, 21, 11, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+    --pt-border: rgba(251, 191, 36, 0.25); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .profile-theme-emerald-club {
+    --pt-bg-from: #071f17; --pt-bg-to: #060a09; --pt-accent: #10e88a; --pt-accent-ink: #041d12; --pt-glow: rgba(16, 232, 138, 0.28);
+    --pt-surface: rgba(10, 29, 22, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+    --pt-border: rgba(52, 211, 153, 0.26); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .profile-theme-synth-violet {
+    --pt-bg-from: #180d29; --pt-bg-to: #07070f; --pt-accent: #c084fc; --pt-accent-ink: #19082b; --pt-glow: rgba(192, 132, 252, 0.32);
+    --pt-surface: rgba(25, 16, 44, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+    --pt-border: rgba(216, 180, 254, 0.26); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="dark"])) .profile-theme-zine-mono {
+    --pt-bg-from: #171920; --pt-bg-to: #08090c; --pt-accent: #f8fafc; --pt-accent-ink: #090a0d; --pt-glow: rgba(226, 232, 240, 0.2);
+    --pt-surface: rgba(22, 25, 33, 0.88); --pt-surface-inner: rgba(0, 0, 0, 0.32); --pt-surface-active: rgba(255, 255, 255, 0.09);
+    --pt-border: rgba(255, 255, 255, 0.24); --pt-border-subtle: rgba(255, 255, 255, 0.12); --pt-pill-bg: rgba(0, 0, 0, 0.38); --pt-pill-hover: rgba(255, 255, 255, 0.14);
+  }
+
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-guitar { --inst-color: #c2410c; --inst-bg: #fff1e0; --inst-border: rgba(194, 65, 12, 0.28); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-bass { --inst-color: #0369a1; --inst-bg: #e5f4ff; --inst-border: rgba(3, 105, 161, 0.28); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-drums { --inst-color: #be123c; --inst-bg: #ffe6ed; --inst-border: rgba(190, 18, 60, 0.28); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-vocals { --inst-color: #be185d; --inst-bg: #fce7f3; --inst-border: rgba(190, 24, 93, 0.28); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-keys { --inst-color: #a16207; --inst-bg: #fef7d6; --inst-border: rgba(161, 98, 7, 0.3); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-synth { --inst-color: #7e22ce; --inst-bg: #f3e8ff; --inst-border: rgba(126, 34, 206, 0.28); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-horns { --inst-color: #b45309; --inst-bg: #fef2d6; --inst-border: rgba(180, 83, 9, 0.3); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-strings { --inst-color: #be123c; --inst-bg: #ffe8ec; --inst-border: rgba(190, 18, 60, 0.26); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-producer { --inst-color: #0f766e; --inst-bg: #e3faf6; --inst-border: rgba(15, 118, 110, 0.28); --inst-ink: #10131d; }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .inst-band { --inst-color: #047857; --inst-bg: #e4f9ee; --inst-border: rgba(4, 120, 87, 0.28); --inst-ink: #10131d; }
+
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .profile-theme-stage-coral {
+    --pt-bg-from: #ffe4ec; --pt-bg-to: #fff6f8; --pt-accent: #d91b4c; --pt-accent-ink: #ffffff; --pt-glow: rgba(217, 27, 76, 0.16);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(217, 27, 76, 0.05); --pt-surface-active: rgba(217, 27, 76, 0.12);
+    --pt-border: rgba(217, 27, 76, 0.24); --pt-border-subtle: rgba(217, 27, 76, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .profile-theme-midnight-vinyl {
+    --pt-bg-from: #e3edff; --pt-bg-to: #f5f9ff; --pt-accent: #1d4ed8; --pt-accent-ink: #ffffff; --pt-glow: rgba(29, 78, 216, 0.15);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(29, 78, 216, 0.05); --pt-surface-active: rgba(29, 78, 216, 0.12);
+    --pt-border: rgba(29, 78, 216, 0.22); --pt-border-subtle: rgba(29, 78, 216, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .profile-theme-tube-amber {
+    --pt-bg-from: #feefd2; --pt-bg-to: #fffaf0; --pt-accent: #b45309; --pt-accent-ink: #ffffff; --pt-glow: rgba(180, 83, 9, 0.16);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(180, 83, 9, 0.055); --pt-surface-active: rgba(180, 83, 9, 0.12);
+    --pt-border: rgba(180, 83, 9, 0.24); --pt-border-subtle: rgba(180, 83, 9, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .profile-theme-emerald-club {
+    --pt-bg-from: #dff8ec; --pt-bg-to: #f3fcf8; --pt-accent: #047857; --pt-accent-ink: #ffffff; --pt-glow: rgba(4, 120, 87, 0.15);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(4, 120, 87, 0.05); --pt-surface-active: rgba(4, 120, 87, 0.12);
+    --pt-border: rgba(4, 120, 87, 0.22); --pt-border-subtle: rgba(4, 120, 87, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .profile-theme-synth-violet {
+    --pt-bg-from: #f0e4ff; --pt-bg-to: #faf6ff; --pt-accent: #7e22ce; --pt-accent-ink: #ffffff; --pt-glow: rgba(126, 34, 206, 0.15);
+    --pt-surface: rgba(255, 255, 255, 0.9); --pt-surface-inner: rgba(126, 34, 206, 0.05); --pt-surface-active: rgba(126, 34, 206, 0.12);
+    --pt-border: rgba(126, 34, 206, 0.22); --pt-border-subtle: rgba(126, 34, 206, 0.14); --pt-pill-bg: rgba(255, 255, 255, 0.82); --pt-pill-hover: rgba(255, 255, 255, 0.96);
+  }
+  :root:where(:has(> head > meta[name="color-scheme"][content="light"])) .profile-theme-zine-mono {
+    --pt-bg-from: #ebeef3; --pt-bg-to: #f9fafb; --pt-accent: #10131d; --pt-accent-ink: #ffffff; --pt-glow: rgba(15, 23, 42, 0.08);
+    --pt-surface: rgba(255, 255, 255, 0.92); --pt-surface-inner: rgba(15, 23, 42, 0.045); --pt-surface-active: rgba(15, 23, 42, 0.09);
+    --pt-border: rgba(15, 23, 42, 0.18); --pt-border-subtle: rgba(15, 23, 42, 0.12); --pt-pill-bg: rgba(255, 255, 255, 0.85); --pt-pill-hover: rgba(255, 255, 255, 0.98);
+  }
 }
 
 @media (pointer: coarse) {

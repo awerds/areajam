@@ -347,7 +347,7 @@ export function VideoClipRecorder({
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition"
             style={
               studioTab === 'webcam'
-                ? { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
+                ? { backgroundColor: 'var(--accent)', color: 'var(--accent-ink)' }
                 : { color: 'var(--muted)' }
             }
           >
@@ -363,7 +363,7 @@ export function VideoClipRecorder({
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition"
             style={
               studioTab === 'upload'
-                ? { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
+                ? { backgroundColor: 'var(--accent)', color: 'var(--accent-ink)' }
                 : { color: 'var(--muted)' }
             }
           >
@@ -415,7 +415,7 @@ export function VideoClipRecorder({
 
               {cameraActive && (
                 <div className="space-y-3">
-                  <div className="reel-aspect relative mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-[var(--border)] bg-black">
+                  <div className="reel-aspect relative mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
                     <video
                       ref={liveVideoRef}
                       autoPlay
@@ -444,9 +444,9 @@ export function VideoClipRecorder({
                       <button
                         type="button"
                         onClick={startRecording}
-                        className="inline-flex items-center gap-2 rounded-full bg-[var(--jam)] px-5 py-2.5 text-xs font-bold text-white"
+                        className="inline-flex items-center gap-2 rounded-full bg-[var(--jam)] px-5 py-2.5 text-xs font-bold text-[var(--jam-ink)]"
                       >
-                        <span className="h-2.5 w-2.5 rounded-full bg-white" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-current" />
                         <span>Start recording</span>
                       </button>
                     ) : (
@@ -472,7 +472,7 @@ export function VideoClipRecorder({
 
               {recordedPreviewUrl && recordedBlob && (
                 <div className="space-y-3">
-                  <div className="reel-aspect mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-[var(--border)] bg-black">
+                  <div className="reel-aspect mx-auto max-w-[15rem] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
                     <video
                       src={recordedPreviewUrl}
                       controls

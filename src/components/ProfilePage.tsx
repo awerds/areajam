@@ -192,28 +192,23 @@ export function ProfilePage({
 
   return (
     <article
-      className="mx-auto w-full max-w-[1440px] space-y-6 pb-8"
-      style={
-        {
-          '--page-accent': theme.accent,
-          '--page-accent-ink': theme.accentInk,
-        } as React.CSSProperties
-      }
+      className={`profile-theme-${theme.id} mx-auto w-full max-w-[1440px] space-y-6 pb-8`}
     >
       {/* MySpace-inspired custom-themed hero banner */}
       <header
-        className="dark-stage relative overflow-hidden rounded-[2rem] border p-6 shadow-2xl md:p-8"
+        className="relative overflow-hidden rounded-[2rem] border p-6 shadow-[0_24px_60px_var(--glass-shadow)] md:p-8"
         style={{
-          backgroundColor: theme.bgTo,
-          backgroundImage: `radial-gradient(circle at 85% 18%, ${theme.glow}, transparent 50%), linear-gradient(135deg, ${theme.bgFrom}, ${theme.bgTo})`,
-          borderColor: theme.borderTint,
+          backgroundColor: 'var(--pt-bg-to)',
+          backgroundImage:
+            'radial-gradient(circle at 85% 18%, var(--pt-glow), transparent 50%), linear-gradient(135deg, var(--pt-bg-from), var(--pt-bg-to))',
+          borderColor: 'var(--pt-border)',
         }}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/60"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span>Back to {region?.city ?? 'scene'}</span>
@@ -224,9 +219,13 @@ export function ProfilePage({
               <button
                 type="button"
                 onClick={() => setCustomizeOpen((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
               >
-                <Palette className="h-3.5 w-3.5" style={{ color: theme.accent }} aria-hidden="true" />
+                <Palette
+                  className="h-3.5 w-3.5"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
                 <span>{customizeOpen ? 'Close editor' : 'Customize page'}</span>
               </button>
             )}
@@ -234,7 +233,7 @@ export function ProfilePage({
             <button
               type="button"
               onClick={onShareUrl}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/60"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
             >
               <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Share link</span>
@@ -247,31 +246,43 @@ export function ProfilePage({
             <div className="flex flex-wrap items-center gap-2.5">
               <span
                 className="rounded-full px-3 py-1 text-xs font-bold"
-                style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
-                {isJam ? 'Jam player' : listing.gigSubtype === 'open-gig' ? 'Open gig slot' : 'Band for hire'}
+                {isJam
+                  ? 'Jam player'
+                  : listing.gigSubtype === 'open-gig'
+                    ? 'Open gig slot'
+                    : 'Band for hire'}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-medium text-white/90">
-                <MapPin className="h-3.5 w-3.5" style={{ color: theme.accent }} aria-hidden="true" />
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-medium text-[var(--ink)]">
+                <MapPin
+                  className="h-3.5 w-3.5"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
                 {listing.neighborhood}, {region?.label ?? listing.regionId}
               </span>
               {listing.payOrSplit && (
-                <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-semibold text-white">
+                <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
                   {listing.payOrSplit}
                 </span>
               )}
             </div>
 
-            <h1 className="hero-title font-bold text-white">{listing.title}</h1>
-            <p className="text-base font-medium text-white/80">{listing.subtitle}</p>
+            <h1 className="hero-title font-bold text-[var(--ink)]">{listing.title}</h1>
+            <p className="text-base font-medium text-[var(--muted)]">{listing.subtitle}</p>
 
             <InstrumentBadgeRow instruments={listing.instruments} max={6} />
 
             {listing.profileStyle?.moodStatus && (
-              <div className="inline-flex max-w-2xl items-center gap-2 rounded-2xl border border-white/15 bg-black/40 px-4 py-2 text-sm text-white/95 backdrop-blur-md">
-                <Sparkles className="h-4 w-4 shrink-0" style={{ color: theme.accent }} aria-hidden="true" />
+              <div className="inline-flex max-w-2xl items-center gap-2 rounded-2xl border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-sm text-[var(--ink)] backdrop-blur-md">
+                <Sparkles
+                  className="h-4 w-4 shrink-0"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
                 <span>
-                  <strong className="font-semibold text-white">Status:</strong>{' '}
+                  <strong className="font-semibold text-[var(--ink)]">Status:</strong>{' '}
                   {listing.profileStyle.moodStatus}
                 </span>
               </div>
@@ -284,7 +295,7 @@ export function ProfilePage({
                 type="button"
                 onClick={() => onOpenChat(listing)}
                 className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
-                style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
                 <MessageCircle className="h-4 w-4" aria-hidden="true" />
                 <span>Open match chat</span>
@@ -295,7 +306,7 @@ export function ProfilePage({
                   type="button"
                   onClick={() => onSwipe(listing, 'like')}
                   className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
-                  style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                  style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
                 >
                   {isJam ? (
                     <>
@@ -320,10 +331,12 @@ export function ProfilePage({
         <section
           aria-label="Customize your profile page"
           className="glass-surface space-y-5 rounded-3xl p-6"
-          style={{ borderColor: theme.borderTint }}
+          style={{ borderColor: 'var(--pt-border)' }}
         >
           <div>
-            <h2 className="font-display text-xl font-bold">Customize your artist page</h2>
+            <h2 className="font-display text-xl font-bold text-[var(--ink)]">
+              Customize your artist page
+            </h2>
             <p className="text-xs text-[var(--muted)]">
               Pick a room aesthetic, set your status line, and update your influence tags
             </p>
@@ -337,19 +350,19 @@ export function ProfilePage({
                   key={t.id}
                   type="button"
                   onClick={() => handleThemeChange(t.id)}
-                  className="rounded-2xl border p-3 text-left transition"
+                  className={`profile-theme-${t.id} rounded-2xl border p-3 text-left transition`}
                   style={{
-                    background: `linear-gradient(135deg, ${t.bgFrom}, ${t.bgTo})`,
-                    borderColor: selected ? t.accent : 'var(--border-strong)',
-                    boxShadow: selected ? `0 0 0 1px ${t.accent}` : undefined,
+                    background: 'linear-gradient(135deg, var(--pt-bg-from), var(--pt-bg-to))',
+                    borderColor: selected ? 'var(--pt-accent)' : 'var(--pt-border)',
+                    boxShadow: selected ? '0 0 0 1px var(--pt-accent)' : undefined,
                   }}
                 >
                   <span
                     className="mb-2 block h-3 w-8 rounded-full"
-                    style={{ backgroundColor: t.accent }}
+                    style={{ backgroundColor: 'var(--pt-accent)' }}
                   />
-                  <span className="block text-xs font-bold text-white">{t.name}</span>
-                  <span className="block text-[11px] text-white/70">{t.tagline}</span>
+                  <span className="block text-xs font-bold text-[var(--ink)]">{t.name}</span>
+                  <span className="block text-[11px] text-[var(--muted)]">{t.tagline}</span>
                 </button>
               );
             })}
@@ -390,7 +403,7 @@ export function ProfilePage({
               <button
                 type="submit"
                 className="rounded-2xl px-5 py-2.5 text-xs font-bold"
-                style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
                 Save page style
               </button>
@@ -405,8 +418,8 @@ export function ProfilePage({
         <div className="space-y-6 lg:col-span-5">
           {/* Featured Video / Audio Reel Player */}
           <div
-            className="dark-stage relative h-[29rem] overflow-hidden rounded-[2rem] border bg-[#0b0d14] shadow-2xl sm:h-[33rem]"
-            style={{ borderColor: theme.borderTint }}
+            className="relative h-[29rem] overflow-hidden rounded-[2rem] border bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] sm:h-[33rem]"
+            style={{ borderColor: 'var(--pt-border)' }}
           >
             <ClipPlayer
               listing={listing}
@@ -422,16 +435,15 @@ export function ProfilePage({
           {/* MySpace Music Playlist */}
           <section
             aria-label="Clips and recordings playlist"
-            className="dark-stage rounded-3xl border p-5"
+            className="rounded-3xl border p-5"
             style={{
-              backgroundColor: '#0c0e15',
-              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
-              borderColor: theme.borderTint,
+              backgroundColor: 'var(--pt-surface)',
+              borderColor: 'var(--pt-border)',
             }}
           >
             <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="font-display text-lg font-bold text-white">Clips &amp; reels</h2>
-              <span className="text-xs text-white/70">
+              <h2 className="font-display text-lg font-bold text-[var(--ink)]">Clips &amp; reels</h2>
+              <span className="text-xs text-[var(--muted)]">
                 {orderedClips.length} {orderedClips.length === 1 ? 'track' : 'tracks'}
               </span>
             </div>
@@ -445,8 +457,10 @@ export function ProfilePage({
                     key={clip.id}
                     className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 transition"
                     style={{
-                      borderColor: isPlayingNow ? theme.accent : 'rgba(255,255,255,0.1)',
-                      backgroundColor: isPlayingNow ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.28)',
+                      borderColor: isPlayingNow ? 'var(--pt-accent)' : 'var(--pt-border-subtle)',
+                      backgroundColor: isPlayingNow
+                        ? 'var(--pt-surface-active)'
+                        : 'var(--pt-surface-inner)',
                     }}
                   >
                     <button
@@ -458,19 +472,23 @@ export function ProfilePage({
                         className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                         style={
                           isPlayingNow
-                            ? { backgroundColor: theme.accent, color: theme.accentInk }
-                            : { backgroundColor: 'rgba(255,255,255,0.1)', color: '#ffffff' }
+                            ? { backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }
+                            : { backgroundColor: 'var(--pt-pill-bg)', color: 'var(--ink)' }
                         }
                       >
                         <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-white">
+                        <p className="truncate text-sm font-semibold text-[var(--ink)]">
                           {idx + 1}. {clip.title}
                         </p>
-                        <p className="text-xs text-white/65">
-                          {clip.kind === 'video' ? 'Video clip' : clip.kind === 'audio' ? 'Audio upload' : 'Studio groove'},{' '}
-                          {clip.durationSec}s
+                        <p className="text-xs text-[var(--muted)]">
+                          {clip.kind === 'video'
+                            ? 'Video clip'
+                            : clip.kind === 'audio'
+                              ? 'Audio upload'
+                              : 'Studio groove'}
+                          , {clip.durationSec}s
                         </p>
                       </div>
                     </button>
@@ -479,7 +497,10 @@ export function ProfilePage({
                       {isMain ? (
                         <span
                           className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
-                          style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                          style={{
+                            backgroundColor: 'var(--pt-accent)',
+                            color: 'var(--pt-accent-ink)',
+                          }}
                         >
                           <Star className="h-3 w-3 fill-current" aria-hidden="true" />
                           <span>Main clip</span>
@@ -489,7 +510,7 @@ export function ProfilePage({
                           <button
                             type="button"
                             onClick={() => handleSetMainClip(clip.id)}
-                            className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/20"
+                            className="rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-2.5 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
                           >
                             Set main
                           </button>
@@ -504,16 +525,21 @@ export function ProfilePage({
 
           {/* Schedule & Press Link */}
           <section
-            className="dark-stage space-y-3 rounded-3xl border p-5"
+            className="space-y-3 rounded-3xl border p-5"
             style={{
-              backgroundColor: '#0c0e15',
-              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
-              borderColor: theme.borderTint,
+              backgroundColor: 'var(--pt-surface)',
+              borderColor: 'var(--pt-border)',
             }}
           >
-            <h2 className="font-display text-lg font-bold text-white">Availability &amp; links</h2>
-            <div className="flex items-start gap-3 text-sm text-white/90">
-              <Calendar className="mt-0.5 h-4 w-4 shrink-0" style={{ color: theme.accent }} aria-hidden="true" />
+            <h2 className="font-display text-lg font-bold text-[var(--ink)]">
+              Availability &amp; links
+            </h2>
+            <div className="flex items-start gap-3 text-sm text-[var(--ink)]/90">
+              <Calendar
+                className="mt-0.5 h-4 w-4 shrink-0"
+                style={{ color: 'var(--pt-accent)' }}
+                aria-hidden="true"
+              />
               <span>{listing.availability}</span>
             </div>
             {safeHref && (
@@ -521,8 +547,8 @@ export function ProfilePage({
                 href={safeHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-semibold underline decoration-white/30 underline-offset-4 hover:opacity-85"
-                style={{ color: theme.accent }}
+                className="inline-flex items-center gap-2 text-sm font-semibold underline decoration-[var(--pt-border)] underline-offset-4 hover:opacity-85"
+                style={{ color: 'var(--pt-accent)' }}
               >
                 <span>Open music / press kit ({listing.sampleLink})</span>
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
@@ -533,16 +559,19 @@ export function ProfilePage({
           {/* Local Scene: "Top 4 in City" (MySpace Top Friends homage) */}
           {localSceneNeighbors.length > 0 && (
             <section
-              className="dark-stage rounded-3xl border p-5"
+              className="rounded-3xl border p-5"
               style={{
-                backgroundColor: '#0c0e15',
-                backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
-                borderColor: theme.borderTint,
+                backgroundColor: 'var(--pt-surface)',
+                borderColor: 'var(--pt-border)',
               }}
             >
               <div className="mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" style={{ color: theme.accent }} aria-hidden="true" />
-                <h2 className="font-display text-lg font-bold text-white">
+                <Users
+                  className="h-4 w-4"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
+                <h2 className="font-display text-lg font-bold text-[var(--ink)]">
                   Nearby in {region?.city ?? listing.regionId}
                 </h2>
               </div>
@@ -554,13 +583,20 @@ export function ProfilePage({
                       key={neighbor.id}
                       type="button"
                       onClick={() => onOpenProfile(neighbor)}
-                      className="rounded-2xl border border-white/10 bg-black/35 p-3 text-left transition hover:border-white/30"
+                      className="rounded-2xl border p-3 text-left transition hover:brightness-95"
+                      style={{
+                        backgroundColor: 'var(--pt-surface-inner)',
+                        borderColor: 'var(--pt-border-subtle)',
+                      }}
                     >
-                      <p className="font-display truncate text-sm font-bold text-white">
+                      <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
                         {neighbor.title}
                       </p>
-                      <p className="truncate text-xs text-white/70">{neighbor.subtitle}</p>
-                      <p className="mt-1.5 text-[11px] font-medium" style={{ color: theme.accent }}>
+                      <p className="truncate text-xs text-[var(--muted)]">{neighbor.subtitle}</p>
+                      <p
+                        className="mt-1.5 text-[11px] font-medium"
+                        style={{ color: 'var(--pt-accent)' }}
+                      >
                         {neighbor.neighborhood || nRegion?.city}
                       </p>
                     </button>
@@ -575,27 +611,35 @@ export function ProfilePage({
         <div className="space-y-6 lg:col-span-7">
           {/* About & Sounds Like */}
           <section
-            className="dark-stage space-y-4 rounded-3xl border p-6"
+            className="space-y-4 rounded-3xl border p-6"
             style={{
-              backgroundColor: '#0c0e15',
-              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
-              borderColor: theme.borderTint,
+              backgroundColor: 'var(--pt-surface)',
+              borderColor: 'var(--pt-border)',
             }}
           >
             <div>
-              <h2 className="font-display text-xl font-bold text-white">What I&apos;m looking for</h2>
-              <p className="mt-1.5 text-lg font-semibold leading-snug" style={{ color: theme.accent }}>
+              <h2 className="font-display text-xl font-bold text-[var(--ink)]">
+                What I&apos;m looking for
+              </h2>
+              <p
+                className="mt-1.5 text-lg font-semibold leading-snug"
+                style={{ color: 'var(--pt-accent)' }}
+              >
                 {listing.seekingOrOffer}
               </p>
             </div>
 
-            <p className="text-sm leading-relaxed text-white/90">{listing.bio}</p>
+            <p className="text-sm leading-relaxed text-[var(--ink)]/90">{listing.bio}</p>
 
             <div className="flex flex-wrap gap-2 pt-1">
               {listing.genres.map((g) => (
                 <span
                   key={g}
-                  className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white"
+                  className="rounded-full border px-3 py-1 text-xs font-semibold text-[var(--ink)]"
+                  style={{
+                    backgroundColor: 'var(--pt-pill-bg)',
+                    borderColor: 'var(--pt-border-subtle)',
+                  }}
                 >
                   {g}
                 </span>
@@ -603,13 +647,22 @@ export function ProfilePage({
             </div>
 
             {listing.profileStyle?.soundsLike && listing.profileStyle.soundsLike.length > 0 && (
-              <div className="border-t border-white/10 pt-4">
-                <p className="mb-2 text-xs font-semibold text-white/70">Sounds like / influences</p>
+              <div
+                className="border-t pt-4"
+                style={{ borderColor: 'var(--pt-border-subtle)' }}
+              >
+                <p className="mb-2 text-xs font-semibold text-[var(--muted)]">
+                  Sounds like / influences
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {listing.profileStyle.soundsLike.map((artist) => (
                     <span
                       key={artist}
-                      className="rounded-xl border border-white/15 bg-black/35 px-3 py-1.5 text-xs font-medium text-white"
+                      className="rounded-xl border px-3 py-1.5 text-xs font-medium text-[var(--ink)]"
+                      style={{
+                        backgroundColor: 'var(--pt-surface-inner)',
+                        borderColor: 'var(--pt-border-subtle)',
+                      }}
                     >
                       {artist}
                     </span>
@@ -621,19 +674,24 @@ export function ProfilePage({
 
           {/* The Gear Locker */}
           <section
-            className="dark-stage space-y-4 rounded-3xl border p-6"
+            className="space-y-4 rounded-3xl border p-6"
             style={{
-              backgroundColor: '#0c0e15',
-              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
-              borderColor: theme.borderTint,
+              backgroundColor: 'var(--pt-surface)',
+              borderColor: 'var(--pt-border)',
             }}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
-                <Speaker className="h-5 w-5" style={{ color: theme.accent }} aria-hidden="true" />
+                <Speaker
+                  className="h-5 w-5"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
                 <div>
-                  <h2 className="font-display text-xl font-bold text-white">Gear locker &amp; rig</h2>
-                  <p className="text-xs text-white/70">
+                  <h2 className="font-display text-xl font-bold text-[var(--ink)]">
+                    Gear locker &amp; rig
+                  </h2>
+                  <p className="text-xs text-[var(--muted)]">
                     Exact instruments, amps, pedals, mics, or stage backline
                   </p>
                 </div>
@@ -645,18 +703,22 @@ export function ProfilePage({
                 {groupedGear.map((group) => (
                   <div
                     key={group.category}
-                    className="rounded-2xl border border-white/10 bg-black/30 p-4"
+                    className="rounded-2xl border p-4"
+                    style={{
+                      backgroundColor: 'var(--pt-surface-inner)',
+                      borderColor: 'var(--pt-border-subtle)',
+                    }}
                   >
-                    <h3 className="text-xs font-bold" style={{ color: theme.accent }}>
+                    <h3 className="text-xs font-bold" style={{ color: 'var(--pt-accent)' }}>
                       {group.category}
                     </h3>
                     <ul className="mt-2.5 space-y-2.5">
                       {group.items.map((item) => (
                         <li key={item.id} className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-white">{item.name}</p>
+                            <p className="text-sm font-semibold text-[var(--ink)]">{item.name}</p>
                             {item.notes && (
-                              <p className="text-xs text-white/70">{item.notes}</p>
+                              <p className="text-xs text-[var(--muted)]">{item.notes}</p>
                             )}
                           </div>
                           {canCustomize && (
@@ -664,7 +726,7 @@ export function ProfilePage({
                               type="button"
                               onClick={() => handleRemoveGearItem(item.id)}
                               aria-label={`Remove ${item.name}`}
-                              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-[var(--err)]"
+                              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] hover:bg-[var(--pt-pill-hover)] hover:text-[var(--err)]"
                             >
                               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
@@ -676,7 +738,13 @@ export function ProfilePage({
                 ))}
               </div>
             ) : (
-              <p className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/85">
+              <p
+                className="rounded-2xl border p-4 text-sm text-[var(--ink)]/90"
+                style={{
+                  backgroundColor: 'var(--pt-surface-inner)',
+                  borderColor: 'var(--pt-border-subtle)',
+                }}
+              >
                 {listing.gearOrBackline}
               </p>
             )}
@@ -684,7 +752,11 @@ export function ProfilePage({
             {canCustomize && (
               <form
                 onSubmit={handleAddGearItem}
-                className="grid grid-cols-1 gap-2.5 rounded-2xl border border-dashed border-white/20 bg-black/25 p-4 sm:grid-cols-12"
+                className="grid grid-cols-1 gap-2.5 rounded-2xl border border-dashed p-4 sm:grid-cols-12"
+                style={{
+                  backgroundColor: 'var(--pt-surface-inner)',
+                  borderColor: 'var(--pt-border)',
+                }}
               >
                 <div className="sm:col-span-4">
                   <label htmlFor="page-gear-cat" className="visually-hidden">
@@ -697,7 +769,11 @@ export function ProfilePage({
                     className="field-control text-xs"
                   >
                     {GEAR_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat} className="bg-[var(--surface-solid)] text-[var(--ink)]">
+                      <option
+                        key={cat}
+                        value={cat}
+                        className="bg-[var(--surface-solid)] text-[var(--ink)]"
+                      >
                         {cat}
                       </option>
                     ))}
@@ -717,7 +793,7 @@ export function ProfilePage({
                     className="field-control text-xs"
                   />
                 </div>
-                <div className="sm:col-span-4 flex gap-2">
+                <div className="flex gap-2 sm:col-span-4">
                   <label htmlFor="page-gear-notes" className="visually-hidden">
                     Gear notes
                   </label>
@@ -733,7 +809,10 @@ export function ProfilePage({
                     type="submit"
                     aria-label="Add gear piece"
                     className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                    style={{
+                      backgroundColor: 'var(--pt-accent)',
+                      color: 'var(--pt-accent-ink)',
+                    }}
                   >
                     <Plus className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -744,22 +823,27 @@ export function ProfilePage({
 
           {/* MySpace-style Comment Wall */}
           <section
-            className="dark-stage space-y-4 rounded-3xl border p-6"
+            className="space-y-4 rounded-3xl border p-6"
             style={{
-              backgroundColor: '#0c0e15',
-              backgroundImage: `linear-gradient(${theme.surfaceTint}, ${theme.surfaceTint})`,
-              borderColor: theme.borderTint,
+              backgroundColor: 'var(--pt-surface)',
+              borderColor: 'var(--pt-border)',
             }}
           >
             <div>
-              <h2 className="font-display text-xl font-bold text-white">Scene wall</h2>
-              <p className="text-xs text-white/70">
+              <h2 className="font-display text-xl font-bold text-[var(--ink)]">Scene wall</h2>
+              <p className="text-xs text-[var(--muted)]">
                 Leave a public note, shout-out, or jam inquiry for {listing.title}
               </p>
             </div>
 
             {wallComments.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-4 text-sm text-white/70">
+              <p
+                className="rounded-2xl border border-dashed p-4 text-sm text-[var(--muted)]"
+                style={{
+                  backgroundColor: 'var(--pt-surface-inner)',
+                  borderColor: 'var(--pt-border)',
+                }}
+              >
                 No wall notes yet. Be the first local musician to say hey.
               </p>
             ) : (
@@ -767,12 +851,16 @@ export function ProfilePage({
                 {wallComments.map((comment) => (
                   <li
                     key={comment.id}
-                    className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3"
+                    className="rounded-2xl border px-4 py-3"
+                    style={{
+                      backgroundColor: 'var(--pt-surface-inner)',
+                      borderColor: 'var(--pt-border-subtle)',
+                    }}
                   >
-                    <p className="text-xs font-bold" style={{ color: theme.accent }}>
+                    <p className="text-xs font-bold" style={{ color: 'var(--pt-accent)' }}>
                       {comment.authorName}
                     </p>
-                    <p className="mt-1 text-sm text-white/95">{comment.text}</p>
+                    <p className="mt-1 text-sm text-[var(--ink)]">{comment.text}</p>
                   </li>
                 ))}
               </ul>
@@ -801,7 +889,10 @@ export function ProfilePage({
                 disabled={!wallText.trim()}
                 aria-label="Post wall note"
                 className="inline-flex h-12 shrink-0 items-center gap-1.5 rounded-2xl px-4 text-xs font-bold transition disabled:opacity-40"
-                style={{ backgroundColor: theme.accent, color: theme.accentInk }}
+                style={{
+                  backgroundColor: 'var(--pt-accent)',
+                  color: 'var(--pt-accent-ink)',
+                }}
               >
                 <Send className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Post</span>

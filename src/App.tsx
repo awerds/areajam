@@ -954,9 +954,9 @@ export function App() {
                             style={
                               active
                                 ? {
-                                    backgroundColor: 'var(--ink)',
-                                    color: 'var(--bg)',
-                                    borderColor: 'var(--ink)',
+                                    backgroundColor: 'var(--accent)',
+                                    color: 'var(--accent-ink)',
+                                    borderColor: 'var(--accent)',
                                   }
                                 : {
                                     backgroundColor: 'var(--pill-bg)',

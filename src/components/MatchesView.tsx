@@ -230,7 +230,7 @@ export function MatchesView({
                 className="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
                 style={
                   active
-                    ? { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
+                    ? { backgroundColor: 'var(--accent)', color: 'var(--accent-ink)' }
                     : { color: 'var(--muted)' }
                 }
               >

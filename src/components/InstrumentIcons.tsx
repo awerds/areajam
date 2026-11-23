@@ -377,20 +377,20 @@ export function InstrumentBadgeRow({
           <span
             key={id}
             style={{
-              backgroundColor: meta.bg,
-              borderColor: meta.border,
-              color: '#f8fafc',
+              backgroundColor: 'var(--inst-bg)',
+              borderColor: 'var(--inst-border)',
+              color: 'var(--inst-ink)',
             }}
             className={
               compact
-                ? 'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-xs shadow-xs'
-                : 'inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold backdrop-blur-xs shadow-xs'
+                ? `inst-${id} inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-xs shadow-xs`
+                : `inst-${id} inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold backdrop-blur-xs shadow-xs`
             }
           >
             <InstrumentIcon
               id={id}
               size={compact ? 20 : 24}
-              style={{ color: meta.color }}
+              style={{ color: 'var(--inst-color)' }}
             />
             <span>{compact ? meta.shortLabel : meta.label}</span>
           </span>
