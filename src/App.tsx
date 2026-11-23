@@ -52,6 +52,7 @@ import { stopCardPreview } from './lib/audioPreview';
 import { signOutUser, subscribeAuth } from './lib/auth';
 import { subscribeColorScheme, toggleColorScheme } from './lib/colorScheme';
 import { detectLocationByIp, estimateRoughDistanceMiles } from './lib/location';
+import { runFilterTransition } from './lib/viewTransition';
 import {
   loadState,
   parseUrlState,
@@ -405,21 +406,31 @@ export function App() {
   const prefChoices = JAM_PREFERENCES;
 
   const togglePreference = (pref: string) => {
-    setState((prev) => {
-      const key = prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs';
-      const current = prev[key];
-      const next = current.includes(pref)
-        ? current.filter((item) => item !== pref)
-        : [...current, pref];
-      return { ...prev, [key]: next };
+    runFilterTransition(() => {
+      setState((prev) => {
+        const key = prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs';
+        const current = prev[key];
+        const next = current.includes(pref)
+          ? current.filter((item) => item !== pref)
+          : [...current, pref];
+        return { ...prev, [key]: next };
+      });
     });
   };
 
   const clearPreferences = () => {
-    setState((prev) => ({
-      ...prev,
-      [prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs']: [],
-    }));
+    runFilterTransition(() => {
+      setState((prev) => ({
+        ...prev,
+        [prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs']: [],
+      }));
+    });
+  };
+
+  const handleSelectChipFilter = (filter: string) => {
+    runFilterTransition(() => {
+      setChipFilter(filter);
+    });
   };
 
   const handleAllowIpLocation = async () => {
@@ -1146,7 +1157,7 @@ export function App() {
                           type="button"
                           aria-pressed={selected}
                           onClick={() => togglePreference(pref)}
-                          className="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold transition"
+                          className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
                           style={
                             selected
                               ? {
@@ -1232,7 +1243,7 @@ export function App() {
                               type="button"
                               aria-pressed={selected}
                               onClick={() => togglePreference(pref)}
-                              className="rounded-full border px-3.5 py-2 text-xs font-semibold transition"
+                              className="filter-chip-btn rounded-full border px-3.5 py-2 text-xs font-semibold"
                               style={
                                 selected
                                   ? {
@@ -1290,8 +1301,8 @@ export function App() {
                           <button
                             key={filter}
                             type="button"
-                            onClick={() => setChipFilter(filter)}
-                            className="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition"
+                            onClick={() => handleSelectChipFilter(filter)}
+                            className="filter-chip-btn shrink-0 rounded-full border px-3 py-1 text-xs font-semibold"
                             style={
                               active
                                 ? {
@@ -1321,6 +1332,7 @@ export function App() {
                       includeNearbyRegions={state.includeNearbyRegions}
                       showingNearestFallback={showingDeckNearestFallback}
                       showSampleCards={samplesEnabled}
+                      filterKey={`${activePrefs.join('|')}::${chipFilter}`}
                       soundEnabled={soundEnabled}
                       currentUserUid={user?.uid}
                       inviteByTargetUid={inviteByTargetUid}
@@ -1393,7 +1405,7 @@ export function App() {
                           type="button"
                           aria-pressed={selected}
                           onClick={() => togglePreference(pref)}
-                          className="rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                          className="filter-chip-btn rounded-full border px-3 py-1.5 text-xs font-semibold"
                           style={
                             selected
                               ? {

@@ -17,6 +17,7 @@ interface SwipeDeckProps {
   includeNearbyRegions: boolean;
   showingNearestFallback?: boolean;
   showSampleCards?: boolean;
+  filterKey?: string;
   soundEnabled: boolean;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
@@ -47,6 +48,7 @@ export function SwipeDeck({
   includeNearbyRegions,
   showingNearestFallback = false,
   showSampleCards = true,
+  filterKey = '',
   soundEnabled,
   currentUserUid,
   inviteByTargetUid,
@@ -68,6 +70,8 @@ export function SwipeDeck({
   const cardRef = useRef<HTMLElement>(null);
   const nextCardRef = useRef<HTMLElement>(null);
   const glareRef = useRef<HTMLDivElement>(null);
+  const emptyRef = useRef<HTMLDivElement>(null);
+  const prevFilterKeyRef = useRef(filterKey);
   const startRef = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const tiltQuickToRef = useRef<{
     rx: gsap.QuickToFunc;
@@ -84,8 +88,26 @@ export function SwipeDeck({
   }, [topCard?.id]);
 
   useLayoutEffect(() => {
+    const isFilterChange = prevFilterKeyRef.current !== filterKey;
+    prevFilterKeyRef.current = filterKey;
+
     const el = cardRef.current;
-    if (!el || !topCard) return;
+    const emptyEl = emptyRef.current;
+
+    if (!topCard || !el) {
+      if (!topCard && emptyEl && isFilterChange) {
+        const mmEmpty = gsap.matchMedia();
+        mmEmpty.add('(prefers-reduced-motion: no-preference)', () => {
+          gsap.fromTo(
+            emptyEl,
+            { y: 14, opacity: 0, scale: 0.97 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.28, ease: 'power2.out', clearProps: 'transform,opacity' }
+          );
+        });
+        return () => mmEmpty.revert();
+      }
+      return;
+    }
 
     const mm = gsap.matchMedia();
     mm.add(
@@ -96,11 +118,35 @@ export function SwipeDeck({
       (context) => {
         const { motion, finePointer } = context.conditions ?? {};
         if (motion) {
-          gsap.fromTo(
-            el,
-            { scale: 0.95, y: 12, opacity: 0.85, x: 0, rotation: 0 },
-            { scale: 1, y: 0, opacity: 1, duration: 0.34, ease: 'power3.out', clearProps: 'transform' }
-          );
+          if (isFilterChange) {
+            gsap.fromTo(
+              el,
+              { scale: 0.91, y: 26, opacity: 0, rotationZ: -2.5, rotationX: 7, x: 0 },
+              {
+                scale: 1,
+                y: 0,
+                opacity: 1,
+                rotationZ: 0,
+                rotationX: 0,
+                duration: 0.42,
+                ease: 'back.out(1.25)',
+                clearProps: 'transform,opacity',
+              }
+            );
+            if (nextCardRef.current) {
+              gsap.fromTo(
+                nextCardRef.current,
+                { scale: 0.88, y: 34, opacity: 0 },
+                { scale: 0.94, y: 14, opacity: 0.65, duration: 0.36, delay: 0.05, ease: 'power3.out' }
+              );
+            }
+          } else {
+            gsap.fromTo(
+              el,
+              { scale: 0.95, y: 12, opacity: 0.85, x: 0, rotation: 0 },
+              { scale: 1, y: 0, opacity: 1, duration: 0.34, ease: 'power3.out', clearProps: 'transform' }
+            );
+          }
         } else {
           gsap.set(el, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 });
         }
@@ -120,7 +166,7 @@ export function SwipeDeck({
       tiltQuickToRef.current = null;
       mm.revert();
     };
-  }, [topCard?.id]);
+  }, [topCard?.id, filterKey]);
 
   const triggerSwipe = (decision: SwipeDecision) => {
     if (!topCard || flyDir) return;
@@ -301,7 +347,10 @@ export function SwipeDeck({
 
   if (!topCard) {
     return (
-      <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-12 text-center">
+      <div
+        ref={emptyRef}
+        className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-12 text-center"
+      >
         <AreaJamMark className="mb-3 h-10 w-10" />
         <span className="mb-4 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
           {region.label} — Jam board

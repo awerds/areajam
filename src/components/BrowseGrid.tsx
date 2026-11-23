@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Flame, Instagram, MapPin, Maximize2, MessageCircle, Pause, Play, Search } from 'lucide-react';
 import { getPlayingListingId, subscribeAudioState, toggleCardPreview } from '../lib/audioPreview';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
+import { cardViewTransitionName } from '../lib/viewTransition';
 import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { CardArtwork } from './CardArtwork';
 import { InstrumentBadgeRow } from './InstrumentIcons';
@@ -67,6 +69,9 @@ export function BrowseGrid({
               : mode === 'jam'
                 ? `Browse players around ${region.city}`
                 : `Browse gigs and bands in ${region.city}`}
+            <span className="ml-2 inline-flex align-middle rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 font-sans text-xs font-semibold text-[var(--muted)]">
+              {filtered.length}
+            </span>
           </h2>
           <p className="text-sm text-[var(--muted)]">
             {showingNearestFallback ? (
@@ -120,7 +125,7 @@ export function BrowseGrid({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="glass-surface rounded-3xl px-6 py-12 text-center">
+        <div className="glass-surface filter-empty-state rounded-3xl px-6 py-12 text-center">
           <p className="font-display text-lg font-bold">No local cards match those filters</p>
           <p className="mt-1 text-sm text-[var(--muted)]">
             Clear your search or broaden your player preferences above.
@@ -128,7 +133,7 @@ export function BrowseGrid({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((item) => {
+          {filtered.map((item, idx) => {
             const itemRegion = allRegions.find((r) => r.id === item.regionId);
             const isPlaying = playingId === item.id;
             const action = getProfileActionState(item, currentUserUid, inviteByTargetUid);
@@ -149,7 +154,12 @@ export function BrowseGrid({
             return (
               <article
                 key={item.id}
-                className="glass-surface flex flex-col overflow-hidden rounded-[1.5rem] transition hover:border-[var(--border-strong)]"
+                className={`glass-surface ${idx < 24 ? 'filter-grid-card ' : ''}flex flex-col overflow-hidden rounded-[1.5rem] transition hover:border-[var(--border-strong)]`}
+                style={
+                  idx < 24
+                    ? ({ viewTransitionName: cardViewTransitionName(item.id) } as CSSProperties)
+                    : undefined
+                }
               >
                 <div className="relative">
                   <button

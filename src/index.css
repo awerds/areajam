@@ -2,6 +2,7 @@
 
 :root {
   color-scheme: light dark;
+  view-transition-name: none;
 
   &:has(> head > meta[name="color-scheme"][content="dark"]) {
     color-scheme: dark;
@@ -1134,4 +1135,74 @@ dialog.areajam-dialog::backdrop {
   padding: 0 !important;
   border: 0 !important;
   white-space: nowrap !important;
+}
+
+.filter-chip-btn {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .filter-chip-btn {
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease,
+      transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .filter-chip-btn:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Native View Transitions for instrument filter updates */
+::view-transition {
+  pointer-events: none;
+}
+
+.filter-grid-card {
+  view-transition-class: filter-card;
+}
+
+.filter-empty-state {
+  view-transition-name: aj-filter-empty;
+  view-transition-class: filter-card;
+}
+
+@keyframes filter-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+}
+
+@keyframes filter-card-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.92);
+  }
+}
+
+::view-transition-group(.filter-card) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-new(.filter-card):only-child {
+  animation: filter-card-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-old(.filter-card):only-child {
+  animation: filter-card-out 210ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
