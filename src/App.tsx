@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ChevronDown,
   Compass,
-  Flame,
   HelpCircle,
   LayoutGrid,
   MapPin,
@@ -13,7 +12,6 @@ import {
   Navigation,
   PlusSquare,
   Sun,
-  Ticket,
   UserCheck,
   Video,
   X,
@@ -31,7 +29,7 @@ import { PostView } from './components/PostView';
 import { ProfilePage } from './components/ProfilePage';
 import { RegionDialog } from './components/RegionDialog';
 import { SwipeDeck } from './components/SwipeDeck';
-import { DEFAULT_ALL_REGIONS, GIGS_PREFERENCES, JAM_PREFERENCES } from './data/regions';
+import { DEFAULT_ALL_REGIONS, JAM_PREFERENCES } from './data/regions';
 import {
   addProfileWallNote,
   blockUser,
@@ -64,7 +62,6 @@ import {
   syncUrlState,
 } from './lib/storage';
 import type {
-  AppMode,
   AppState,
   AuthUser,
   BlockedUser,
@@ -134,7 +131,6 @@ export function App() {
   const [chipFilter, setChipFilter] = useState<string>('All');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
   const [ipDetecting, setIpDetecting] = useState<boolean>(false);
-  const [dismissedSampleFallback, setDismissedSampleFallback] = useState<boolean>(false);
 
   const [regionModalOpen, setRegionModalOpen] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
@@ -174,7 +170,6 @@ export function App() {
         setInvites([]);
         setThreads([]);
         setBlocks([]);
-        setDismissedSampleFallback(false);
         // Clear pending cross-account intentions on sign-out or account switch.
         if (prevUid !== null || nextUid === null) {
           setPendingInviteTarget(null);
@@ -317,31 +312,31 @@ export function App() {
     [visibleRemoteProfiles, user]
   );
 
+  const samplesEnabled = state.samplesEnabled;
+
   const hasAnyLivePlayers = useMemo(
-    () => visibleRemoteProfiles.some((l) => l.side === state.mode),
-    [visibleRemoteProfiles, state.mode]
+    () => visibleRemoteProfiles.some((l) => l.side === 'jam'),
+    [visibleRemoteProfiles]
   );
 
-  const usingSampleFallback =
-    !hasAnyLivePlayers && !state.showSampleCards && !dismissedSampleFallback;
-  const includeSamples = state.showSampleCards || usingSampleFallback;
+  const showingSampleOnly = samplesEnabled && !hasAnyLivePlayers;
 
-  const handleToggleSampleCards = () => {
-    if (includeSamples) {
-      setState((prev) => ({ ...prev, showSampleCards: false }));
-      setDismissedSampleFallback(true);
-    } else {
-      setState((prev) => ({ ...prev, showSampleCards: true }));
-      setDismissedSampleFallback(false);
-    }
+  const handleToggleSamples = () => {
+    const next = !state.samplesEnabled;
+    setState((prev) => ({ ...prev, samplesEnabled: next }));
+    showToast(
+      next
+        ? 'Sample profiles turned on.'
+        : 'Sample profiles turned off — showing live musicians only.'
+    );
   };
 
   const allListings = useMemo<Listing[]>(
     () => [
       ...visibleRemoteProfiles,
-      ...(includeSamples ? SEED_LISTINGS.filter((l) => l.side === 'jam') : []),
+      ...(samplesEnabled ? SEED_LISTINGS.filter((l) => l.side === 'jam') : []),
     ],
-    [visibleRemoteProfiles, includeSamples]
+    [visibleRemoteProfiles, samplesEnabled]
   );
 
   const activeProfile = useMemo<Listing | null>(() => {
@@ -397,8 +392,8 @@ export function App() {
     return subscribeProfileWallNotes(activeProfile.id, setLiveWallNotes, () => {});
   }, [activeProfile?.id, activeProfile?.isSample]);
 
-  const activePrefs = state.mode === 'jam' ? state.lookingForJam : state.lookingForGigs;
-  const prefChoices = state.mode === 'jam' ? JAM_PREFERENCES : GIGS_PREFERENCES;
+  const activePrefs = state.lookingForJam;
+  const prefChoices = JAM_PREFERENCES;
 
   const togglePreference = (pref: string) => {
     setState((prev) => {
@@ -555,17 +550,6 @@ export function App() {
     state.swiped,
     user,
   ]);
-
-  const handleModeChange = (nextMode: AppMode) => {
-    if (nextMode === 'gigs') {
-      showToast('Gigs board opens soon once local venues join — Jam pilot is live now!');
-      return;
-    }
-    stopCardPreview();
-    setActiveProfileId(null);
-    setState((prev) => ({ ...prev, mode: nextMode }));
-    setChipFilter('All');
-  };
 
   const handleTabChange = (nextTab: NavTab) => {
     stopCardPreview();
@@ -967,35 +951,33 @@ export function App() {
               <ChevronDown className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
             </button>
 
-            <div
-              role="group"
-              aria-label="Switch mode between Jam and Gigs"
-              className="inline-flex rounded-full border border-[var(--border)] bg-[var(--track-bg)] p-0.5"
+            <button
+              type="button"
+              role="switch"
+              aria-checked={samplesEnabled}
+              aria-label="Show sample profiles"
+              title="Turn sample preview profiles on or off"
+              onClick={handleToggleSamples}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
             >
-              <button
-                type="button"
-                aria-pressed={state.mode === 'jam'}
-                onClick={() => handleModeChange('jam')}
-                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition"
-                style={
-                  state.mode === 'jam'
-                    ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
-                    : { color: 'var(--muted)' }
-                }
+              <span>Samples</span>
+              <span
+                aria-hidden="true"
+                className="relative inline-flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors"
+                style={{
+                  backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
+                }}
               >
-                <Flame className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Jam</span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={false}
-                onClick={() => handleModeChange('gigs')}
-                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
-              >
-                <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Gigs (Soon)</span>
-              </button>
-            </div>
+                <span
+                  className={`h-3 w-3 rounded-full shadow-xs transition-transform ${
+                    samplesEnabled ? 'translate-x-3' : 'translate-x-0'
+                  }`}
+                  style={{
+                    backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
+                  }}
+                />
+              </span>
+            </button>
 
             <button
               type="button"
@@ -1052,7 +1034,7 @@ export function App() {
             <div className="flex items-center gap-1.5 text-[var(--ink)] md:gap-2">
               <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)] md:h-4 md:w-4" aria-hidden="true" />
               <span className="hidden sm:inline">
-                Use your IP address to jump to sample profiles near your city automatically?
+                Use your IP address to jump to musicians near your city automatically?
               </span>
               <span className="sm:hidden">Detect city via IP?</span>
             </div>
@@ -1176,13 +1158,6 @@ export function App() {
                 <div className="grid grid-cols-1 items-start gap-2.5 md:gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
                   {/* Mobile single-row compact filter strip */}
                   <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:hidden">
-                    <button
-                      type="button"
-                      onClick={handleToggleSampleCards}
-                      className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--muted)]"
-                    >
-                      {includeSamples ? 'Samples: On' : 'Samples: Off'}
-                    </button>
                     {activePrefs.length > 0 && (
                       <button
                         type="button"
@@ -1232,13 +1207,6 @@ export function App() {
                         <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)]">
                           Live Jam pilot across all US cities
                         </span>
-                        <button
-                          type="button"
-                          onClick={handleToggleSampleCards}
-                          className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
-                        >
-                          {includeSamples ? 'Sample demos: On' : 'Sample demos: Off'}
-                        </button>
                       </div>
 
                       <h1 className="hero-title font-bold text-[var(--ink)]">
@@ -1384,8 +1352,8 @@ export function App() {
                       canUndo={canUndo}
                       includeNearbyRegions={state.includeNearbyRegions}
                       showingNearestFallback={showingDeckNearestFallback}
-                      showingSampleFallback={usingSampleFallback}
-                      showSampleCards={includeSamples}
+                      showingSampleFallback={showingSampleOnly}
+                      showSampleCards={samplesEnabled}
                       soundEnabled={soundEnabled}
                       currentUserUid={user?.uid}
                       inviteByTargetUid={inviteByTargetUid}
@@ -1399,7 +1367,7 @@ export function App() {
                       onEnableNearby={() =>
                         setState((prev) => ({ ...prev, includeNearbyRegions: true }))
                       }
-                      onToggleSampleCards={handleToggleSampleCards}
+                      onToggleSampleCards={handleToggleSamples}
                       onResetPassed={handleResetPassed}
                       onGoToPost={() => handleTabChange('post')}
                     />
@@ -1417,7 +1385,7 @@ export function App() {
                     allRegions={allRegions}
                     swiped={state.swiped}
                     showingNearestFallback={showingNearestFallback}
-                    showingSampleFallback={usingSampleFallback}
+                    showingSampleFallback={showingSampleOnly}
                     currentUserUid={user?.uid}
                     inviteByTargetUid={inviteByTargetUid}
                     onInspect={setDetailListing}
@@ -1488,7 +1456,7 @@ export function App() {
                   allRegions={allRegions}
                   swiped={state.swiped}
                   showingNearestFallback={showingNearestFallback}
-                  showingSampleFallback={usingSampleFallback}
+                  showingSampleFallback={showingSampleOnly}
                   currentUserUid={user?.uid}
                   inviteByTargetUid={inviteByTargetUid}
                   onInspect={setDetailListing}
@@ -1526,7 +1494,6 @@ export function App() {
                 user={user}
                 onRequireAuth={openAuthPrompt}
                 onSignOut={() => void signOutUser()}
-                defaultSide={state.mode}
                 region={currentRegion}
                 onOpenRegionPicker={() => setRegionModalOpen(true)}
                 userListings={ownedUserListings}

@@ -74,7 +74,7 @@ export function getDefaultState(): AppState {
     regionId: PILOT_REGION_ID,
     mode: 'jam',
     includeNearbyRegions: false,
-    showSampleCards: false,
+    samplesEnabled: true,
     locationConsent: 'unknown',
     detectedCityLabel: undefined,
     lookingForJam: [],
@@ -189,9 +189,9 @@ function buildStateFromParsed(
 
   return {
     regionId: resolvedRegionId,
-    mode: urlOverride.mode ?? (parsed.mode === 'gigs' ? 'gigs' : 'jam'),
+    mode: 'jam',
     includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
-    showSampleCards: Boolean(parsed.showSampleCards),
+    samplesEnabled: typeof parsed.samplesEnabled === 'boolean' ? parsed.samplesEnabled : true,
     locationConsent: consent,
     detectedCityLabel:
       typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,
@@ -252,13 +252,13 @@ export function loadState(uid?: string | null): AppState {
     return {
       ...fallback,
       regionId: urlOverride.regionId ?? fallback.regionId,
-      mode: urlOverride.mode ?? fallback.mode,
+      mode: 'jam',
     };
   } catch {
     return {
       ...fallback,
       regionId: urlOverride.regionId ?? fallback.regionId,
-      mode: urlOverride.mode ?? fallback.mode,
+      mode: 'jam',
     };
   }
 }

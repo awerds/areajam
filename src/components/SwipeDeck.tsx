@@ -306,15 +306,15 @@ export function SwipeDeck({
       <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-12 text-center">
         <AreaJamMark className="mb-3 h-10 w-10" />
         <span className="mb-4 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
-          {region.label} — {mode === 'jam' ? 'Jam board' : 'Gigs (soon)'}
+          {region.label} — Jam board
         </span>
         <h2 className="font-display text-2xl font-bold tracking-tight">
           {canUndo
-            ? `You have checked every ${mode === 'jam' ? 'musician' : 'listing'} here`
-            : `No live ${mode === 'jam' ? 'musicians' : 'listings'} posted in ${region.city} yet`}
+            ? 'You have checked every musician here'
+            : `No live musicians posted in ${region.city} yet`}
         </h2>
         <p className="mt-2.5 max-w-xs text-sm leading-relaxed text-[var(--muted)]">
-          Be one of the first players on {region.city}, widen to nearby cities, or turn on sample preview cards while local scenes grow.
+          Be one of the first players in {region.city}, turn on sample profiles with the Samples switch, or post your own card.
         </p>
 
         <div className="mt-6 flex w-full max-w-xs flex-col gap-2.5">
@@ -343,7 +343,7 @@ export function SwipeDeck({
             onClick={onToggleSampleCards}
             className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
           >
-            {showSampleCards ? 'Hide sample preview cards' : 'Show sample preview cards'}
+            {showSampleCards ? 'Turn off sample profiles' : 'Turn on sample profiles'}
           </button>
           {canUndo && (
             <button

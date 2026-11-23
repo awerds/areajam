@@ -1,4 +1,4 @@
-import { Compass, Film, Flame, MapPin, ShieldCheck, Ticket } from 'lucide-react';
+import { Compass, Film, Flame, MapPin, ShieldCheck } from 'lucide-react';
 import { AreaJamLogo } from './BrandLogo';
 import { NativeDialog } from './NativeDialog';
 
@@ -50,19 +50,19 @@ export function HowItWorksDialog({
             <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--jam-soft)] text-[var(--jam-text)]">
               <Flame className="h-5 w-5" aria-hidden="true" />
             </div>
-            <h3 className="font-display text-base font-bold">Jam side</h3>
+            <h3 className="font-display text-base font-bold">Jam with local players</h3>
             <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
               Find drummers, guitarists, vocalists, or full rhythm sections nearby to jam, write songs, or start a band.
             </p>
           </div>
 
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
-            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--gigs-soft)] text-[var(--gigs)]">
-              <Ticket className="h-5 w-5" aria-hidden="true" />
+            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--jam-soft)] text-[var(--jam-text)]">
+              <MapPin className="h-5 w-5" aria-hidden="true" />
             </div>
-            <h3 className="font-display text-base font-bold">Gigs side (Coming soon)</h3>
+            <h3 className="font-display text-base font-bold">Open across all US cities</h3>
             <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-              Launching once local venues join with verified dates and bills. Sample cards can still be toggled on to preview the format.
+              Spotlighting Nashville (615) first with every US state and custom city searchable. If no players are posted locally yet, nearest cities appear with rough distance.
             </p>
           </div>
         </div>

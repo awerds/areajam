@@ -22,7 +22,6 @@ import {
 } from '../lib/embedMedia';
 import { attachFormValidation } from '../lib/formValidation';
 import type {
-  AppMode,
   AuthUser,
   BlockedUser,
   GearCategory,
@@ -39,7 +38,6 @@ interface PostViewProps {
   user: AuthUser | null;
   onRequireAuth: (reason?: string) => void;
   onSignOut: () => void;
-  defaultSide: AppMode;
   region: Region;
   onOpenRegionPicker: () => void;
   userListings: Listing[];
@@ -89,7 +87,6 @@ export function PostView({
   user,
   onRequireAuth,
   onSignOut,
-  defaultSide,
   region,
   onOpenRegionPicker,
   userListings,
@@ -417,13 +414,6 @@ export function PostView({
             Change city board
           </button>
         </div>
-
-        {defaultSide === 'gigs' && (
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-xs leading-relaxed text-[var(--muted)]">
-            <strong className="font-semibold text-[var(--ink)]">Gigs board opens soon:</strong>{' '}
-            while venues onboard, new pages publish straight to the live Jam board across all US cities.
-          </div>
-        )}
 
         <div className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 sm:flex-row sm:items-center sm:justify-between">
           {user ? (
