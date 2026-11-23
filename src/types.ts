@@ -73,6 +73,7 @@ export interface MediaClip {
   mediaId?: string;
   embedUrl?: string;
   embedProvider?: EmbedProvider;
+  posterUrl?: string;
   durationSec: number;
   clipVariation?: number;
 }
@@ -121,6 +122,8 @@ export interface Listing {
   instagramHandle?: string;
   sampleLink?: string;
   visualSeed: number;
+  portraitUrl?: string;
+  portraitAlt?: string;
   clips: MediaClip[];
   featuredClipId?: string;
   profileStyle: ProfileStyle;
@@ -207,6 +210,7 @@ export interface SwipeHistoryItem {
 export interface AppState {
   regionId: string;
   mode: AppMode;
+  samplesEnabled: boolean;
   includeNearbyRegions: boolean;
   locationConsent: LocationConsent;
   detectedCityLabel?: string;

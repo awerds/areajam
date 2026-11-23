@@ -58,7 +58,7 @@ export function DetailDialog({
       title={listing ? listing.title : 'Listing details'}
       subtitle={
         listing
-          ? `${listing.isSample ? 'Sample preview card' : 'Live profile'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}${verboseDistance ? ` (${verboseDistance})` : ''}`
+          ? `${listing.isSample ? 'Fictional sample profile' : 'Live profile'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}${verboseDistance ? ` (${verboseDistance})` : ''}`
           : undefined
       }
     >

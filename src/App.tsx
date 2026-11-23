@@ -30,6 +30,7 @@ import { ProfilePage } from './components/ProfilePage';
 import { RegionDialog } from './components/RegionDialog';
 import { SwipeDeck } from './components/SwipeDeck';
 import { DEFAULT_ALL_REGIONS, JAM_PREFERENCES } from './data/regions';
+import { SAMPLE_PROFILES } from './data/sampleProfiles';
 import {
   addProfileWallNote,
   blockUser,
@@ -91,6 +92,9 @@ function matchesPreferences(listing: Listing, selectedPrefs: string[]): boolean 
     }
     if (pref === 'Horns & Strings') {
       return listing.instruments.includes('horns') || listing.instruments.includes('strings');
+    }
+    if (pref === 'Producers') {
+      return listing.instruments.includes('producer');
     }
     return text.includes(pref.toLowerCase());
   });
@@ -311,12 +315,32 @@ export function App() {
     [visibleRemoteProfiles, user]
   );
 
-  const allListings = visibleRemoteProfiles;
+  const samplesEnabled = state.samplesEnabled;
+
+  const handleToggleSamples = () => {
+    const next = !state.samplesEnabled;
+    setState((prev) => ({ ...prev, samplesEnabled: next }));
+    showToast(
+      next
+        ? 'Sample profiles turned on.'
+        : 'Sample profiles turned off — showing live musicians only.'
+    );
+  };
+
+  const allListings = useMemo<Listing[]>(
+    () => [
+      ...visibleRemoteProfiles,
+      ...(samplesEnabled ? SAMPLE_PROFILES : []),
+    ],
+    [visibleRemoteProfiles, samplesEnabled]
+  );
 
   const activeProfile = useMemo<Listing | null>(() => {
     if (!activeProfileId) return null;
     const fromVisible = visibleRemoteProfiles.find((l) => l.id === activeProfileId);
     if (fromVisible) return fromVisible;
+    const fromSample = SAMPLE_PROFILES.find((l) => l.id === activeProfileId);
+    if (fromSample) return fromSample;
     if (deepLinkProfile && deepLinkProfile.id === activeProfileId) {
       if (deepLinkProfile.ownerUid && blockedUidSet.has(deepLinkProfile.ownerUid)) return null;
       return deepLinkProfile;
@@ -332,7 +356,9 @@ export function App() {
       setDeepLinkLoading(false);
       return;
     }
-    const alreadyLoaded = remoteProfiles.some((l) => l.id === activeProfileId);
+    const alreadyLoaded =
+      remoteProfiles.some((l) => l.id === activeProfileId) ||
+      SAMPLE_PROFILES.some((l) => l.id === activeProfileId);
     if (alreadyLoaded) {
       setDeepLinkLoading(false);
       return;
@@ -420,7 +446,18 @@ export function App() {
   );
 
   const localUnfiltered = useMemo(
-    () => sidePool.filter((l) => l.regionId === state.regionId),
+    () =>
+      sidePool
+        .filter((l) => l.regionId === state.regionId)
+        .sort((a, b) => {
+          const aSample = Boolean(a.isSample);
+          const bSample = Boolean(b.isSample);
+          if (aSample !== bSample) return aSample ? 1 : -1;
+          const aHasVideo = a.clips.some((c) => c.kind === 'video' && Boolean(c.embedUrl));
+          const bHasVideo = b.clips.some((c) => c.kind === 'video' && Boolean(c.embedUrl));
+          if (aHasVideo !== bHasVideo) return aHasVideo ? -1 : 1;
+          return b.createdAt - a.createdAt;
+        }),
     [sidePool, state.regionId]
   );
 
@@ -915,6 +952,34 @@ export function App() {
 
             <button
               type="button"
+              role="switch"
+              aria-checked={samplesEnabled}
+              aria-label="Show sample profiles"
+              title="Turn sample preview profiles on or off"
+              onClick={handleToggleSamples}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+            >
+              <span>Samples</span>
+              <span
+                aria-hidden="true"
+                className="relative inline-flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors"
+                style={{
+                  backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
+                }}
+              >
+                <span
+                  className={`h-3 w-3 rounded-full shadow-xs transition-transform ${
+                    samplesEnabled ? 'translate-x-3' : 'translate-x-0'
+                  }`}
+                  style={{
+                    backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
+                  }}
+                />
+              </span>
+            </button>
+
+            <button
+              type="button"
               onClick={handleToggleColorScheme}
               title="Switch light or dark theme"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
@@ -1007,17 +1072,9 @@ export function App() {
 
       {/* Full-width main container */}
       <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-4 pt-2.5 md:px-6 md:pt-8 xl:px-10">
-        {!activeProfileId && (activeTab === 'discover' || activeTab === 'browse') && (
-          <a
-            href="./?side-stage=all"
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-2 text-xs font-semibold text-[var(--ink)] hover:border-[var(--accent-text)]"
-          >
-            <span>Side Stage</span>
-            <span className="text-[var(--muted)]">Fictional musician profiles</span>
-          </a>
-        )}
         {activeProfile ? (
           <ProfilePage
+            key={activeProfile.id}
             listing={activeProfile}
             region={allRegions.find((r) => r.id === activeProfile.regionId)}
             selectedRegion={currentRegion}
@@ -1292,6 +1349,7 @@ export function App() {
                       canUndo={canUndo}
                       includeNearbyRegions={state.includeNearbyRegions}
                       showingNearestFallback={showingDeckNearestFallback}
+                      showSampleCards={samplesEnabled}
                       soundEnabled={soundEnabled}
                       currentUserUid={user?.uid}
                       inviteByTargetUid={inviteByTargetUid}
@@ -1305,6 +1363,7 @@ export function App() {
                       onEnableNearby={() =>
                         setState((prev) => ({ ...prev, includeNearbyRegions: true }))
                       }
+                      onToggleSampleCards={handleToggleSamples}
                       onResetPassed={handleResetPassed}
                       onGoToPost={() => handleTabChange('post')}
                     />

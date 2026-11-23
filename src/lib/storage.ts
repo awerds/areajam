@@ -21,9 +21,12 @@ export function getStorageKeyForUid(uid?: string | null): string {
 export function parseUrlState(): { regionId?: string; mode?: AppMode; profileId?: string } {
   if (typeof window === 'undefined') return {};
   const params = new URLSearchParams(window.location.search);
-  const area = params.get('area')?.trim().toLowerCase();
+  const area = (params.get('area') || params.get('city'))?.trim().toLowerCase();
   const rawMode = params.get('mode')?.trim().toLowerCase();
-  const profileId = params.get('profile')?.trim();
+  const sideStageId = params.get('side-stage')?.trim();
+  const profileId =
+    params.get('profile')?.trim() ||
+    (sideStageId && sideStageId !== 'all' ? sideStageId : undefined);
   const mode: AppMode | undefined = rawMode === 'jam' || rawMode === 'gigs' ? rawMode : undefined;
   return {
     regionId: area || undefined,
@@ -53,6 +56,7 @@ export function getDefaultState(): AppState {
   return {
     regionId: PILOT_REGION_ID,
     mode: 'jam',
+    samplesEnabled: true,
     includeNearbyRegions: false,
     locationConsent: 'unknown',
     detectedCityLabel: undefined,
@@ -97,15 +101,17 @@ function normalizeListing(raw: Listing): Listing {
   const fallbackClips =
     Array.isArray(raw.clips) && raw.clips.length > 0
       ? raw.clips
-      : [
-          {
-            id: `${raw.id}-c1`,
-            title: 'Intro reel',
-            kind: 'synth-reel' as const,
-            durationSec: 8,
-            clipVariation: 0,
-          },
-        ];
+      : raw.portraitUrl
+        ? []
+        : [
+            {
+              id: `${raw.id}-c1`,
+              title: 'Intro reel',
+              kind: 'synth-reel' as const,
+              durationSec: 8,
+              clipVariation: 0,
+            },
+          ];
 
   const fallbackLocker: GearItem[] =
     Array.isArray(raw.gearLocker) && raw.gearLocker.length > 0
@@ -169,6 +175,7 @@ function buildStateFromParsed(
   return {
     regionId: resolvedRegionId,
     mode: 'jam',
+    samplesEnabled: parsed.samplesEnabled !== false,
     includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
     locationConsent: consent,
     detectedCityLabel:

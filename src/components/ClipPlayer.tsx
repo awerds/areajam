@@ -98,7 +98,10 @@ export function ClipPlayer({
   activeClipId,
   onActiveClipChange,
 }: ClipPlayerProps) {
+  const hasPortraitOnly = listing.clips.length === 0 && Boolean(listing.portraitUrl);
+
   const clips = useMemo<MediaClip[]>(() => {
+    if (hasPortraitOnly) return [];
     const raw: MediaClip[] =
       listing.clips && listing.clips.length > 0
         ? listing.clips
@@ -108,7 +111,7 @@ export function ClipPlayer({
     const featuredIdx = raw.findIndex((c) => c.id === listing.featuredClipId);
     if (featuredIdx <= 0) return raw;
     return [raw[featuredIdx], ...raw.slice(0, featuredIdx), ...raw.slice(featuredIdx + 1)];
-  }, [listing.clips, listing.featuredClipId, listing.id]);
+  }, [hasPortraitOnly, listing.clips, listing.featuredClipId, listing.id]);
 
   const [clipIndex, setClipIndex] = useState(0);
   const [localMediaUrl, setLocalMediaUrl] = useState<string | null>(null);
@@ -190,10 +193,12 @@ export function ClipPlayer({
 
   useEffect(() => {
     const usesSynthAudio =
-      activeClip?.kind === 'synth-reel' ||
-      (activeClip?.kind === 'audio' && !activeClip.mediaId && !activeClip.embedUrl);
+      !hasPortraitOnly &&
+      Boolean(activeClip) &&
+      (activeClip?.kind === 'synth-reel' ||
+        (activeClip?.kind === 'audio' && !activeClip.mediaId && !activeClip.embedUrl));
 
-    if (!isActive || !soundEnabled || !usesSynthAudio) {
+    if (!isActive || !soundEnabled || !usesSynthAudio || !activeClip) {
       return;
     }
 
@@ -203,10 +208,12 @@ export function ClipPlayer({
       stopCardPreview();
     };
   }, [
+    activeClip,
     activeClip?.clipVariation,
     activeClip?.embedUrl,
     activeClip?.kind,
     activeClip?.mediaId,
+    hasPortraitOnly,
     isActive,
     listing,
     safeIndex,
@@ -214,7 +221,7 @@ export function ClipPlayer({
   ]);
 
   useEffect(() => {
-    if (hasRealVideo || isEmbed) return;
+    if (hasRealVideo || isEmbed || hasPortraitOnly) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -287,6 +294,7 @@ export function ClipPlayer({
     };
   }, [
     activeClip?.durationSec,
+    hasPortraitOnly,
     hasRealVideo,
     isActive,
     isEmbed,
@@ -419,18 +427,20 @@ export function ClipPlayer({
         showTopBadges={false}
       />
 
-      {hasRealVideo && resolvedDirectUrl ? (
+      {hasRealVideo && resolvedDirectUrl && isActive ? (
         <video
           ref={videoRef}
           src={resolvedDirectUrl}
+          poster={activeClip?.posterUrl || listing.portraitUrl}
+          preload="auto"
           autoPlay={isActive}
           loop
           playsInline
           muted={!soundEnabled || !isActive}
           onTimeUpdate={(e) => handleMediaTimeUpdate(e.currentTarget)}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-[50%_22%]"
         />
-      ) : (
+      ) : !hasRealVideo && !hasPortraitOnly ? (
         <canvas
           ref={canvasRef}
           width={360}
@@ -438,7 +448,7 @@ export function ClipPlayer({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full"
         />
-      )}
+      ) : null}
 
       {hasRealAudio && resolvedDirectUrl && (
         <audio
@@ -451,7 +461,7 @@ export function ClipPlayer({
         />
       )}
 
-      {hasRealVideo && (
+      {(hasRealVideo || hasPortraitOnly) && (
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -461,18 +471,18 @@ export function ClipPlayer({
       )}
 
       <div className="pointer-events-none absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2">
-        {progressStrip}
+        {clips.length > 0 && progressStrip}
 
         {showMetadataOverlay && (
           <div className="flex items-center justify-between gap-2">
             <span
               className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md ${
-                hasRealVideo
+                hasRealVideo || hasPortraitOnly
                   ? 'border-white/20 bg-black/65 text-white'
                   : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)]'
               }`}
             >
-              {isMainClip ? (
+              {!hasPortraitOnly && isMainClip ? (
                 <Star className="h-3 w-3 fill-current text-[var(--accent)]" aria-hidden="true" />
               ) : (
                 <span
@@ -482,15 +492,17 @@ export function ClipPlayer({
                   }}
                 />
               )}
-              <span className="truncate">{activeClip?.title || 'Intro reel'}</span>
-              {activeClip?.embedProvider && (
+              <span className="truncate">
+                {hasPortraitOnly ? 'Fictional sample portrait' : activeClip?.title || 'Intro reel'}
+              </span>
+              {!hasPortraitOnly && activeClip?.embedProvider && (
                 <span className="text-[10px] text-white/75">
                   ({embedProviderLabel(activeClip.embedProvider)})
                 </span>
               )}
             </span>
 
-            {onToggleSound && (
+            {!hasPortraitOnly && onToggleSound && (
               <button
                 type="button"
                 onClick={(e) => {

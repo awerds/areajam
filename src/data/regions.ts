@@ -123,6 +123,7 @@ export const JAM_PREFERENCES = [
   'Vocalists',
   'Keys & Synth',
   'Horns & Strings',
+  'Producers',
   'Songwriters',
 ] as const;
 

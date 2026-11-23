@@ -16,6 +16,7 @@ interface SwipeDeckProps {
   canUndo: boolean;
   includeNearbyRegions: boolean;
   showingNearestFallback?: boolean;
+  showSampleCards?: boolean;
   soundEnabled: boolean;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
@@ -27,6 +28,7 @@ interface SwipeDeckProps {
   onInvite: (listing: Listing) => void;
   onOpenInvites: (threadId?: string) => void;
   onEnableNearby: () => void;
+  onToggleSampleCards?: () => void;
   onResetPassed: () => void;
   onGoToPost: () => void;
 }
@@ -44,6 +46,7 @@ export function SwipeDeck({
   canUndo,
   includeNearbyRegions,
   showingNearestFallback = false,
+  showSampleCards = true,
   soundEnabled,
   currentUserUid,
   inviteByTargetUid,
@@ -55,6 +58,7 @@ export function SwipeDeck({
   onInvite,
   onOpenInvites,
   onEnableNearby,
+  onToggleSampleCards,
   onResetPassed,
   onGoToPost,
 }: SwipeDeckProps) {
@@ -332,6 +336,15 @@ export function SwipeDeck({
               Show players across US cities
             </button>
           )}
+          {showSampleCards === false && onToggleSampleCards && (
+            <button
+              type="button"
+              onClick={onToggleSampleCards}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+            >
+              Show sample profiles
+            </button>
+          )}
           {canUndo && (
             <button
               type="button"
@@ -533,7 +546,7 @@ export function SwipeDeck({
                   <span>{sideBadgeLabel(topCard)}</span>
                 </span>
                 <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-                  {topCard.isSample ? 'Sample demo' : 'Live'}
+                  {topCard.isSample ? 'Fictional sample' : 'Live'}
                 </span>
                 {topCard.instagramHandle && (
                   <a

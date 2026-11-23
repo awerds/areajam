@@ -42,6 +42,8 @@ export function RegionDialog({
 
   const countLiveFor = (regionId: string) =>
     listings.filter((l) => l.regionId === regionId && l.side === 'jam' && !l.isSample).length;
+  const countSampleFor = (regionId: string) =>
+    listings.filter((l) => l.regionId === regionId && l.side === 'jam' && l.isSample).length;
 
   const q = search.trim().toLowerCase();
   const matchesQuery = (r: Region) =>
@@ -74,6 +76,7 @@ export function RegionDialog({
   const renderTile = (region: Region) => {
     const active = region.id === currentRegionId;
     const liveCount = countLiveFor(region.id);
+    const sampleCount = countSampleFor(region.id);
     return (
       <button
         key={region.id}
@@ -97,7 +100,9 @@ export function RegionDialog({
             )}
           </div>
           <p className="mt-0.5 text-xs text-[var(--muted)]">
-            Area {region.areaCode || 'local'}, {liveCount} {liveCount === 1 ? 'player' : 'players'}
+            {sampleCount > 0
+              ? `Area ${region.areaCode || 'local'}, ${liveCount} live, ${sampleCount} samples`
+              : `Area ${region.areaCode || 'local'}, ${liveCount} ${liveCount === 1 ? 'player' : 'players'}`}
           </p>
         </div>
         {active && <Check className="h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />}

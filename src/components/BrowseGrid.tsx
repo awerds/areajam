@@ -133,6 +133,8 @@ export function BrowseGrid({
             const isPlaying = playingId === item.id;
             const action = getProfileActionState(item, currentUserUid, inviteByTargetUid);
             const hasEmbed = item.clips.some((c) => c.kind === 'embed');
+            const hasDirectVideo = item.clips.some((c) => c.kind === 'video' && Boolean(c.embedUrl));
+            const hasPortraitOnly = item.clips.length === 0 && Boolean(item.portraitUrl);
             const distMiles =
               item.regionId !== region.id ? estimateRoughDistanceMiles(region, itemRegion) : null;
             const roughDistance =
@@ -150,11 +152,32 @@ export function BrowseGrid({
                 className="glass-surface flex flex-col overflow-hidden rounded-[1.5rem] transition hover:border-[var(--border-strong)]"
               >
                 <div className="relative">
-                  <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact />
+                  <button
+                    type="button"
+                    onClick={() => onOpenProfile(item)}
+                    aria-label={`Open profile for ${item.title}`}
+                    className="block w-full cursor-pointer text-left focus:outline-none"
+                  >
+                    <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact />
+                  </button>
                   {hasEmbed ? (
-                    <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md">
+                    <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md">
                       <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
                       <span>{item.clips.length} linked {item.clips.length === 1 ? 'clip' : 'clips'}</span>
+                    </span>
+                  ) : hasDirectVideo ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenProfile(item)}
+                      aria-label={`Watch clip for ${item.title}`}
+                      className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/85"
+                    >
+                      <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                      <span>Watch clip</span>
+                    </button>
+                  ) : hasPortraitOnly ? (
+                    <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                      Portrait preview
                     </span>
                   ) : (
                     <button
@@ -187,7 +210,7 @@ export function BrowseGrid({
                               : { backgroundColor: 'var(--gigs-soft)', color: 'var(--gigs)' }
                           }
                         >
-                          {item.isSample ? 'Sample' : 'Live'}
+                          {item.isSample ? 'Fictional sample' : 'Live'}
                         </span>
                       </span>
                       <span className="inline-flex shrink-0 items-center gap-1">

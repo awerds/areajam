@@ -329,7 +329,7 @@ export function ProfilePage({
                 ) : null;
               })()}
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                {listing.isSample ? 'Sample profile (demo)' : 'Live profile (Firestore)'}
+                {listing.isSample ? 'Fictional sample' : 'Live profile (Firestore)'}
               </span>
               {listing.instagramHandle && (
                 <a
@@ -349,8 +349,20 @@ export function ProfilePage({
               )}
             </div>
 
-            <h1 className="hero-title font-bold text-[var(--ink)]">{listing.title}</h1>
-            <p className="text-base font-medium text-[var(--muted)]">{listing.subtitle}</p>
+            <div className="flex items-center gap-4">
+              {listing.portraitUrl && (
+                <img
+                  src={listing.portraitUrl}
+                  alt={listing.portraitAlt || listing.title}
+                  className="h-16 w-16 shrink-0 rounded-2xl border object-cover object-[50%_20%]"
+                  style={{ borderColor: 'var(--pt-border)' }}
+                />
+              )}
+              <div className="min-w-0">
+                <h1 className="hero-title font-bold text-[var(--ink)]">{listing.title}</h1>
+                <p className="text-base font-medium text-[var(--muted)]">{listing.subtitle}</p>
+              </div>
+            </div>
 
             <InstrumentBadgeRow instruments={listing.instruments} max={6} />
 
@@ -410,7 +422,7 @@ export function ProfilePage({
               </button>
             ) : actionState.kind === 'sample' ? (
               <span className="rounded-2xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-4 py-2.5 text-xs font-semibold text-[var(--muted)]">
-                Sample preview card — invites unlock on live musician profiles
+                Fictional sample — Jam invites unlock on live musician profiles
               </span>
             ) : null}
           </div>
@@ -524,97 +536,99 @@ export function ProfilePage({
           </div>
 
           {/* MySpace Music Playlist */}
-          <section
-            aria-label="Clips and recordings playlist"
-            className="rounded-3xl border p-5"
-            style={{
-              backgroundColor: 'var(--pt-surface)',
-              borderColor: 'var(--pt-border)',
-            }}
-          >
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="font-display text-lg font-bold text-[var(--ink)]">Clips &amp; reels</h2>
-              <span className="text-xs text-[var(--muted)]">
-                {orderedClips.length} {orderedClips.length === 1 ? 'track' : 'tracks'}
-              </span>
-            </div>
+          {orderedClips.length > 0 && (
+            <section
+              aria-label="Clips and recordings playlist"
+              className="rounded-3xl border p-5"
+              style={{
+                backgroundColor: 'var(--pt-surface)',
+                borderColor: 'var(--pt-border)',
+              }}
+            >
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="font-display text-lg font-bold text-[var(--ink)]">Clips &amp; reels</h2>
+                <span className="text-xs text-[var(--muted)]">
+                  {orderedClips.length} {orderedClips.length === 1 ? 'track' : 'tracks'}
+                </span>
+              </div>
 
-            <ul className="space-y-2">
-              {orderedClips.map((clip, idx) => {
-                const isPlayingNow = clip.id === (activeClipId || orderedClips[0]?.id);
-                const isMain = clip.id === (listing.featuredClipId || orderedClips[0]?.id);
-                return (
-                  <li
-                    key={clip.id}
-                    className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 transition"
-                    style={{
-                      borderColor: isPlayingNow ? 'var(--pt-accent)' : 'var(--pt-border-subtle)',
-                      backgroundColor: isPlayingNow
-                        ? 'var(--pt-surface-active)'
-                        : 'var(--pt-surface-inner)',
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setActiveClipId(clip.id)}
-                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+              <ul className="space-y-2">
+                {orderedClips.map((clip, idx) => {
+                  const isPlayingNow = clip.id === (activeClipId || orderedClips[0]?.id);
+                  const isMain = clip.id === (listing.featuredClipId || orderedClips[0]?.id);
+                  return (
+                    <li
+                      key={clip.id}
+                      className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 transition"
+                      style={{
+                        borderColor: isPlayingNow ? 'var(--pt-accent)' : 'var(--pt-border-subtle)',
+                        backgroundColor: isPlayingNow
+                          ? 'var(--pt-surface-active)'
+                          : 'var(--pt-surface-inner)',
+                      }}
                     >
-                      <span
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                        style={
-                          isPlayingNow
-                            ? { backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }
-                            : { backgroundColor: 'var(--pt-pill-bg)', color: 'var(--ink)' }
-                        }
+                      <button
+                        type="button"
+                        onClick={() => setActiveClipId(clip.id)}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
                       >
-                        <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-[var(--ink)]">
-                          {idx + 1}. {clip.title}
-                        </p>
-                        <p className="text-xs text-[var(--muted)]">
-                          {clip.kind === 'embed'
-                            ? `${embedProviderLabel(clip.embedProvider)} link`
-                            : clip.kind === 'video'
-                              ? 'Video clip'
-                              : clip.kind === 'audio'
-                                ? 'Audio clip'
-                                : 'Stage synth visual'}
-                          , {clip.durationSec}s
-                        </p>
-                      </div>
-                    </button>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      {isMain ? (
                         <span
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
-                          style={{
-                            backgroundColor: 'var(--pt-accent)',
-                            color: 'var(--pt-accent-ink)',
-                          }}
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                          style={
+                            isPlayingNow
+                              ? { backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }
+                              : { backgroundColor: 'var(--pt-pill-bg)', color: 'var(--ink)' }
+                          }
                         >
-                          <Star className="h-3 w-3 fill-current" aria-hidden="true" />
-                          <span>Main clip</span>
+                          <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
                         </span>
-                      ) : (
-                        canCustomize && (
-                          <button
-                            type="button"
-                            onClick={() => handleSetMainClip(clip.id)}
-                            className="rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-2.5 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[var(--ink)]">
+                            {idx + 1}. {clip.title}
+                          </p>
+                          <p className="text-xs text-[var(--muted)]">
+                            {clip.kind === 'embed'
+                              ? `${embedProviderLabel(clip.embedProvider)} link`
+                              : clip.kind === 'video'
+                                ? 'Video clip'
+                                : clip.kind === 'audio'
+                                  ? 'Audio clip'
+                                  : 'Stage synth visual'}
+                            , {clip.durationSec}s
+                          </p>
+                        </div>
+                      </button>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        {isMain ? (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                            style={{
+                              backgroundColor: 'var(--pt-accent)',
+                              color: 'var(--pt-accent-ink)',
+                            }}
                           >
-                            Set main
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+                            <Star className="h-3 w-3 fill-current" aria-hidden="true" />
+                            <span>Main clip</span>
+                          </span>
+                        ) : (
+                          canCustomize && (
+                            <button
+                              type="button"
+                              onClick={() => handleSetMainClip(clip.id)}
+                              className="rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-2.5 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
+                            >
+                              Set main
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
 
           {/* Schedule & Press Link */}
           <section
@@ -676,22 +690,33 @@ export function ProfilePage({
                       key={neighbor.id}
                       type="button"
                       onClick={() => onOpenProfile(neighbor)}
-                      className="rounded-2xl border p-3 text-left transition hover:brightness-95"
+                      className="flex items-center gap-2.5 rounded-2xl border p-2.5 text-left transition hover:brightness-95"
                       style={{
                         backgroundColor: 'var(--pt-surface-inner)',
                         borderColor: 'var(--pt-border-subtle)',
                       }}
                     >
-                      <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
-                        {neighbor.title}
-                      </p>
-                      <p className="truncate text-xs text-[var(--muted)]">{neighbor.subtitle}</p>
-                      <p
-                        className="mt-1.5 text-[11px] font-medium"
-                        style={{ color: 'var(--pt-accent)' }}
-                      >
-                        {neighbor.neighborhood || nRegion?.city}
-                      </p>
+                      {neighbor.portraitUrl && (
+                        <img
+                          src={neighbor.portraitUrl}
+                          alt={neighbor.portraitAlt || neighbor.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-10 w-10 shrink-0 rounded-xl object-cover object-[50%_20%]"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
+                          {neighbor.title}
+                        </p>
+                        <p className="truncate text-xs text-[var(--muted)]">{neighbor.subtitle}</p>
+                        <p
+                          className="mt-1 text-[11px] font-medium"
+                          style={{ color: 'var(--pt-accent)' }}
+                        >
+                          {neighbor.neighborhood || nRegion?.city}
+                        </p>
+                      </div>
                     </button>
                   );
                 })}
