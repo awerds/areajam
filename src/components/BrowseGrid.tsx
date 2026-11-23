@@ -58,7 +58,7 @@ export function BrowseGrid({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative min-w-[15rem] flex-1 sm:flex-initial">
+          <div className="relative min-w-[17.5rem] flex-1 sm:w-[21rem] sm:flex-initial">
             <label htmlFor="browse-search" className="visually-hidden">
               Search players, instruments, gear, or neighborhoods
             </label>
@@ -71,7 +71,7 @@ export function BrowseGrid({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Instrument, gear, genre, neighborhood..."
+              placeholder="Search instruments, gear, genre..."
               className="field-control pl-10"
             />
           </div>

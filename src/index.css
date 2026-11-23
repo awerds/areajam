@@ -24,7 +24,7 @@
   --track-bg-light: rgba(15, 23, 42, 0.07);
   --header-bg-light: rgba(246, 244, 239, 0.84);
   --dock-bg-light: rgba(255, 255, 255, 0.88);
-  --dialog-bg-light: rgba(255, 255, 255, 0.94);
+  --dialog-bg-light: rgba(255, 255, 255, 0.99);
   --dialog-backdrop-light: rgba(15, 23, 42, 0.42);
   --input-bg-light: rgba(255, 255, 255, 0.88);
   --placeholder-light: rgba(71, 85, 105, 0.72);
@@ -1033,15 +1033,17 @@ dialog.areajam-dialog::backdrop {
 }
 
 /* Form validation after interaction */
-.field-control {
-  width: 100%;
-  border-radius: 0.95rem;
-  border: 1px solid var(--border);
-  background-color: var(--input-bg);
-  color: var(--ink);
-  padding: 0.7rem 0.95rem;
-  font-size: 0.95rem;
-  transition: border-color 140ms ease, background-color 140ms ease;
+@layer components {
+  .field-control {
+    width: 100%;
+    border-radius: 0.95rem;
+    border: 1px solid var(--border);
+    background-color: var(--input-bg);
+    color: var(--ink);
+    padding: 0.7rem 0.95rem;
+    font-size: 0.95rem;
+    transition: border-color 140ms ease, background-color 140ms ease;
+  }
 }
 
 .field-control::placeholder {
