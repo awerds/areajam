@@ -1,0 +1,287 @@
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, MessageCircle, Send } from 'lucide-react';
+import type { AppMode, Listing, MatchRecord, Region } from '../types';
+
+interface MatchesViewProps {
+  matches: MatchRecord[];
+  listings: Listing[];
+  regions: Region[];
+  selectedMatchId: string | null;
+  onSelectMatch: (matchId: string | null) => void;
+  onSendMessage: (matchId: string, text: string) => void;
+  onInspectListing: (listing: Listing) => void;
+  onBackToDiscover: () => void;
+}
+
+const ICEBREAKERS: Record<AppMode, string[]> = {
+  jam: [
+    'Free to book an hour room this week?',
+    'What bands or records are you listening to lately?',
+    'Want me to send a quick voice memo riff?',
+  ],
+  gigs: [
+    'Here is our live clip — what dates are open?',
+    'What is the backline & load-in time?',
+    'Still looking to fill that slot on the bill?',
+  ],
+};
+
+export function MatchesView({
+  matches,
+  listings,
+  regions,
+  selectedMatchId,
+  onSelectMatch,
+  onSendMessage,
+  onInspectListing,
+  onBackToDiscover,
+}: MatchesViewProps) {
+  const [filter, setFilter] = useState<'all' | AppMode>('all');
+  const [draft, setDraft] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const selectedMatch = matches.find((m) => m.id === selectedMatchId) ?? null;
+  const selectedListing = selectedMatch
+    ? listings.find((l) => l.id === selectedMatch.listingId)
+    : undefined;
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [selectedMatch?.messages.length]);
+
+  const submitMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedMatch) return;
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    onSendMessage(selectedMatch.id, trimmed);
+    setDraft('');
+  };
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (e.nativeEvent.isComposing || e.keyCode === 229) {
+        return;
+      }
+      formRef.current?.requestSubmit();
+    }
+  };
+
+  if (selectedMatch && selectedListing) {
+    const region = regions.find((r) => r.id === selectedListing.regionId);
+    const isJam = selectedListing.side === 'jam';
+
+    return (
+      <section className="mx-auto flex h-[min(74dvh,38rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-md">
+        <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => onSelectMatch(null)}
+              aria-label="Back to matches"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-[var(--ink)]"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <div className="min-w-0">
+              <h2 className="font-display truncate text-base font-extrabold">{selectedListing.title}</h2>
+              <p className="font-mono-code truncate text-[11px] text-[var(--muted)]">
+                {isJam ? 'JAM' : 'GIGS'} · {region?.city ?? selectedListing.regionId} ·{' '}
+                {selectedListing.neighborhood}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onInspectListing(selectedListing)}
+            className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs font-semibold hover:opacity-85"
+          >
+            View Card
+          </button>
+        </header>
+
+        <div className="app-scroll flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          {selectedMatch.messages.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-2)] p-4 text-center">
+              <p className="text-sm font-medium text-[var(--ink)]">
+                You matched with {selectedListing.title} in {selectedListing.neighborhood}.
+              </p>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                Tap a quick opener below or write your own message:
+              </p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                {ICEBREAKERS[selectedListing.side].map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => onSendMessage(selectedMatch.id, prompt)}
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] transition hover:border-[var(--accent)]"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            selectedMatch.messages.map((msg) => {
+              const isMe = msg.sender === 'me';
+              return (
+                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className="max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed"
+                    style={
+                      isMe
+                        ? {
+                            backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
+                            color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                          }
+                        : {
+                            backgroundColor: 'var(--surface-2)',
+                            color: 'var(--ink)',
+                            border: '1px solid var(--border)',
+                          }
+                    }
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        <form
+          ref={formRef}
+          onSubmit={submitMessage}
+          className="flex items-end gap-2 border-t border-[var(--border)] bg-[var(--surface)] p-3"
+        >
+          <label htmlFor="chat-input" className="visually-hidden">
+            Message {selectedListing.title}
+          </label>
+          <textarea
+            id="chat-input"
+            rows={1}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleTextareaKeyDown}
+            placeholder={`Message ${selectedListing.title}...`}
+            className="field-control max-h-28 min-h-11 resize-none"
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim()}
+            aria-label="Send message"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition disabled:opacity-40"
+            style={{
+              backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
+              color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+            }}
+          >
+            <Send className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </form>
+      </section>
+    );
+  }
+
+  const visibleMatches = matches.filter((m) => filter === 'all' || m.side === filter);
+
+  return (
+    <section className="mx-auto w-full max-w-2xl space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="font-display text-2xl font-extrabold tracking-tight">Matches &amp; Threads</h2>
+          <p className="text-sm text-[var(--muted)]">
+            Two-sided inbox for jam sessions and gig bookings.
+          </p>
+        </div>
+
+        <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] p-1">
+          {(['all', 'jam', 'gigs'] as const).map((tab) => {
+            const active = filter === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFilter(tab)}
+                className="rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition"
+                style={
+                  active
+                    ? { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
+                    : { color: 'var(--muted)' }
+                }
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {visibleMatches.length === 0 ? (
+        <div className="rounded-[1.5rem] border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-12 text-center">
+          <MessageCircle className="mx-auto h-8 w-8 text-[var(--muted)]" aria-hidden="true" />
+          <h3 className="font-display mt-3 text-lg font-bold">No matches yet</h3>
+          <p className="mx-auto mt-1 max-w-xs text-sm text-[var(--muted)]">
+            Swipe right on a musician to jam or pitch on a local gig slot to start a thread.
+          </p>
+          <button
+            type="button"
+            onClick={onBackToDiscover}
+            className="mt-5 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-sm font-semibold text-[var(--bg)] transition hover:opacity-90"
+          >
+            Back to Swipe Deck
+          </button>
+        </div>
+      ) : (
+        <ul className="space-y-2.5">
+          {visibleMatches.map((match) => {
+            const listing = listings.find((l) => l.id === match.listingId);
+            if (!listing) return null;
+            const region = regions.find((r) => r.id === listing.regionId);
+            const lastMsg = match.messages[match.messages.length - 1];
+            const isJam = listing.side === 'jam';
+
+            return (
+              <li key={match.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelectMatch(match.id)}
+                  className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition hover:border-[var(--accent)]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="font-mono-code rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                        style={{
+                          backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
+                          color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                        }}
+                      >
+                        {isJam ? 'JAM' : 'GIGS'}
+                      </span>
+                      <span className="font-mono-code text-xs text-[var(--muted)]">
+                        {region?.city ?? listing.regionId} · {listing.neighborhood}
+                      </span>
+                    </div>
+                    <p className="font-display mt-1 truncate text-lg font-bold">{listing.title}</p>
+                    <p className="mt-0.5 truncate text-sm text-[var(--muted)]">
+                      {lastMsg ? lastMsg.text : listing.seekingOrOffer}
+                    </p>
+                  </div>
+                  <span className="font-mono-code shrink-0 text-xs font-semibold text-[var(--muted)]">
+                    Open →
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}

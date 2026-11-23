@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+
+  --target-size: 24px;
+
+  /* Print Flyer (Light) */
+  --bg-light: #f5f0e6;
+  --surface-light: #fcfaf5;
+  --surface-2-light: #ece4d5;
+  --ink-light: #141210;
+  --muted-light: #5e574e;
+  --border-light: rgba(20, 18, 16, 0.14);
+  --jam-light: #d94318;
+  --jam-ink-light: #ffffff;
+  --gigs-light: #1d4ed8;
+  --gigs-ink-light: #ffffff;
+  --ok-light: #18794e;
+  --err-light: #c92a2a;
+  --err-bg-light: #fff0ee;
+  --scrollbar-track-light: #ebe3d3;
+  --scrollbar-thumb-light: #8f8578;
+
+  /* Late-Night Venue (Dark) */
+  --bg-dark: #0e0d0b;
+  --surface-dark: #181613;
+  --surface-2-dark: #23201b;
+  --ink-dark: #f2ece1;
+  --muted-dark: #9e9588;
+  --border-dark: rgba(242, 236, 225, 0.14);
+  --jam-dark: #ff5c2b;
+  --jam-ink-dark: #140b07;
+  --gigs-dark: #5b94ff;
+  --gigs-ink-dark: #081226;
+  --ok-dark: #3dd68c;
+  --err-dark: #ff6b6b;
+  --err-bg-dark: #2d1616;
+  --scrollbar-track-dark: #171512;
+  --scrollbar-thumb-dark: #686055;
+
+  /* Active Tokens — light default fallback */
+  --bg: var(--bg-light);
+  --surface: var(--surface-light);
+  --surface-2: var(--surface-2-light);
+  --ink: var(--ink-light);
+  --muted: var(--muted-light);
+  --border: var(--border-light);
+  --jam: var(--jam-light);
+  --jam-ink: var(--jam-ink-light);
+  --gigs: var(--gigs-light);
+  --gigs-ink: var(--gigs-ink-light);
+  --ok: var(--ok-light);
+  --err: var(--err-light);
+  --err-bg: var(--err-bg-light);
+  --scrollbar-track: var(--scrollbar-track-light);
+  --scrollbar-thumb: var(--scrollbar-thumb-light);
+  --accent: var(--jam);
+
+  @media (prefers-color-scheme: dark) {
+    --bg: var(--bg-dark);
+    --surface: var(--surface-dark);
+    --surface-2: var(--surface-2-dark);
+    --ink: var(--ink-dark);
+    --muted: var(--muted-dark);
+    --border: var(--border-dark);
+    --jam: var(--jam-dark);
+    --jam-ink: var(--jam-ink-dark);
+    --gigs: var(--gigs-dark);
+    --gigs-ink: var(--gigs-ink-dark);
+    --ok: var(--ok-dark);
+    --err: var(--err-dark);
+    --err-bg: var(--err-bg-dark);
+    --scrollbar-track: var(--scrollbar-track-dark);
+    --scrollbar-thumb: var(--scrollbar-thumb-dark);
+  }
+
+  @supports (color: light-dark(white, black)) {
+    --bg: light-dark(var(--bg-light), var(--bg-dark));
+    --surface: light-dark(var(--surface-light), var(--surface-dark));
+    --surface-2: light-dark(var(--surface-2-light), var(--surface-2-dark));
+    --ink: light-dark(var(--ink-light), var(--ink-dark));
+    --muted: light-dark(var(--muted-light), var(--muted-dark));
+    --border: light-dark(var(--border-light), var(--border-dark));
+    --jam: light-dark(var(--jam-light), var(--jam-dark));
+    --jam-ink: light-dark(var(--jam-ink-light), var(--jam-ink-dark));
+    --gigs: light-dark(var(--gigs-light), var(--gigs-dark));
+    --gigs-ink: light-dark(var(--gigs-ink-light), var(--gigs-ink-dark));
+    --ok: light-dark(var(--ok-light), var(--ok-dark));
+    --err: light-dark(var(--err-light), var(--err-dark));
+    --err-bg: light-dark(var(--err-bg-light), var(--err-bg-dark));
+    --scrollbar-track: light-dark(var(--scrollbar-track-light), var(--scrollbar-track-dark));
+    --scrollbar-thumb: light-dark(var(--scrollbar-thumb-light), var(--scrollbar-thumb-dark));
+  }
+
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+@media (pointer: coarse) {
+  :root {
+    --target-size: 44px;
+  }
+}
+
+html {
+  accent-color: var(--accent);
+  scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Syne', system-ui, sans-serif;
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  img,
+  video {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  :where(a, code) {
+    overflow-wrap: anywhere;
+  }
+
+  :where(
+    button,
+    select,
+    textarea,
+    input:not([type='checkbox'], [type='radio']),
+    [role='button'],
+    nav a,
+    label:has(input[type='checkbox'], input[type='radio'])
+  ) {
+    min-block-size: var(--target-size);
+    min-inline-size: var(--target-size);
+  }
+
+  :where([role='button'], nav a, label:has(input[type='checkbox'], input[type='radio'])) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :where(nav, nav ul, .toolbar) {
+    flex-wrap: wrap;
+  }
+
+  :where(.toolbar > :not(button, input, select, textarea, a, [role='button'], label)) {
+    min-inline-size: 0;
+  }
+}
+
+.font-display {
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.stage-shell {
+  container: stage / inline-size;
+}
+
+.safe-top {
+  padding-top: max(0.625rem, env(safe-area-inset-top, 0px));
+}
+
+.safe-bottom {
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+
+.icon-btn {
+  position: relative;
+}
+
+.icon-btn::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@supports not (scrollbar-color: auto) {
+  .app-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .app-scroll::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 999px;
+  }
+  .app-scroll::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+}
+
+/* Native <dialog> — never set display on bare dialog */
+dialog.areajam-dialog {
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background-color: var(--surface);
+  color: var(--ink);
+  width: min(calc(100vw - 1.5rem), 32rem);
+  max-height: min(88dvh, 46rem);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+}
+
+dialog.areajam-dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog.areajam-dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: rgba(10, 9, 8, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+/* Form validation after interaction */
+.field-control {
+  width: 100%;
+  border-radius: 0.875rem;
+  border: 1px solid var(--border);
+  background-color: var(--surface-2);
+  color: var(--ink);
+  padding: 0.65rem 0.875rem;
+  font-size: 0.95rem;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.field-control:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+:is(input, select, textarea).field-control:is(:user-invalid, .user-invalid-fallback) {
+  border-color: var(--err);
+  background-color: var(--err-bg);
+}
+
+.error-msg {
+  display: none;
+  color: var(--err);
+  font-size: 0.82rem;
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
+
+:is(input, select, textarea).field-control:is(:user-invalid, .user-invalid-fallback) + .error-msg {
+  display: block;
+}
+
+:is(input, select, textarea).field-control:is(:user-valid, .user-valid-fallback) {
+  border-color: var(--ok);
+}
+
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+@container stage (inline-size > 38rem) {
+  .deck-frame {
+    max-width: 26rem;
+  }
+}
