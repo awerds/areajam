@@ -14,7 +14,6 @@ interface BrowseGridProps {
   allRegions: Region[];
   swiped: Record<string, SwipeDecision>;
   showingNearestFallback?: boolean;
-  showingSampleFallback?: boolean;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
   onInspect: (listing: Listing) => void;
@@ -32,7 +31,6 @@ export function BrowseGrid({
   region,
   allRegions,
   showingNearestFallback = false,
-  showingSampleFallback = false,
   currentUserUid,
   inviteByTargetUid,
   onOpenProfile,
@@ -64,24 +62,16 @@ export function BrowseGrid({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-display text-2xl font-bold tracking-tight">
-            {showingNearestFallback && showingSampleFallback
-              ? `Nearest sample players to ${region.city}`
-              : showingNearestFallback
-                ? `Nearest players to ${region.city}`
-                : showingSampleFallback
-                  ? `Sample players in ${region.city}`
-                  : mode === 'jam'
-                    ? `Browse players around ${region.city}`
-                    : `Browse gigs and bands in ${region.city}`}
+            {showingNearestFallback
+              ? `Nearest players to ${region.city}`
+              : mode === 'jam'
+                ? `Browse players around ${region.city}`
+                : `Browse gigs and bands in ${region.city}`}
           </h2>
           <p className="text-sm text-[var(--muted)]">
-            {showingNearestFallback || showingSampleFallback ? (
+            {showingNearestFallback ? (
               <>
-                {showingNearestFallback && showingSampleFallback
-                  ? `No live players in ${region.city} yet — showing nearest clearly labeled sample demos sorted closest first.`
-                  : showingNearestFallback
-                    ? `No players in ${region.city} yet — sorted closest first by rough distance.`
-                    : `No live players in ${region.city} yet — showing sample demos until local players post.`}{' '}
+                No players in {region.city} yet. Listings are sorted by estimated distance.{' '}
                 {onGoToPost && (
                   <button
                     type="button"

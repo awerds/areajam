@@ -9,7 +9,6 @@ import type {
   LocationConsent,
   ProfileThemeId,
   Region,
-  WallComment,
 } from '../types';
 
 const LEGACY_STORAGE_KEY = 'areajam_v1_state';
@@ -18,25 +17,6 @@ const GUEST_STORAGE_KEY = 'areajam_v2_guest';
 export function getStorageKeyForUid(uid?: string | null): string {
   return uid ? `areajam_v2_user_${uid}` : GUEST_STORAGE_KEY;
 }
-
-const STARTER_WALL_COMMENTS: Record<string, WallComment[]> = {
-  'atx-jam-1': [
-    {
-      id: 'wall-atx-1',
-      authorName: 'Devon R.',
-      text: 'Watched your Vistalite clip — that Can-style motorik pocket is ridiculous. Down to trade guitar tracks Thursday.',
-      createdAt: 1730001000000,
-    },
-  ],
-  'atx-gigs-1': [
-    {
-      id: 'wall-gigs-1',
-      authorName: 'Sunburn Velvet',
-      text: 'Played this patio last month — house engineer gets mixes dialed in 10 minutes flat.',
-      createdAt: 1730002000000,
-    },
-  ],
-};
 
 export function parseUrlState(): { regionId?: string; mode?: AppMode; profileId?: string } {
   if (typeof window === 'undefined') return {};
@@ -74,7 +54,6 @@ export function getDefaultState(): AppState {
     regionId: PILOT_REGION_ID,
     mode: 'jam',
     includeNearbyRegions: false,
-    samplesEnabled: true,
     locationConsent: 'unknown',
     detectedCityLabel: undefined,
     lookingForJam: [],
@@ -84,7 +63,7 @@ export function getDefaultState(): AppState {
     swiped: {},
     history: [],
     matches: [],
-    wallComments: STARTER_WALL_COMMENTS,
+    wallComments: {},
   };
 }
 
@@ -191,7 +170,6 @@ function buildStateFromParsed(
     regionId: resolvedRegionId,
     mode: 'jam',
     includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
-    samplesEnabled: typeof parsed.samplesEnabled === 'boolean' ? parsed.samplesEnabled : true,
     locationConsent: consent,
     detectedCityLabel:
       typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,
@@ -209,7 +187,7 @@ function buildStateFromParsed(
     wallComments:
       parsed.wallComments && typeof parsed.wallComments === 'object'
         ? parsed.wallComments
-        : STARTER_WALL_COMMENTS,
+        : {},
   };
 }
 

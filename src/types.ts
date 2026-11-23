@@ -208,7 +208,6 @@ export interface AppState {
   regionId: string;
   mode: AppMode;
   includeNearbyRegions: boolean;
-  samplesEnabled: boolean;
   locationConsent: LocationConsent;
   detectedCityLabel?: string;
   lookingForJam: string[];

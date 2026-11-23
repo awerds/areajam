@@ -16,8 +16,6 @@ interface SwipeDeckProps {
   canUndo: boolean;
   includeNearbyRegions: boolean;
   showingNearestFallback?: boolean;
-  showingSampleFallback?: boolean;
-  showSampleCards: boolean;
   soundEnabled: boolean;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
@@ -29,7 +27,6 @@ interface SwipeDeckProps {
   onInvite: (listing: Listing) => void;
   onOpenInvites: (threadId?: string) => void;
   onEnableNearby: () => void;
-  onToggleSampleCards: () => void;
   onResetPassed: () => void;
   onGoToPost: () => void;
 }
@@ -47,8 +44,6 @@ export function SwipeDeck({
   canUndo,
   includeNearbyRegions,
   showingNearestFallback = false,
-  showingSampleFallback = false,
-  showSampleCards,
   soundEnabled,
   currentUserUid,
   inviteByTargetUid,
@@ -60,7 +55,6 @@ export function SwipeDeck({
   onInvite,
   onOpenInvites,
   onEnableNearby,
-  onToggleSampleCards,
   onResetPassed,
   onGoToPost,
 }: SwipeDeckProps) {
@@ -314,7 +308,7 @@ export function SwipeDeck({
             : `No live musicians posted in ${region.city} yet`}
         </h2>
         <p className="mt-2.5 max-w-xs text-sm leading-relaxed text-[var(--muted)]">
-          Be one of the first players in {region.city}, turn on sample profiles with the Samples switch, or post your own card.
+          Create a profile to help other musicians in {region.city} find you, or explore another city.
         </p>
 
         <div className="mt-6 flex w-full max-w-xs flex-col gap-2.5">
@@ -338,13 +332,6 @@ export function SwipeDeck({
               Show players across US cities
             </button>
           )}
-          <button
-            type="button"
-            onClick={onToggleSampleCards}
-            className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
-          >
-            {showSampleCards ? 'Turn off sample profiles' : 'Turn on sample profiles'}
-          </button>
           {canUndo && (
             <button
               type="button"
@@ -380,16 +367,12 @@ export function SwipeDeck({
 
   return (
     <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
-      {(showingNearestFallback || showingSampleFallback) && (
+      {showingNearestFallback && (
         <div className="mb-3 flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2.5 text-xs backdrop-blur-md">
           <span className="flex min-w-0 items-start gap-2 font-medium leading-snug text-[var(--ink)]">
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <span>
-              {showingNearestFallback && showingSampleFallback
-                ? `No live players in ${region.city} yet — showing nearest sample demos`
-                : showingNearestFallback
-                  ? `No players in ${region.city} yet — showing nearest`
-                  : `No live players in ${region.city} yet — showing sample demos`}
+              No players in {region.city} yet. Showing the nearest listed players.
             </span>
           </span>
           <button
