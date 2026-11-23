@@ -224,7 +224,7 @@ export function ProfilePage({
             className="inline-flex items-center gap-2 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span>Back to {region?.city ?? 'scene'}</span>
+            <span>Back to {selectedRegion?.city ?? region?.city ?? 'scene'}</span>
           </button>
 
           <div className="flex flex-wrap items-center gap-2">

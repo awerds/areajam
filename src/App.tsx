@@ -134,6 +134,7 @@ export function App() {
   const [chipFilter, setChipFilter] = useState<string>('All');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
   const [ipDetecting, setIpDetecting] = useState<boolean>(false);
+  const [dismissedSampleFallback, setDismissedSampleFallback] = useState<boolean>(false);
 
   const [regionModalOpen, setRegionModalOpen] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
@@ -173,6 +174,7 @@ export function App() {
         setInvites([]);
         setThreads([]);
         setBlocks([]);
+        setDismissedSampleFallback(false);
         // Clear pending cross-account intentions on sign-out or account switch.
         if (prevUid !== null || nextUid === null) {
           setPendingInviteTarget(null);
@@ -315,12 +317,31 @@ export function App() {
     [visibleRemoteProfiles, user]
   );
 
+  const hasAnyLivePlayers = useMemo(
+    () => visibleRemoteProfiles.some((l) => l.side === state.mode),
+    [visibleRemoteProfiles, state.mode]
+  );
+
+  const usingSampleFallback =
+    !hasAnyLivePlayers && !state.showSampleCards && !dismissedSampleFallback;
+  const includeSamples = state.showSampleCards || usingSampleFallback;
+
+  const handleToggleSampleCards = () => {
+    if (includeSamples) {
+      setState((prev) => ({ ...prev, showSampleCards: false }));
+      setDismissedSampleFallback(true);
+    } else {
+      setState((prev) => ({ ...prev, showSampleCards: true }));
+      setDismissedSampleFallback(false);
+    }
+  };
+
   const allListings = useMemo<Listing[]>(
     () => [
       ...visibleRemoteProfiles,
-      ...(state.showSampleCards ? SEED_LISTINGS.filter((l) => l.side === 'jam') : []),
+      ...(includeSamples ? SEED_LISTINGS.filter((l) => l.side === 'jam') : []),
     ],
-    [visibleRemoteProfiles, state.showSampleCards]
+    [visibleRemoteProfiles, includeSamples]
   );
 
   const activeProfile = useMemo<Listing | null>(() => {
@@ -1157,12 +1178,10 @@ export function App() {
                   <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:hidden">
                     <button
                       type="button"
-                      onClick={() =>
-                        setState((prev) => ({ ...prev, showSampleCards: !prev.showSampleCards }))
-                      }
+                      onClick={handleToggleSampleCards}
                       className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--muted)]"
                     >
-                      {state.showSampleCards ? 'Samples: On' : 'Samples: Off'}
+                      {includeSamples ? 'Samples: On' : 'Samples: Off'}
                     </button>
                     {activePrefs.length > 0 && (
                       <button
@@ -1215,12 +1234,10 @@ export function App() {
                         </span>
                         <button
                           type="button"
-                          onClick={() =>
-                            setState((prev) => ({ ...prev, showSampleCards: !prev.showSampleCards }))
-                          }
+                          onClick={handleToggleSampleCards}
                           className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
                         >
-                          {state.showSampleCards ? 'Sample demos: On' : 'Sample demos: Off'}
+                          {includeSamples ? 'Sample demos: On' : 'Sample demos: Off'}
                         </button>
                       </div>
 
@@ -1367,7 +1384,8 @@ export function App() {
                       canUndo={canUndo}
                       includeNearbyRegions={state.includeNearbyRegions}
                       showingNearestFallback={showingDeckNearestFallback}
-                      showSampleCards={state.showSampleCards}
+                      showingSampleFallback={usingSampleFallback}
+                      showSampleCards={includeSamples}
                       soundEnabled={soundEnabled}
                       currentUserUid={user?.uid}
                       inviteByTargetUid={inviteByTargetUid}
@@ -1381,9 +1399,7 @@ export function App() {
                       onEnableNearby={() =>
                         setState((prev) => ({ ...prev, includeNearbyRegions: true }))
                       }
-                      onToggleSampleCards={() =>
-                        setState((prev) => ({ ...prev, showSampleCards: !prev.showSampleCards }))
-                      }
+                      onToggleSampleCards={handleToggleSampleCards}
                       onResetPassed={handleResetPassed}
                       onGoToPost={() => handleTabChange('post')}
                     />
@@ -1401,6 +1417,7 @@ export function App() {
                     allRegions={allRegions}
                     swiped={state.swiped}
                     showingNearestFallback={showingNearestFallback}
+                    showingSampleFallback={usingSampleFallback}
                     currentUserUid={user?.uid}
                     inviteByTargetUid={inviteByTargetUid}
                     onInspect={setDetailListing}
@@ -1471,6 +1488,7 @@ export function App() {
                   allRegions={allRegions}
                   swiped={state.swiped}
                   showingNearestFallback={showingNearestFallback}
+                  showingSampleFallback={usingSampleFallback}
                   currentUserUid={user?.uid}
                   inviteByTargetUid={inviteByTargetUid}
                   onInspect={setDetailListing}

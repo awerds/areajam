@@ -16,6 +16,7 @@ interface SwipeDeckProps {
   canUndo: boolean;
   includeNearbyRegions: boolean;
   showingNearestFallback?: boolean;
+  showingSampleFallback?: boolean;
   showSampleCards: boolean;
   soundEnabled: boolean;
   currentUserUid?: string;
@@ -46,6 +47,7 @@ export function SwipeDeck({
   canUndo,
   includeNearbyRegions,
   showingNearestFallback = false,
+  showingSampleFallback = false,
   showSampleCards,
   soundEnabled,
   currentUserUid,
@@ -378,18 +380,24 @@ export function SwipeDeck({
 
   return (
     <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
-      {showingNearestFallback && (
-        <div className="mb-3 flex w-full items-center justify-between gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md">
-          <span className="flex min-w-0 items-center gap-1.5 font-medium text-[var(--ink)]">
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
-            <span className="truncate">No players in {region.city} yet — showing nearest</span>
+      {(showingNearestFallback || showingSampleFallback) && (
+        <div className="mb-3 flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2.5 text-xs backdrop-blur-md">
+          <span className="flex min-w-0 items-start gap-2 font-medium leading-snug text-[var(--ink)]">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
+            <span>
+              {showingNearestFallback && showingSampleFallback
+                ? `No live players in ${region.city} yet — showing nearest sample demos`
+                : showingNearestFallback
+                  ? `No players in ${region.city} yet — showing nearest`
+                  : `No live players in ${region.city} yet — showing sample demos`}
+            </span>
           </span>
           <button
             type="button"
             onClick={onGoToPost}
-            className="shrink-0 font-bold text-[var(--accent-text)] hover:underline"
+            className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-solid)] px-2.5 py-1 font-bold text-[var(--accent-text)] transition hover:bg-[var(--surface-hover)]"
           >
-            Post in {region.city}
+            Be first
           </button>
         </div>
       )}
