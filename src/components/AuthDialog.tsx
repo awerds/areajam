@@ -11,6 +11,37 @@ interface AuthDialogProps {
   onAuthenticated: (user: AuthUser) => void;
 }
 
+function formatAuthError(err: unknown, provider: 'google' | 'apple'): string {
+  const code =
+    err && typeof err === 'object' && 'code' in err && typeof err.code === 'string'
+      ? err.code
+      : '';
+
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign-in popup closed before finishing.';
+  }
+  if (code === 'auth/popup-blocked') {
+    return 'Browser blocked the sign-in popup. Allow popups for areajam.com and try again.';
+  }
+  if (code === 'auth/unauthorized-domain') {
+    return 'This domain is not authorized in Firebase Auth settings.';
+  }
+  if (
+    provider === 'apple' &&
+    (code === 'auth/operation-not-allowed' ||
+      code === 'auth/invalid-credential' ||
+      code === 'auth/internal-error' ||
+      code === 'auth/missing-or-invalid-nonce' ||
+      code.startsWith('auth/'))
+  ) {
+    return 'Apple Sign-In requires adding your Apple Developer Services ID, Team ID, Key ID, and Private Key in Firebase Console first. Use Continue with Google right now.';
+  }
+
+  return err instanceof Error && err.message
+    ? err.message
+    : 'Sign-in could not complete. Allow popups for this site and try again.';
+}
+
 export function AuthDialog({ open, reason, onClose, onAuthenticated }: AuthDialogProps) {
   const [nameInput, setNameInput] = useState('');
   const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
@@ -26,11 +57,7 @@ export function AuthDialog({ open, reason, onClose, onAuthenticated }: AuthDialo
       onAuthenticated(user);
       onClose();
     } catch (err) {
-      const message =
-        err instanceof Error && err.message
-          ? err.message
-          : 'Sign-in could not complete. Allow popups for this site and try again.';
-      setErrorMsg(message);
+      setErrorMsg(formatAuthError(err, provider));
     } finally {
       setLoadingProvider(null);
     }

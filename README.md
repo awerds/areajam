@@ -18,17 +18,13 @@ Type-check and build production static output (`dist/`):
 npm run typecheck && npm run build
 ```
 
-## Enabling Live Google & Apple Sign-In (Firebase Auth)
+## Google & Apple Sign-In (Firebase Auth)
 
-1. Copy `.env.example` to `.env.local` (or inject `VITE_FIREBASE_*` secrets in GitHub Actions) and set:
-   - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
-   - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_APP_ID`
-2. In **Firebase Console → Authentication → Sign-in method**, enable **Google** and **Apple**.
-3. In **Firebase Console → Authentication → Settings → Authorized domains**, add `areajam.com`, `www.areajam.com`, and `localhost` (domain names only, no protocol or port).
+AreaJam is wired to Firebase project **`areajam-c3947`** by default (`src/lib/firebaseConfig.ts`), with `areajam.com`, `www.areajam.com`, and `localhost` listed in Authorized domains:
+- **Google Sign-In:** Live now (`Authentication → Sign-in method → Google` enabled).
+- **Apple Sign-In on Web:** Enabled in Firebase; to activate on the web, add your Apple Developer **Services ID**, **Apple Team ID**, **Key ID**, and **Private Key** under **Firebase Console → Authentication → Sign-in method → Apple**, and register return URL `https://areajam-c3947.firebaseapp.com/__/auth/handler` in Apple Developer Console.
 
-*(Without `VITE_FIREBASE_*` keys configured, AreaJam cleanly runs an instant local Apple/Google preview sign-in so profile creation and webcam clip uploads can be tested immediately.)*
+You can override the default Firebase project anytime using the optional `VITE_FIREBASE_*` keys in `.env.example`.
 
 ## Free Hosting via GitHub Pages + Namecheap (`areajam.com`)
 

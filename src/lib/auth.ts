@@ -1,4 +1,5 @@
 import type { AuthUser } from '../types';
+import { DEFAULT_FIREBASE_CONFIG } from './firebaseConfig';
 
 const LOCAL_AUTH_KEY = 'areajam_v1_user';
 const authListeners = new Set<(user: AuthUser | null) => void>();
@@ -11,8 +12,10 @@ function readFirebaseConfig() {
   const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID?.trim();
   const appId = import.meta.env.VITE_FIREBASE_APP_ID?.trim();
 
-  if (!apiKey || !authDomain || !projectId) return null;
-  return { apiKey, authDomain, projectId, appId };
+  if (apiKey && authDomain && projectId) {
+    return { apiKey, authDomain, projectId, appId };
+  }
+  return DEFAULT_FIREBASE_CONFIG;
 }
 
 export function isFirebaseAuthConfigured(): boolean {
