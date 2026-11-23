@@ -16,15 +16,15 @@ export interface ProfileTheme {
 export const PROFILE_THEMES: Record<ProfileThemeId, ProfileTheme> = {
   'stage-coral': {
     id: 'stage-coral',
-    name: 'Stage Coral',
-    tagline: 'Red-light rehearsal loft',
-    bgFrom: '#1f0b15',
-    bgTo: '#090a11',
-    accent: '#ff3b6b',
+    name: 'Pink Signature',
+    tagline: 'Signature pink on ink navy',
+    bgFrom: '#1f0b17',
+    bgTo: '#10131d',
+    accent: '#d91b4c',
     accentInk: '#ffffff',
-    glow: 'rgba(255, 59, 107, 0.34)',
-    surfaceTint: 'rgba(28, 14, 24, 0.72)',
-    borderTint: 'rgba(255, 92, 138, 0.28)',
+    glow: 'rgba(217, 27, 76, 0.34)',
+    surfaceTint: 'rgba(22, 26, 40, 0.86)',
+    borderTint: 'rgba(217, 27, 76, 0.32)',
   },
   'midnight-vinyl': {
     id: 'midnight-vinyl',

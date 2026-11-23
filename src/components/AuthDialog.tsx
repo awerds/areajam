@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertCircle, ShieldCheck } from 'lucide-react';
 import { isFirebaseAuthConfigured, signInWithProvider } from '../lib/auth';
 import type { AuthUser } from '../types';
+import { AreaJamLogo } from './BrandLogo';
 import { NativeDialog } from './NativeDialog';
 
 interface AuthDialogProps {
@@ -75,6 +76,22 @@ export function AuthDialog({ open, reason, onClose, onAuthenticated }: AuthDialo
       }
     >
       <div className="space-y-4">
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-5 py-4 text-center">
+          <svg
+            viewBox="0 0 400 120"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full"
+          >
+            <g fill="none" stroke="var(--brand-contour)" strokeWidth="1.5">
+              {[70, 120, 170].map((r) => (
+                <circle key={r} cx="380" cy="110" r={r} />
+              ))}
+            </g>
+          </svg>
+          <AreaJamLogo className="relative mx-auto h-10 w-[172px] text-[var(--ink)]" decorative />
+        </div>
+
         {!firebaseLive && (
           <div className="space-y-2 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <div className="flex items-start gap-2 text-xs text-[var(--muted)]">

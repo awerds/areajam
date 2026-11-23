@@ -1,8 +1,9 @@
-const CACHE_NAME = 'areajam-shell-v11';
+const CACHE_NAME = 'areajam-shell-v12';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './favicon.ico',
   './icon.svg',
   './apple-touch-icon.png',
   './icon-192.png',

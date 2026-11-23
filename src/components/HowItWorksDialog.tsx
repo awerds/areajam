@@ -1,4 +1,5 @@
 import { Compass, Film, Flame, MapPin, ShieldCheck, Ticket } from 'lucide-react';
+import { AreaJamLogo } from './BrandLogo';
 import { NativeDialog } from './NativeDialog';
 
 interface HowItWorksDialogProps {
@@ -23,9 +24,30 @@ export function HowItWorksDialog({
       subtitle="Interactive local preview — sample profiles & browser storage"
     >
       <div className="space-y-4">
+        <div className="relative overflow-hidden rounded-2xl bg-[#10131d] px-5 py-5 text-white">
+          <svg
+            viewBox="0 0 480 140"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full"
+          >
+            <g fill="none" stroke="rgba(217, 27, 76, 0.28)" strokeWidth="1.6">
+              {[80, 140, 200, 260].map((r) => (
+                <circle key={r} cx="450" cy="120" r={r} />
+              ))}
+            </g>
+          </svg>
+          <div className="relative space-y-1.5">
+            <AreaJamLogo wordmarkColor="#ffffff" className="h-9 w-[162px]" decorative />
+            <p className="text-xs font-medium text-[#f6f4ef]/85">
+              Your local sound. A fresh signature.
+            </p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
-            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--jam-soft)] text-[var(--jam)]">
+            <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--jam-soft)] text-[var(--jam-text)]">
               <Flame className="h-5 w-5" aria-hidden="true" />
             </div>
             <h3 className="font-display text-base font-bold">Jam side</h3>
@@ -47,7 +69,7 @@ export function HowItWorksDialog({
 
         <ol className="space-y-2.5 text-sm">
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
-            <Compass className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
+            <Compass className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
               <p className="font-semibold">Browse free without an account</p>
               <p className="text-xs text-[var(--muted)]">
@@ -56,7 +78,7 @@ export function HowItWorksDialog({
             </div>
           </li>
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
-            <Film className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
+            <Film className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
               <p className="font-semibold">Record a quick webcam intro or upload cuts</p>
               <p className="text-xs text-[var(--muted)]">
@@ -65,7 +87,7 @@ export function HowItWorksDialog({
             </div>
           </li>
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
               <p className="font-semibold">Simulated matches &amp; browser-local drafts</p>
               <p className="text-xs text-[var(--muted)]">

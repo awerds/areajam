@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Flame, Info, Maximize2, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
 import type { AppMode, Listing, Region, SwipeDecision } from '../types';
+import { AreaJamMark } from './BrandLogo';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
 
@@ -262,6 +263,7 @@ export function SwipeDeck({
   if (!topCard) {
     return (
       <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-14 text-center">
+        <AreaJamMark className="mb-3 h-10 w-10" />
         <span className="mb-4 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
           {region.city} ({region.areaCode}) — {mode === 'jam' ? 'Jam' : 'Gigs'}
         </span>

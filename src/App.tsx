@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { AuthDialog } from './components/AuthDialog';
+import { AreaJamLogo, AreaJamMark, BrandContourBackdrop } from './components/BrandLogo';
 import { BrowseGrid } from './components/BrowseGrid';
 import { DetailDialog } from './components/DetailDialog';
 import { HowItWorksDialog } from './components/HowItWorksDialog';
@@ -164,6 +165,10 @@ export function App() {
     document.documentElement.style.setProperty(
       '--accent-ink',
       scopedState.data.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)'
+    );
+    document.documentElement.style.setProperty(
+      '--accent-text',
+      scopedState.data.mode === 'jam' ? 'var(--jam-text)' : 'var(--gigs)'
     );
   }, [scopedState, activeProfileId]);
 
@@ -595,26 +600,12 @@ export function App() {
     }
   };
 
-  const activeSeed = deckCards[0]?.visualSeed ?? 1;
-  const secondaryOrbColor = activeSeed % 2 === 0 ? 'var(--orb-sec-a)' : 'var(--orb-sec-b)';
-
   return (
     <div className="relative min-h-dvh pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12">
       <InstrumentIconSprite />
 
-      {/* Ambient spatial lighting */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div
-          className="ambient-orb -top-32 right-[-6rem] h-[28rem] w-[28rem]"
-          style={{
-            backgroundColor: state.mode === 'jam' ? 'var(--orb-jam)' : 'var(--orb-gigs)',
-          }}
-        />
-        <div
-          className="ambient-orb bottom-[-8rem] left-[-6rem] h-[25rem] w-[25rem]"
-          style={{ backgroundColor: secondaryOrbColor }}
-        />
-      </div>
+      {/* Architectural pink/gigs acoustic contour lines */}
+      <BrandContourBackdrop mode={state.mode} />
 
       {/* Full-width edge-to-edge sticky header */}
       <header className="safe-top sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-xl">
@@ -623,25 +614,27 @@ export function App() {
             <button
               type="button"
               onClick={() => handleTabChange('discover')}
+              aria-label="AreaJam home"
               className="flex items-center gap-2.5 text-left"
             >
-              <img src="./icon.svg" alt="" className="h-9 w-9 rounded-xl shadow-sm" />
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-display block text-lg font-bold leading-none tracking-tight">
-                    AreaJam
-                  </span>
-                  <span className="hidden rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)] sm:inline-block">
-                    Demo
-                  </span>
-                </div>
-                <span className="mt-0.5 block text-[10px] font-semibold leading-none text-[var(--muted)] sm:hidden">
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1.5 shadow-sm sm:hidden">
+                <AreaJamMark className="h-full w-full" />
+              </span>
+              <span className="sm:hidden">
+                <span className="font-display block text-base font-bold leading-none tracking-tight text-[var(--ink)]">
+                  AreaJam
+                </span>
+                <span className="mt-0.5 block text-[10px] font-semibold leading-none text-[var(--muted)]">
                   Interactive demo
                 </span>
-                <span className="mt-0.5 hidden text-[11px] text-[var(--muted)] sm:block">
-                  Interactive demo, local preview
+              </span>
+
+              <span className="hidden items-center gap-2.5 sm:inline-flex">
+                <AreaJamLogo className="h-10 w-[164px] shrink-0 text-[var(--ink)]" />
+                <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--muted)]">
+                  Interactive demo
                 </span>
-              </div>
+              </span>
             </button>
 
             <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
@@ -676,7 +669,7 @@ export function App() {
               aria-label={`Change local region, currently ${currentRegion.label}`}
               className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
             >
-              <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
+              <MapPin className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
               <span>
                 {currentRegion.city}
                 {currentRegion.areaCode !== 'LOC' ? `, ${currentRegion.areaCode}` : ''}
@@ -772,7 +765,7 @@ export function App() {
         <div className="relative z-10 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
           <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-1.5 text-xs md:gap-3 md:px-6 md:py-2.5 xl:px-10">
             <div className="flex items-center gap-1.5 text-[var(--ink)] md:gap-2">
-              <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent)] md:h-4 md:w-4" aria-hidden="true" />
+              <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)] md:h-4 md:w-4" aria-hidden="true" />
               <span className="hidden sm:inline">
                 Use your IP address to jump to sample profiles near your city automatically?
               </span>
@@ -835,8 +828,9 @@ export function App() {
         ) : hasMissingProfile ? (
           <section className="mx-auto max-w-xl py-8 md:py-12">
             <div className="glass-surface space-y-4 rounded-[2rem] p-6 md:p-8">
+              <AreaJamMark className="h-10 w-10" />
               <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                <AlertCircle className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
+                <AlertCircle className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
                 <span>Unavailable link</span>
               </span>
               <h1 className="font-display text-2xl font-bold text-[var(--ink)]">
@@ -884,7 +878,7 @@ export function App() {
                       <button
                         type="button"
                         onClick={clearPreferences}
-                        className="shrink-0 rounded-full border border-[var(--accent)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent)]"
+                        className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
                       >
                         Clear ({activePrefs.length})
                       </button>
@@ -926,15 +920,15 @@ export function App() {
                           {currentRegion.label}
                           {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
                         </span>
-                        <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                        <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)]">
                           Interactive demo, sample profiles &amp; local storage
                         </span>
                       </div>
 
                       <h1 className="hero-title font-bold text-[var(--ink)]">
                         {state.mode === 'jam'
-                          ? 'Preview local players. Explore Jam & Gigs.'
-                          : 'Preview local bands and venue bills.'}
+                          ? 'Find your people. Make some noise.'
+                          : 'More local stages. More live music.'}
                       </h1>
 
                       <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
@@ -945,20 +939,20 @@ export function App() {
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="glass-surface rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent)]">1. Pick your city</p>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Local by city</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
                           Allow IP city detection or pick any metro board to keep sessions local.
                         </p>
                       </div>
-                      <div className="glass-surface rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent)]">2. Watch &amp; inspect</p>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Watch &amp; inspect</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
                           Every card plays its main clip and opens into a customizable artist page.
                         </p>
                       </div>
-                      <div className="glass-surface rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent)]">3. Join to post</p>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Save a draft</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
                           Sign in with Google or Apple to record clips and showcase your gear locker.
                         </p>
@@ -976,7 +970,7 @@ export function App() {
                           <button
                             type="button"
                             onClick={clearPreferences}
-                            className="text-xs font-semibold text-[var(--accent)] hover:underline"
+                            className="text-xs font-semibold text-[var(--accent-text)] hover:underline"
                           >
                             Show all ({activePrefs.length} selected)
                           </button>
@@ -1125,7 +1119,7 @@ export function App() {
                       <button
                         type="button"
                         onClick={clearPreferences}
-                        className="text-xs font-semibold text-[var(--accent)]"
+                        className="text-xs font-semibold text-[var(--accent-text)]"
                       >
                         Clear filters
                       </button>

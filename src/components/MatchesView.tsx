@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { ArrowLeft, ChevronRight, MessageCircle, Send } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Send } from 'lucide-react';
 import type { AppMode, Listing, MatchRecord, Region } from '../types';
+import { AreaJamMark } from './BrandLogo';
 
 interface MatchesViewProps {
   matches: MatchRecord[];
@@ -252,7 +253,7 @@ export function MatchesView({
 
       {visibleMatches.length === 0 ? (
         <div className="glass-surface rounded-[2rem] px-6 py-12 text-center">
-          <MessageCircle className="mx-auto h-8 w-8 text-[var(--muted)]" aria-hidden="true" />
+          <AreaJamMark className="mx-auto h-10 w-10" />
           <h3 className="font-display mt-3 text-lg font-bold">No matches yet</h3>
           <p className="mx-auto mt-1.5 max-w-xs text-sm text-[var(--muted)]">
             Swipe right on a musician to jam or pitch on a local gig slot to start a thread.
@@ -286,10 +287,8 @@ export function MatchesView({
                     aria-hidden="true"
                     className="font-display flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold"
                     style={{
-                      background: isJam
-                        ? 'linear-gradient(135deg, #ff3b6b, #ff8a5b)'
-                        : 'linear-gradient(135deg, #10e88a, #3b82f6)',
-                      color: isJam ? '#ffffff' : '#041d12',
+                      backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
+                      color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
                     }}
                   >
                     {initial}
@@ -301,7 +300,7 @@ export function MatchesView({
                         className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
                         style={{
                           backgroundColor: isJam ? 'var(--jam-soft)' : 'var(--gigs-soft)',
-                          color: isJam ? 'var(--jam)' : 'var(--gigs)',
+                          color: isJam ? 'var(--jam-text)' : 'var(--gigs)',
                         }}
                       >
                         {isJam ? 'Jam' : 'Gigs'}

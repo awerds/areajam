@@ -27,7 +27,7 @@ export function applyColorSchemeMeta(stored: StoredColorScheme): ResolvedColorSc
     }
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (themeMeta) {
-      themeMeta.content = resolved === 'dark' ? '#07080d' : '#f6f4ef';
+      themeMeta.content = resolved === 'dark' ? '#10131d' : '#f6f4ef';
     }
   }
   return resolved;

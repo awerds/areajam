@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { MessageCircle, Sparkles } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import type { Listing, Region } from '../types';
+import { AreaJamMark } from './BrandLogo';
 import { NativeDialog } from './NativeDialog';
 
 interface MatchDialogProps {
@@ -50,11 +51,11 @@ export function MatchDialog({ listing, region, onClose, onOpenChat }: MatchDialo
               backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
               color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
               boxShadow: isJam
-                ? '0 12px 32px rgba(255, 59, 107, 0.45)'
-                : '0 12px 32px rgba(16, 232, 138, 0.35)',
+                ? '0 12px 32px rgba(217, 27, 76, 0.36)'
+                : '0 12px 32px rgba(16, 232, 138, 0.32)',
             }}
           >
-            <Sparkles className="h-8 w-8" aria-hidden="true" />
+            <AreaJamMark color={isJam ? '#ffffff' : 'var(--gigs-ink)'} className="h-9 w-9" />
           </div>
 
           <div>
@@ -63,7 +64,7 @@ export function MatchDialog({ listing, region, onClose, onOpenChat }: MatchDialo
               {listing.subtitle}, {listing.neighborhood}
             </p>
             <div className="mt-4 space-y-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3.5 text-left">
-              <p className="text-[11px] font-semibold text-[var(--accent)]">
+              <p className="text-[11px] font-semibold text-[var(--accent-text)]">
                 Simulated sample reply (local preview only)
               </p>
               <p className="text-sm italic text-[var(--ink)]">

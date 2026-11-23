@@ -59,19 +59,20 @@ export function CardArtwork({
 
         {motif === 0 && (
           <g fill="none">
-            {[74, 108, 142, 176, 210, 244].map((r, i) => (
+            {[120, 185, 250, 315, 380, 445].map((r, i) => (
               <circle
                 key={r}
-                cx="265"
-                cy="185"
+                cx="325"
+                cy="390"
                 r={r}
-                style={{ stroke: i % 2 === 0 ? 'var(--art-ring)' : glowVar }}
-                strokeOpacity={0.14 + (i % 3) * 0.06}
-                strokeWidth={i === 2 ? 2.5 : 1.2}
+                style={{ stroke: i % 2 === 0 ? glowVar : 'var(--art-ring)' }}
+                strokeOpacity={i % 2 === 0 ? 0.24 : 0.14}
+                strokeWidth={i === 2 ? 2.2 : 1.4}
               />
             ))}
-            <circle cx="265" cy="185" r="34" style={{ fill: glowVar }} fillOpacity="0.85" />
-            <circle cx="265" cy="185" r="9" style={{ fill: 'var(--art-base)' }} />
+            <circle cx="215" cy="185" r="54" style={{ stroke: glowVar }} strokeOpacity="0.28" strokeWidth="1.6" />
+            <circle cx="215" cy="185" r="32" style={{ fill: glowVar }} fillOpacity="0.88" />
+            <circle cx="215" cy="185" r="9" style={{ fill: 'var(--art-base)' }} />
           </g>
         )}
 
