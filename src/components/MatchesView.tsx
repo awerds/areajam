@@ -108,7 +108,7 @@ export function MatchesView({
             <div className="min-w-0">
               <h2 className="font-display truncate text-lg font-bold">{selectedListing.title}</h2>
               <p className="truncate text-xs text-[var(--muted)]">
-                {isJam ? 'Jam' : 'Gigs'} in {region?.city ?? selectedListing.regionId},{' '}
+                Simulated {isJam ? 'jam' : 'gig'} preview — {region?.city ?? selectedListing.regionId},{' '}
                 {selectedListing.neighborhood}
               </p>
             </div>
@@ -127,10 +127,10 @@ export function MatchesView({
           {selectedMatch.messages.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-subtle)] p-5 text-center">
               <p className="text-sm font-medium text-[var(--ink)]">
-                You matched with {selectedListing.title} in {selectedListing.neighborhood}.
+                Simulated demo thread with {selectedListing.title} in {selectedListing.neighborhood}.
               </p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Tap an opener below or type your own message
+                Messages stay in this browser and sample profiles send a prewritten preview reply
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {ICEBREAKERS[selectedListing.side].map((prompt) => (
@@ -148,8 +148,17 @@ export function MatchesView({
           ) : (
             selectedMatch.messages.map((msg) => {
               const isMe = msg.sender === 'me';
+              const isSimulatedReply = !isMe && (msg.isSimulated || !selectedListing.isUserCreated);
               return (
-                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  key={msg.id}
+                  className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                >
+                  {isSimulatedReply && (
+                    <span className="mb-1 px-1 text-[10px] font-semibold text-[var(--muted)]">
+                      Simulated sample reply
+                    </span>
+                  )}
                   <div
                     className="max-w-[82%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed"
                     style={
@@ -296,6 +305,9 @@ export function MatchesView({
                         }}
                       >
                         {isJam ? 'Jam' : 'Gigs'}
+                      </span>
+                      <span className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+                        Demo thread
                       </span>
                       <span className="truncate text-xs text-[var(--muted)]">
                         {region?.city ?? listing.regionId}, {listing.neighborhood}

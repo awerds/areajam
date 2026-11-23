@@ -129,7 +129,12 @@ export function BrowseGrid({
                 <div className="flex flex-1 flex-col justify-between gap-3 p-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
-                      <span className="truncate font-medium">{item.roleCategory}</span>
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate font-medium">{item.roleCategory}</span>
+                        <span className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+                          {item.isUserCreated ? 'Local draft' : 'Sample'}
+                        </span>
+                      </span>
                       <span className="inline-flex shrink-0 items-center gap-1">
                         <MapPin className="h-3 w-3" aria-hidden="true" />
                         {itemRegion?.city ?? item.regionId}

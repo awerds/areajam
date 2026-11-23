@@ -20,7 +20,7 @@ export function HowItWorksDialog({
       onClose={onClose}
       titleId="how-it-works-title"
       title="How AreaJam works"
-      subtitle="Regional music matching built like Craigslist meets TikTok and Tinder"
+      subtitle="Interactive local preview — sample profiles & browser storage"
     >
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -67,9 +67,13 @@ export function HowItWorksDialog({
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Local-first by city</p>
+              <p className="font-semibold">Simulated matches &amp; browser-local drafts</p>
               <p className="text-xs text-[var(--muted)]">
-                Allow IP city detection once or switch metro boards anytime so you only see players within driving distance.
+                Sample cards, match popups, and replies are simulated locally. Profile drafts, clips, and messages stay on this browser per signed-in account. Build{' '}
+                <code className="rounded bg-[var(--pill-bg)] px-1 py-0.5 text-[11px] text-[var(--ink)]">
+                  {import.meta.env.VITE_BUILD_SHA || 'local'}
+                </code>
+                .
               </p>
             </div>
           </li>

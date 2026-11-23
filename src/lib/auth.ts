@@ -82,7 +82,7 @@ export function subscribeAuth(callback: (user: AuthUser | null) => void): () => 
       });
     } catch {
       if (!cancelled) {
-        callback(loadLocalPreviewUser());
+        setCurrentUser(null);
       }
     }
   })();

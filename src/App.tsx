@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AlertCircle,
+  ArrowLeft,
   ChevronDown,
   Compass,
   Flame,
@@ -33,6 +35,7 @@ import { stopCardPreview } from './lib/audioPreview';
 import { signOutUser, subscribeAuth } from './lib/auth';
 import { subscribeColorScheme, toggleColorScheme } from './lib/colorScheme';
 import { detectLocationByIp } from './lib/location';
+import { deleteMediaBlob } from './lib/mediaStorage';
 import {
   loadState,
   parseUrlState,
@@ -73,8 +76,24 @@ function matchesPreferences(listing: Listing, selectedPrefs: string[]): boolean 
   });
 }
 
+interface ScopedAppState {
+  scopeUid: string | null;
+  data: AppState;
+}
+
 export function App() {
-  const [state, setState] = useState<AppState>(() => loadState());
+  const [scopedState, setScopedState] = useState<ScopedAppState>(() => ({
+    scopeUid: null,
+    data: loadState(null),
+  }));
+  const state = scopedState.data;
+  const setState = (updater: AppState | ((prev: AppState) => AppState)) => {
+    setScopedState((prev) => ({
+      ...prev,
+      data: typeof updater === 'function' ? updater(prev.data) : updater,
+    }));
+  };
+
   const [user, setUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<NavTab>('discover');
   const [activeProfileId, setActiveProfileId] = useState<string | null>(
@@ -104,9 +123,31 @@ export function App() {
   const browseSectionRef = useRef<HTMLDivElement>(null);
   const replyTimersRef = useRef<number[]>([]);
   const toastTimerRef = useRef<number | undefined>(undefined);
+  const activeUidRef = useRef<string | null>(null);
 
   useEffect(() => {
-    return subscribeAuth(setUser);
+    return subscribeAuth((nextUser) => {
+      const nextUid = nextUser?.uid ?? null;
+      const prevUid = activeUidRef.current;
+      const uidChanged = nextUid !== prevUid;
+      activeUidRef.current = nextUid;
+      setUser(nextUser);
+
+      if (uidChanged) {
+        stopCardPreview();
+        replyTimersRef.current.forEach((id) => window.clearTimeout(id));
+        replyTimersRef.current = [];
+        setDetailListing(null);
+        setMatchPopupListing(null);
+        setSelectedMatchId(null);
+        // Clear any pending cross-account drafts on sign-out or account switch.
+        if (prevUid !== null || nextUid === null) {
+          setPendingMessage(null);
+          setPendingWallNote(null);
+        }
+        setScopedState({ scopeUid: nextUid, data: loadState(nextUid) });
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -114,17 +155,17 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    saveState(state);
-    syncUrlState(state.regionId, state.mode, activeProfileId);
+    saveState(scopedState.data, scopedState.scopeUid);
+    syncUrlState(scopedState.data.regionId, scopedState.data.mode, activeProfileId);
     document.documentElement.style.setProperty(
       '--accent',
-      state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)'
+      scopedState.data.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)'
     );
     document.documentElement.style.setProperty(
       '--accent-ink',
-      state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)'
+      scopedState.data.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)'
     );
-  }, [state, activeProfileId]);
+  }, [scopedState, activeProfileId]);
 
   useEffect(() => {
     return () => {
@@ -161,15 +202,21 @@ export function App() {
     [allRegions, state.regionId]
   );
 
+  const ownedUserListings = useMemo<Listing[]>(
+    () => (user ? state.userListings.filter((l) => l.ownerUid === user.uid) : []),
+    [state.userListings, user]
+  );
+
   const allListings = useMemo<Listing[]>(
-    () => [...state.userListings, ...SEED_LISTINGS],
-    [state.userListings]
+    () => [...ownedUserListings, ...SEED_LISTINGS],
+    [ownedUserListings]
   );
 
   const activeProfile = useMemo<Listing | null>(
     () => (activeProfileId ? allListings.find((l) => l.id === activeProfileId) ?? null : null),
     [activeProfileId, allListings]
   );
+  const hasMissingProfile = Boolean(activeProfileId && !activeProfile);
 
   const activePrefs = state.mode === 'jam' ? state.lookingForJam : state.lookingForGigs;
   const prefChoices = state.mode === 'jam' ? JAM_PREFERENCES : GIGS_PREFERENCES;
@@ -321,7 +368,7 @@ export function App() {
     if (createdMatch) {
       setMatchPopupListing(listing);
     } else if (decision === 'like') {
-      showToast(`Saved interest in ${listing.title}.`);
+      showToast(`Saved local interest in ${listing.title} (sample demo).`);
     }
   };
 
@@ -434,7 +481,9 @@ export function App() {
     });
 
     if (shouldScheduleReply && replyText) {
+      const scheduledUid = activeUidRef.current;
       const timerId = window.setTimeout(() => {
+        if (activeUidRef.current !== scheduledUid) return;
         setState((prev) => ({
           ...prev,
           matches: prev.matches.map((m) =>
@@ -448,6 +497,7 @@ export function App() {
                       sender: 'them' as const,
                       text: replyText,
                       sentAt: Date.now(),
+                      isSimulated: true,
                     },
                   ],
                 }
@@ -503,9 +553,15 @@ export function App() {
   };
 
   const handleUpdateUserListing = (updated: Listing) => {
+    if (!user || updated.ownerUid !== user.uid) {
+      showToast('Only the creator can edit this local draft.');
+      return;
+    }
     setState((prev) => ({
       ...prev,
-      userListings: prev.userListings.map((l) => (l.id === updated.id ? updated : l)),
+      userListings: prev.userListings.map((l) =>
+        l.id === updated.id && l.ownerUid === user.uid ? updated : l
+      ),
     }));
   };
 
@@ -524,10 +580,14 @@ export function App() {
     setAuthModalOpen(true);
   };
 
-  const handleShareProfileUrl = () => {
+  const handleShareProfileUrl = (listing?: Listing | null) => {
+    const isLocalDraft = Boolean(listing?.isUserCreated);
+    const copiedToast = isLocalDraft
+      ? 'Copied link (local browser draft only — opens on this browser & account).'
+      : 'Copied sample demo profile link.';
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(window.location.href).then(
-        () => showToast('Copied profile link to clipboard.'),
+        () => showToast(copiedToast),
         () => showToast('Share the URL in your browser bar.')
       );
     } else {
@@ -567,11 +627,19 @@ export function App() {
             >
               <img src="./icon.svg" alt="" className="h-9 w-9 rounded-xl shadow-sm" />
               <div>
-                <span className="font-display block text-lg font-bold leading-none tracking-tight">
-                  AreaJam
+                <div className="flex items-center gap-1.5">
+                  <span className="font-display block text-lg font-bold leading-none tracking-tight">
+                    AreaJam
+                  </span>
+                  <span className="hidden rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)] sm:inline-block">
+                    Demo
+                  </span>
+                </div>
+                <span className="mt-0.5 block text-[10px] font-semibold leading-none text-[var(--muted)] sm:hidden">
+                  Interactive demo
                 </span>
                 <span className="mt-0.5 hidden text-[11px] text-[var(--muted)] sm:block">
-                  Local musicians &amp; gigs
+                  Interactive demo, local preview
                 </span>
               </div>
             </button>
@@ -591,7 +659,7 @@ export function App() {
                 <button
                   key={item.id}
                   type="button"
-                  aria-current={!activeProfile && activeTab === item.id ? 'page' : undefined}
+                  aria-current={!activeProfileId && activeTab === item.id ? 'page' : undefined}
                   onClick={() => handleTabChange(item.id)}
                   className="nav-pill-btn rounded-full px-3.5 py-2 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
                 >
@@ -700,24 +768,25 @@ export function App() {
       </header>
 
       {/* Opt-in IP Geolocation consent bar */}
-      {!activeProfile && state.locationConsent === 'unknown' && (
+      {!activeProfileId && state.locationConsent === 'unknown' && (
         <div className="relative z-10 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
-          <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-xs md:px-6 xl:px-10">
-            <div className="flex items-center gap-2 text-[var(--ink)]">
-              <Navigation className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
-              <span>
-                Use your IP address to jump to musicians and gigs near your city automatically?
+          <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-1.5 text-xs md:gap-3 md:px-6 md:py-2.5 xl:px-10">
+            <div className="flex items-center gap-1.5 text-[var(--ink)] md:gap-2">
+              <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent)] md:h-4 md:w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">
+                Use your IP address to jump to sample profiles near your city automatically?
               </span>
+              <span className="sm:hidden">Detect city via IP?</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 md:gap-2">
               <button
                 type="button"
                 disabled={ipDetecting}
                 onClick={() => void handleAllowIpLocation()}
-                className="rounded-full bg-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 disabled:opacity-60"
+                className="rounded-full bg-[var(--ink)] px-3 py-1 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 disabled:opacity-60 md:px-3.5 md:py-1.5"
               >
-                {ipDetecting ? 'Detecting city...' : 'Allow location'}
+                {ipDetecting ? 'Detecting...' : 'Allow'}
               </button>
               <button
                 type="button"
@@ -725,7 +794,7 @@ export function App() {
                   setState((prev) => ({ ...prev, locationConsent: 'declined' }));
                   setRegionModalOpen(true);
                 }}
-                className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)]"
+                className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)] md:px-3 md:py-1.5"
               >
                 Pick city
               </button>
@@ -733,7 +802,7 @@ export function App() {
                 type="button"
                 aria-label="Dismiss location prompt"
                 onClick={() => setState((prev) => ({ ...prev, locationConsent: 'declined' }))}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)]"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)] md:h-8 md:w-8"
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -743,7 +812,7 @@ export function App() {
       )}
 
       {/* Full-width main container */}
-      <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-4 pt-4 md:px-6 md:pt-8 xl:px-10">
+      <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-4 pt-2.5 md:px-6 md:pt-8 xl:px-10">
         {activeProfile ? (
           <ProfilePage
             listing={activeProfile}
@@ -761,60 +830,92 @@ export function App() {
             onOpenProfile={handleOpenProfile}
             onUpdateListing={handleUpdateUserListing}
             onAddWallComment={handleAddWallComment}
-            onShareUrl={handleShareProfileUrl}
+            onShareUrl={() => handleShareProfileUrl(activeProfile)}
           />
+        ) : hasMissingProfile ? (
+          <section className="mx-auto max-w-xl py-8 md:py-12">
+            <div className="glass-surface space-y-4 rounded-[2rem] p-6 md:p-8">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+                <AlertCircle className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
+                <span>Unavailable link</span>
+              </span>
+              <h1 className="font-display text-2xl font-bold text-[var(--ink)]">
+                This profile is unavailable
+              </h1>
+              <p className="text-sm leading-relaxed text-[var(--muted)]">
+                We could not open <code className="rounded bg-[var(--pill-bg)] px-1.5 py-0.5 text-xs text-[var(--ink)]">?profile={activeProfileId}</code>. User-created drafts in this demo are saved only in the browser and signed-in account where they were created, or the profile may have been removed.
+              </p>
+              <div className="flex flex-wrap gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveProfileId(null);
+                    setActiveTab('discover');
+                  }}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[var(--ink)] px-4 py-2.5 text-sm font-bold text-[var(--bg)] transition hover:opacity-90"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  <span>Back to Discover</span>
+                </button>
+                {!user && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openAuthPrompt(
+                        'Sign in if you created this local draft on this browser under your account.'
+                      )
+                    }
+                    className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                  >
+                    Sign in
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div className="space-y-12">
-                <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
-                  {/* Mobile compact "Looking for" strip */}
-                  <div className="space-y-2 md:hidden">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-[var(--muted)]">
-                        {state.mode === 'jam'
-                          ? 'Who are you looking to jam with?'
-                          : 'What kind of gigs are you looking for?'}
-                      </p>
-                      {activePrefs.length > 0 && (
+              <div className="space-y-8 md:space-y-12">
+                <div className="grid grid-cols-1 items-start gap-2.5 md:gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
+                  {/* Mobile single-row compact filter strip */}
+                  <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:hidden">
+                    {activePrefs.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearPreferences}
+                        className="shrink-0 rounded-full border border-[var(--accent)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent)]"
+                      >
+                        Clear ({activePrefs.length})
+                      </button>
+                    )}
+                    {prefChoices.map((pref) => {
+                      const selected = activePrefs.includes(pref);
+                      return (
                         <button
+                          key={pref}
                           type="button"
-                          onClick={clearPreferences}
-                          className="text-xs font-semibold text-[var(--accent)]"
+                          aria-pressed={selected}
+                          onClick={() => togglePreference(pref)}
+                          className="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold transition"
+                          style={
+                            selected
+                              ? {
+                                  backgroundColor: 'var(--accent)',
+                                  color: 'var(--accent-ink)',
+                                  borderColor: 'var(--accent)',
+                                }
+                              : {
+                                  backgroundColor: 'var(--pill-bg)',
+                                  color: 'var(--muted)',
+                                  borderColor: 'var(--border)',
+                                }
+                          }
                         >
-                          Clear
+                          {pref}
                         </button>
-                      )}
-                    </div>
-                    <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1">
-                      {prefChoices.map((pref) => {
-                        const selected = activePrefs.includes(pref);
-                        return (
-                          <button
-                            key={pref}
-                            type="button"
-                            aria-pressed={selected}
-                            onClick={() => togglePreference(pref)}
-                            className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
-                            style={
-                              selected
-                                ? {
-                                    backgroundColor: 'var(--accent)',
-                                    color: 'var(--accent-ink)',
-                                    borderColor: 'var(--accent)',
-                                  }
-                                : {
-                                    backgroundColor: 'var(--pill-bg)',
-                                    color: 'var(--muted)',
-                                    borderColor: 'var(--border)',
-                                  }
-                            }
-                          >
-                            {pref}
-                          </button>
-                        );
-                      })}
-                    </div>
+                      );
+                    })}
                   </div>
 
                   {/* Desktop & Tablet Intro + How it Works + Looking For selector */}
@@ -825,21 +926,21 @@ export function App() {
                           {currentRegion.label}
                           {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
                         </span>
-                        <span className="text-xs text-[var(--muted)]">
-                          Browse free without an account
+                        <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                          Interactive demo, sample profiles &amp; local storage
                         </span>
                       </div>
 
                       <h1 className="hero-title font-bold text-[var(--ink)]">
                         {state.mode === 'jam'
-                          ? 'Watch local players. Swipe into a real jam.'
-                          : 'Discover local bands and live venue bills.'}
+                          ? 'Preview local players. Explore Jam & Gigs.'
+                          : 'Preview local bands and venue bills.'}
                       </h1>
 
                       <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
                         {state.mode === 'jam'
-                          ? 'Spot instruments at a glance, watch auto-playing intro clips, and open customizable artist pages packed with gear lockers and wall notes. Sign in with Google or Apple when you are ready to post.'
-                          : 'Switch seamlessly between finding bandmates and booking regional gigs. Inspect backline rigs, hear soundcheck clips, and lock in bills across your metro.'}
+                          ? 'Spot instruments at a glance, watch intro clips, and open customizable sample artist pages. Matches, auto-replies, wall notes, and new drafts stay simulated in this browser.'
+                          : 'Explore the Gigs side of the preview with sample venue slots, bands for hire, backline details, and simulated inquiry threads saved in this browser.'}
                       </p>
                     </div>
 
@@ -942,7 +1043,7 @@ export function App() {
 
                   {/* Live 9:16 TikTok / Tinder card stage */}
                   <div className="space-y-3 lg:col-span-5">
-                    <div className="no-scrollbar flex items-center justify-start gap-2 overflow-x-auto pb-1 lg:justify-center">
+                    <div className="no-scrollbar hidden items-center justify-start gap-2 overflow-x-auto pb-1 md:flex lg:justify-center">
                       {availableFilters.map((filter) => {
                         const active = chipFilter === filter;
                         return (
@@ -1095,18 +1196,42 @@ export function App() {
                 onSignOut={() => void signOutUser()}
                 defaultSide={state.mode}
                 region={currentRegion}
-                userListings={state.userListings}
+                userListings={ownedUserListings}
                 onCreateListing={(listing) => {
+                  if (!user) return;
+                  const ownedListing: Listing = {
+                    ...listing,
+                    ownerUid: user.uid,
+                    ownerName: user.displayName,
+                    isUserCreated: true,
+                  };
                   setState((prev) => ({
                     ...prev,
-                    userListings: [listing, ...prev.userListings],
+                    userListings: [ownedListing, ...prev.userListings],
                   }));
                 }}
                 onDeleteListing={(listingId) => {
+                  if (!user) return;
+                  const target = state.userListings.find(
+                    (l) => l.id === listingId && l.ownerUid === user.uid
+                  );
+                  if (!target) {
+                    showToast('Only the creator can delete this local draft.');
+                    return;
+                  }
+                  target.clips.forEach((clip) => {
+                    if (clip.mediaId) void deleteMediaBlob(clip.mediaId);
+                  });
                   setState((prev) => ({
                     ...prev,
-                    userListings: prev.userListings.filter((l) => l.id !== listingId),
+                    userListings: prev.userListings.filter(
+                      (l) => !(l.id === listingId && l.ownerUid === user.uid)
+                    ),
                   }));
+                  if (activeProfileId === listingId) {
+                    setActiveProfileId(null);
+                  }
+                  showToast(`Removed ${target.title} from this browser.`);
                 }}
                 onPreviewListing={handleOpenProfile}
               />
@@ -1123,7 +1248,7 @@ export function App() {
         <div className="glass-dock pointer-events-auto grid w-full max-w-md grid-cols-4 gap-1 rounded-full p-1.5">
           <button
             type="button"
-            aria-current={!activeProfile && activeTab === 'discover' ? 'page' : undefined}
+            aria-current={!activeProfileId && activeTab === 'discover' ? 'page' : undefined}
             onClick={() => handleTabChange('discover')}
             className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
@@ -1133,7 +1258,7 @@ export function App() {
 
           <button
             type="button"
-            aria-current={!activeProfile && activeTab === 'browse' ? 'page' : undefined}
+            aria-current={!activeProfileId && activeTab === 'browse' ? 'page' : undefined}
             onClick={() => handleTabChange('browse')}
             className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
@@ -1143,7 +1268,7 @@ export function App() {
 
           <button
             type="button"
-            aria-current={!activeProfile && activeTab === 'matches' ? 'page' : undefined}
+            aria-current={!activeProfileId && activeTab === 'matches' ? 'page' : undefined}
             onClick={() => handleTabChange('matches')}
             className="nav-pill-btn relative flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
@@ -1166,7 +1291,7 @@ export function App() {
 
           <button
             type="button"
-            aria-current={!activeProfile && activeTab === 'post' ? 'page' : undefined}
+            aria-current={!activeProfileId && activeTab === 'post' ? 'page' : undefined}
             onClick={() => handleTabChange('post')}
             className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >

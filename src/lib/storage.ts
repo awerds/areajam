@@ -12,7 +12,12 @@ import type {
   WallComment,
 } from '../types';
 
-const STORAGE_KEY = 'areajam_v1_state';
+const LEGACY_STORAGE_KEY = 'areajam_v1_state';
+const GUEST_STORAGE_KEY = 'areajam_v2_guest';
+
+export function getStorageKeyForUid(uid?: string | null): string {
+  return uid ? `areajam_v2_user_${uid}` : GUEST_STORAGE_KEY;
+}
 
 const STARTER_WALL_COMMENTS: Record<string, WallComment[]> = {
   'atx-jam-1': [
@@ -154,62 +159,98 @@ function normalizeListing(raw: Listing): Listing {
   };
 }
 
-export function loadState(): AppState {
+function buildStateFromParsed(
+  parsed: Partial<AppState>,
+  uid: string | null | undefined,
+  urlOverride: { regionId?: string; mode?: AppMode; profileId?: string },
+  fallback: AppState
+): AppState {
+  const knownRegions: Region[] = [
+    ...STARTER_REGIONS,
+    ...(Array.isArray(parsed.customRegions) ? parsed.customRegions : []),
+  ];
+
+  const resolvedRegionId =
+    urlOverride.regionId && knownRegions.some((r) => r.id === urlOverride.regionId)
+      ? urlOverride.regionId
+      : parsed.regionId && knownRegions.some((r) => r.id === parsed.regionId)
+        ? parsed.regionId
+        : fallback.regionId;
+
+  const consent: LocationConsent =
+    parsed.locationConsent === 'granted' || parsed.locationConsent === 'declined'
+      ? parsed.locationConsent
+      : 'unknown';
+
+  const ownedListings = uid && Array.isArray(parsed.userListings)
+    ? parsed.userListings.map(normalizeListing).filter((l) => l.ownerUid === uid)
+    : [];
+
+  return {
+    regionId: resolvedRegionId,
+    mode: urlOverride.mode ?? (parsed.mode === 'gigs' ? 'gigs' : 'jam'),
+    includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
+    locationConsent: consent,
+    detectedCityLabel:
+      typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,
+    lookingForJam: Array.isArray(parsed.lookingForJam)
+      ? parsed.lookingForJam.filter((x) => typeof x === 'string')
+      : [],
+    lookingForGigs: Array.isArray(parsed.lookingForGigs)
+      ? parsed.lookingForGigs.filter((x) => typeof x === 'string')
+      : [],
+    customRegions: Array.isArray(parsed.customRegions) ? parsed.customRegions : [],
+    userListings: ownedListings,
+    swiped: parsed.swiped && typeof parsed.swiped === 'object' ? parsed.swiped : {},
+    history: Array.isArray(parsed.history) ? parsed.history : [],
+    matches: Array.isArray(parsed.matches) ? parsed.matches : [],
+    wallComments:
+      parsed.wallComments && typeof parsed.wallComments === 'object'
+        ? parsed.wallComments
+        : STARTER_WALL_COMMENTS,
+  };
+}
+
+export function loadState(uid?: string | null): AppState {
   const fallback = getDefaultState();
   const urlOverride = parseUrlState();
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return {
-        ...fallback,
-        regionId: urlOverride.regionId ?? fallback.regionId,
-        mode: urlOverride.mode ?? fallback.mode,
-      };
+    const storageKey = getStorageKeyForUid(uid);
+    const raw = window.localStorage.getItem(storageKey);
+    if (raw) {
+      return buildStateFromParsed(JSON.parse(raw) as Partial<AppState>, uid, urlOverride, fallback);
     }
 
-    const parsed = JSON.parse(raw) as Partial<AppState>;
-    const knownRegions: Region[] = [
-      ...STARTER_REGIONS,
-      ...(Array.isArray(parsed.customRegions) ? parsed.customRegions : []),
-    ];
-
-    const resolvedRegionId =
-      urlOverride.regionId && knownRegions.some((r) => r.id === urlOverride.regionId)
-        ? urlOverride.regionId
-        : parsed.regionId && knownRegions.some((r) => r.id === parsed.regionId)
-          ? parsed.regionId
-          : fallback.regionId;
-
-    const consent: LocationConsent =
-      parsed.locationConsent === 'granted' || parsed.locationConsent === 'declined'
-        ? parsed.locationConsent
-        : 'unknown';
+    // Only carry over region prefs and listings explicitly owned by this UID from legacy storage.
+    if (uid) {
+      const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyRaw) {
+        const legacyParsed = JSON.parse(legacyRaw) as Partial<AppState>;
+        const ownedLegacyListings = Array.isArray(legacyParsed.userListings)
+          ? legacyParsed.userListings.filter((l) => l?.ownerUid === uid)
+          : [];
+        return buildStateFromParsed(
+          {
+            regionId: legacyParsed.regionId,
+            mode: legacyParsed.mode,
+            includeNearbyRegions: legacyParsed.includeNearbyRegions,
+            locationConsent: legacyParsed.locationConsent,
+            detectedCityLabel: legacyParsed.detectedCityLabel,
+            customRegions: legacyParsed.customRegions,
+            userListings: ownedLegacyListings,
+          },
+          uid,
+          urlOverride,
+          fallback
+        );
+      }
+    }
 
     return {
-      regionId: resolvedRegionId,
-      mode: urlOverride.mode ?? (parsed.mode === 'gigs' ? 'gigs' : 'jam'),
-      includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
-      locationConsent: consent,
-      detectedCityLabel:
-        typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,
-      lookingForJam: Array.isArray(parsed.lookingForJam)
-        ? parsed.lookingForJam.filter((x) => typeof x === 'string')
-        : [],
-      lookingForGigs: Array.isArray(parsed.lookingForGigs)
-        ? parsed.lookingForGigs.filter((x) => typeof x === 'string')
-        : [],
-      customRegions: Array.isArray(parsed.customRegions) ? parsed.customRegions : [],
-      userListings: Array.isArray(parsed.userListings)
-        ? parsed.userListings.map(normalizeListing)
-        : [],
-      swiped: parsed.swiped && typeof parsed.swiped === 'object' ? parsed.swiped : {},
-      history: Array.isArray(parsed.history) ? parsed.history : [],
-      matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-      wallComments:
-        parsed.wallComments && typeof parsed.wallComments === 'object'
-          ? parsed.wallComments
-          : STARTER_WALL_COMMENTS,
+      ...fallback,
+      regionId: urlOverride.regionId ?? fallback.regionId,
+      mode: urlOverride.mode ?? fallback.mode,
     };
   } catch {
     return {
@@ -220,9 +261,15 @@ export function loadState(): AppState {
   }
 }
 
-export function saveState(state: AppState): void {
+export function saveState(state: AppState, uid?: string | null): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const scopedListings = uid
+      ? state.userListings.filter((l) => l.ownerUid === uid)
+      : [];
+    window.localStorage.setItem(
+      getStorageKeyForUid(uid),
+      JSON.stringify({ ...state, userListings: scopedListings })
+    );
   } catch {
     // Ignore quota errors
   }

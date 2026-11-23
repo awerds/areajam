@@ -123,6 +123,7 @@ export interface ChatMessage {
   sender: 'me' | 'them';
   text: string;
   sentAt: number;
+  isSimulated?: boolean;
 }
 
 export interface MatchRecord {

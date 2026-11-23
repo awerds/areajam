@@ -35,10 +35,10 @@ export function MatchDialog({ listing, region, onClose, onOpenChat }: MatchDialo
       open={Boolean(listing)}
       onClose={onClose}
       titleId="match-dialog-title"
-      title={isJam ? "It's a jam" : "You're on the bill"}
+      title={isJam ? 'Sample jam match' : 'Sample gig match'}
       subtitle={
         listing
-          ? `Mutual match in ${region ? region.label : listing.regionId}`
+          ? `Simulated demo match in ${region ? region.label : listing.regionId}`
           : undefined
       }
     >
@@ -62,9 +62,14 @@ export function MatchDialog({ listing, region, onClose, onOpenChat }: MatchDialo
             <p className="mt-1 text-sm text-[var(--muted)]">
               {listing.subtitle}, {listing.neighborhood}
             </p>
-            <p className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3.5 text-sm italic text-[var(--ink)]">
-              &ldquo;{listing.autoReply}&rdquo;
-            </p>
+            <div className="mt-4 space-y-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3.5 text-left">
+              <p className="text-[11px] font-semibold text-[var(--accent)]">
+                Simulated sample reply (local preview only)
+              </p>
+              <p className="text-sm italic text-[var(--ink)]">
+                &ldquo;{listing.autoReply}&rdquo;
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2.5 sm:flex-row">

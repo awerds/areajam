@@ -311,12 +311,12 @@ export function SwipeDeck({
 
   return (
     <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
-      <div className="deck-perspective relative h-[min(74dvh,39rem)] w-full select-none md:h-[min(68dvh,37rem)]">
+      <div className="deck-perspective relative h-auto w-full select-none md:h-[min(68dvh,37rem)]">
         {nextCard && (
           <article
             ref={nextCardRef}
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 flex flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)]"
+            className="pointer-events-none absolute inset-0 hidden flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] md:flex"
             style={{
               transform: 'translate3d(0, 14px, 0) scale(0.94)',
               opacity: 0.65,
@@ -345,11 +345,11 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing"
+          className="relative flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:absolute md:inset-0"
           style={{ transformStyle: 'preserve-3d' }}
         >
           {/* Zone 1: Adaptive video / artwork media stage */}
-          <div className="relative min-h-[12.5rem] flex-1 overflow-hidden">
+          <div className="relative h-[11rem] shrink-0 overflow-hidden sm:h-[12.5rem] md:h-auto md:min-h-[13rem] md:flex-1">
             <ClipPlayer
               listing={topCard}
               areaCode={getRegionAreaCode(topCard.regionId)}
@@ -447,17 +447,22 @@ export function SwipeDeck({
           </div>
 
           {/* Zone 2: Solid high-contrast card info panel */}
-          <div className="relative z-10 flex shrink-0 flex-col gap-2.5 border-t border-[var(--border)] bg-[var(--surface-solid)] p-5">
+          <div className="relative z-10 flex shrink-0 flex-col gap-2 border-t border-[var(--border)] bg-[var(--surface-solid)] p-3.5 sm:gap-2.5 sm:p-5">
             <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink)]">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor: topCard.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                  }}
-                />
-                <span>{sideBadgeLabel(topCard)}</span>
-              </span>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink)]">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor: topCard.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                    }}
+                  />
+                  <span>{sideBadgeLabel(topCard)}</span>
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+                  {topCard.isUserCreated ? 'Local draft' : 'Sample'}
+                </span>
+              </div>
               <span className="truncate font-medium text-[var(--muted)]">
                 {topCard.payOrSplit || `${topCard.neighborhood}, ${getRegionAreaCode(topCard.regionId)}`}
               </span>
@@ -471,16 +476,16 @@ export function SwipeDeck({
                 onClick={() => onOpenProfile(topCard)}
                 className="text-left transition hover:opacity-80"
               >
-                <h2 className="font-display text-2xl font-bold leading-tight tracking-tight text-[var(--ink)] sm:text-[1.7rem]">
+                <h2 className="font-display text-xl font-bold leading-tight tracking-tight text-[var(--ink)] sm:text-[1.7rem]">
                   {topCard.title}
                 </h2>
               </button>
-              <p className="mt-0.5 text-sm font-medium text-[var(--muted)]">
+              <p className="mt-0.5 text-xs font-medium text-[var(--muted)] sm:text-sm">
                 {topCard.subtitle}, {topCard.neighborhood}
               </p>
             </div>
 
-            <p className="line-clamp-2 text-sm font-medium leading-snug text-[var(--ink)]/90">
+            <p className="line-clamp-2 text-xs font-medium leading-snug text-[var(--ink)]/90 sm:text-sm">
               {topCard.seekingOrOffer}
             </p>
 
@@ -489,7 +494,7 @@ export function SwipeDeck({
                 {topCard.genres.slice(0, 3).map((genre) => (
                   <span
                     key={genre}
-                    className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-medium text-[var(--ink)]"
+                    className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink)] sm:py-1 sm:text-xs"
                   >
                     {genre}
                   </span>
@@ -499,7 +504,7 @@ export function SwipeDeck({
               <button
                 type="button"
                 onClick={() => onOpenProfile(topCard)}
-                className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:inline-flex"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:px-3.5"
               >
                 <Maximize2 className="h-3 w-3" aria-hidden="true" />
                 <span>Full page</span>

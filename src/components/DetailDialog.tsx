@@ -36,7 +36,7 @@ export function DetailDialog({
       title={listing ? listing.title : 'Listing details'}
       subtitle={
         listing
-          ? `${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}`
+          ? `${listing.isUserCreated ? 'Local draft (this browser)' : 'Sample profile (demo)'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}`
           : undefined
       }
     >

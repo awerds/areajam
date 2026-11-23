@@ -76,7 +76,7 @@ export function ProfilePage({
 }: ProfilePageProps) {
   const theme = PROFILE_THEMES[listing.profileStyle?.themeId || 'stage-coral'];
   const canCustomize = Boolean(
-    listing.isUserCreated && (!listing.ownerUid || (user && user.uid === listing.ownerUid))
+    listing.isUserCreated && user && listing.ownerUid === user.uid
   );
 
   const orderedClips = (() => {
@@ -261,6 +261,11 @@ export function ProfilePage({
                   aria-hidden="true"
                 />
                 {listing.neighborhood}, {region?.label ?? listing.regionId}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+                {listing.isUserCreated
+                  ? 'Local draft (saved in this browser)'
+                  : 'Sample profile (demo)'}
               </span>
               {listing.payOrSplit && (
                 <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
@@ -832,7 +837,7 @@ export function ProfilePage({
             <div>
               <h2 className="font-display text-xl font-bold text-[var(--ink)]">Scene wall</h2>
               <p className="text-xs text-[var(--muted)]">
-                Leave a public note, shout-out, or jam inquiry for {listing.title}
+                Preview wall notes for {listing.title}. Notes posted here are stored only in this browser.
               </p>
             </div>
 

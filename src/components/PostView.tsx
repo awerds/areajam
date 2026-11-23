@@ -118,13 +118,13 @@ export function PostView({
           <div className="space-y-4 md:col-span-7">
             <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              Account required only when creating a profile
+              Local browser draft studio (interactive demo)
             </span>
             <h2 className="font-display text-3xl font-bold tracking-tight">
-              Build your {region.city} artist page &amp; gear locker
+              Build a local {region.city} artist page &amp; gear locker
             </h2>
             <p className="text-sm leading-relaxed text-[var(--muted)]">
-              Anyone can browse local players and watch clips without an account. Sign in with Google or Apple to customize your full-page profile, list your exact rig, and record video intro clips.
+              Anyone can browse sample players and watch clips without an account. Sign in with Google or Apple to save a local profile draft, list your rig, and record video clips tied to your account on this browser.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-2">
@@ -326,10 +326,11 @@ export function PostView({
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-2xl font-bold tracking-tight">
-              Create your profile page, gear locker &amp; clips
+              Create a local profile draft, gear locker &amp; clips
             </h2>
             <p className="text-sm text-[var(--muted)]">
-              Publishing to <span className="font-semibold text-[var(--ink)]">{region.label}</span>
+              Saved only in this browser for {user.displayName} under{' '}
+              <span className="font-semibold text-[var(--ink)]">{region.label}</span>
             </p>
           </div>
 
@@ -899,7 +900,7 @@ export function PostView({
           >
             <PlusCircle className="h-4 w-4" aria-hidden="true" />
             <span>
-              Publish profile page to {region.city} ({clips.length} {clips.length === 1 ? 'clip' : 'clips'})
+              Save local profile draft in {region.city} ({clips.length} {clips.length === 1 ? 'clip' : 'clips'})
             </span>
           </button>
         </form>
@@ -908,7 +909,7 @@ export function PostView({
       {userListings.length > 0 && (
         <div className="space-y-3">
           <h3 className="font-display text-lg font-bold">
-            Your published pages ({userListings.length})
+            Your local browser drafts ({userListings.length})
           </h3>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {userListings.map((item) => (
