@@ -21,12 +21,9 @@ export function getStorageKeyForUid(uid?: string | null): string {
 export function parseUrlState(): { regionId?: string; mode?: AppMode; profileId?: string } {
   if (typeof window === 'undefined') return {};
   const params = new URLSearchParams(window.location.search);
-  const area = (params.get('area') || params.get('city'))?.trim().toLowerCase();
+  const area = params.get('area')?.trim().toLowerCase();
   const rawMode = params.get('mode')?.trim().toLowerCase();
-  const sideStageId = params.get('side-stage')?.trim();
-  const profileId =
-    params.get('profile')?.trim() ||
-    (sideStageId && sideStageId !== 'all' ? sideStageId : undefined);
+  const profileId = params.get('profile')?.trim();
   const mode: AppMode | undefined = rawMode === 'jam' || rawMode === 'gigs' ? rawMode : undefined;
   return {
     regionId: area || undefined,
@@ -39,12 +36,15 @@ export function syncUrlState(regionId: string, mode: AppMode, profileId?: string
   if (typeof window === 'undefined') return;
   try {
     const url = new URL(window.location.href);
+    const base =
+      url.pathname.indexOf('/areajam/') === 0 || url.pathname === '/areajam' ? '/areajam/' : '/';
+    url.pathname = base;
+    url.search = '';
+    url.hash = '';
     url.searchParams.set('area', regionId);
     url.searchParams.set('mode', mode);
     if (profileId) {
       url.searchParams.set('profile', profileId);
-    } else {
-      url.searchParams.delete('profile');
     }
     window.history.replaceState(null, '', url.toString());
   } catch {

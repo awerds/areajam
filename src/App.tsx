@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AlertCircle,
-  ArrowLeft,
   ChevronDown,
   Compass,
   HelpCircle,
@@ -122,6 +120,7 @@ export function App() {
   const [remoteProfiles, setRemoteProfiles] = useState<Listing[]>([]);
   const [deepLinkProfile, setDeepLinkProfile] = useState<Listing | null>(null);
   const [deepLinkLoading, setDeepLinkLoading] = useState<boolean>(false);
+  const [resolvedProfileId, setResolvedProfileId] = useState<string | null>(null);
   const [invites, setInvites] = useState<JamInvite[]>([]);
   const [threads, setThreads] = useState<PrivateThread[]>([]);
   const [blocks, setBlocks] = useState<BlockedUser[]>([]);
@@ -348,12 +347,11 @@ export function App() {
     return null;
   }, [activeProfileId, visibleRemoteProfiles, deepLinkProfile, blockedUidSet]);
 
-  const hasMissingProfile = Boolean(activeProfileId && !deepLinkLoading && !activeProfile);
-
   useEffect(() => {
     if (!activeProfileId) {
       setDeepLinkProfile(null);
       setDeepLinkLoading(false);
+      setResolvedProfileId(null);
       return;
     }
     const alreadyLoaded =
@@ -361,6 +359,7 @@ export function App() {
       SAMPLE_PROFILES.some((l) => l.id === activeProfileId);
     if (alreadyLoaded) {
       setDeepLinkLoading(false);
+      setResolvedProfileId(activeProfileId);
       return;
     }
     let cancelled = false;
@@ -370,15 +369,29 @@ export function App() {
         if (!cancelled) {
           setDeepLinkProfile(profile);
           setDeepLinkLoading(false);
+          setResolvedProfileId(activeProfileId);
         }
       })
       .catch(() => {
-        if (!cancelled) setDeepLinkLoading(false);
+        if (!cancelled) {
+          setDeepLinkProfile(null);
+          setDeepLinkLoading(false);
+          setResolvedProfileId(activeProfileId);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, [activeProfileId, remoteProfiles]);
+
+  useEffect(() => {
+    if (!activeProfileId || activeProfile || deepLinkLoading || resolvedProfileId !== activeProfileId) {
+      return;
+    }
+    setActiveProfileId(null);
+    setActiveTab('discover');
+    showToast('Page unavailable — showing musicians near your area.');
+  }, [activeProfileId, activeProfile, deepLinkLoading, resolvedProfileId]);
 
   useEffect(() => {
     if (!activeProfile || activeProfile.isSample) {
@@ -1097,7 +1110,7 @@ export function App() {
             onDeleteWallComment={activeProfile.isSample ? undefined : handleDeleteWallComment}
             onShareUrl={() => handleShareProfileUrl(activeProfile)}
           />
-        ) : activeProfileId && deepLinkLoading ? (
+        ) : activeProfileId && (deepLinkLoading || resolvedProfileId !== activeProfileId) ? (
           <section className="mx-auto max-w-xl py-8 md:py-12">
             <div className="glass-surface space-y-3 rounded-[2rem] p-6 text-center md:p-8">
               <AreaJamMark className="mx-auto h-10 w-10" />
@@ -1107,48 +1120,6 @@ export function App() {
               <p className="text-xs text-[var(--muted)]">
                 Fetching public musician card <code className="rounded bg-[var(--pill-bg)] px-1.5 py-0.5 text-[var(--ink)]">{activeProfileId}</code> from Cloud Firestore.
               </p>
-            </div>
-          </section>
-        ) : hasMissingProfile ? (
-          <section className="mx-auto max-w-xl py-8 md:py-12">
-            <div className="glass-surface space-y-4 rounded-[2rem] p-6 md:p-8">
-              <AreaJamMark className="h-10 w-10" />
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                <AlertCircle className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
-                <span>Unavailable link</span>
-              </span>
-              <h1 className="font-display text-2xl font-bold text-[var(--ink)]">
-                This profile is unavailable
-              </h1>
-              <p className="text-sm leading-relaxed text-[var(--muted)]">
-                We could not find <code className="rounded bg-[var(--pill-bg)] px-1.5 py-0.5 text-xs text-[var(--ink)]">?profile={activeProfileId}</code>. The profile may have been unpublished, deleted by its owner, or shared with an invalid link.
-              </p>
-              <div className="flex flex-wrap gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveProfileId(null);
-                    setActiveTab('discover');
-                  }}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-[var(--ink)] px-4 py-2.5 text-sm font-bold text-[var(--bg)] transition hover:opacity-90"
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                  <span>Back to Discover</span>
-                </button>
-                {!user && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openAuthPrompt(
-                        'Sign in if you created this local draft on this browser under your account.'
-                      )
-                    }
-                    className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
-                  >
-                    Sign in
-                  </button>
-                )}
-              </div>
             </div>
           </section>
         ) : (
