@@ -1007,6 +1007,15 @@ export function App() {
 
       {/* Full-width main container */}
       <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-4 pt-2.5 md:px-6 md:pt-8 xl:px-10">
+        {!activeProfileId && (activeTab === 'discover' || activeTab === 'browse') && (
+          <a
+            href="./?side-stage=all"
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-2 text-xs font-semibold text-[var(--ink)] hover:border-[var(--accent-text)]"
+          >
+            <span>Side Stage</span>
+            <span className="text-[var(--muted)]">Fictional musician profiles</span>
+          </a>
+        )}
         {activeProfile ? (
           <ProfilePage
             listing={activeProfile}

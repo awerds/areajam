@@ -1,0 +1,2532 @@
+[
+  {
+    "id": "fictional-nashville-01-pedal-stew",
+    "name": "Pedal Stew",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "East Nashville",
+    "tagline": "A pedal steel with a breakfast shift",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Alt-Country",
+      "Western Swing"
+    ],
+    "bio": "Used to practice behind a diner counter until the cook offered a permanent corner. Plays sweet high harmonies and refuses to end a tune before everyone gets a solo.",
+    "lookingFor": "An upright bassist and a brush drummer for a three-song country shuffle set.",
+    "availability": "Tue and Thu evenings",
+    "gear": [
+      "Diner-stool pedal steel",
+      "Spring reverb tank"
+    ],
+    "portraitAlt": "Fictional musician Pedal Stew in a small club with diner-stool pedal steel."
+  },
+  {
+    "id": "fictional-nashville-02-organ-darnell",
+    "name": "Organ Darnell",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "North Nashville",
+    "tagline": "The organ has one hot key",
+    "instrument": [
+      "keys",
+      "vocals"
+    ],
+    "genres": [
+      "Gospel",
+      "Soul"
+    ],
+    "bio": "One key on his organ throws a spark every time he lands a turnaround. He swears it only happens in B-flat and leaves the bench open for anyone who knows the bridge.",
+    "lookingFor": "An alto singer and a drummer who can hold a slow pocket under four-part harmonies.",
+    "availability": "Sunday afternoons",
+    "gear": [
+      "Broken-key electric organ",
+      "Tube preamp"
+    ],
+    "portraitAlt": "Fictional musician Organ Darnell in a small club with broken-key electric organ."
+  },
+  {
+    "id": "fictional-nashville-03-banjo-signal",
+    "name": "Banjo Signal",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Inglewood",
+    "tagline": "Tunes to the weirdest station",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Bluegrass",
+      "Experimental Folk"
+    ],
+    "bio": "Built a banjo that picks up the weather report between songs. Plays traditional rolls underneath melodies that sound like they came from a moon landing.",
+    "lookingFor": "A fiddle player for fiddle-and-banjo duets in odd meters.",
+    "availability": "Mon evenings and Sat afternoons",
+    "gear": [
+      "Satellite-dish open-back banjo",
+      "Clip-on tuner"
+    ],
+    "portraitAlt": "Fictional musician Banjo Signal in a small club with satellite-dish open-back banjo."
+  },
+  {
+    "id": "fictional-nashville-04-busker-biscuit",
+    "name": "Busker Biscuit",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Madison",
+    "tagline": "Exact change for the turnaround",
+    "instrument": [
+      "horns",
+      "vocals"
+    ],
+    "genres": [
+      "Country Blues",
+      "Roots"
+    ],
+    "bio": "His harmonica spits out a bus ticket on every bent note. The collection is organized by route, key and whether the middle eight was any good.",
+    "lookingFor": "A fingerstyle guitarist for stripped-down blues duos.",
+    "availability": "Wed and Fri after 6 PM",
+    "gear": [
+      "Ticket-punch harmonica set",
+      "Green bullet mic"
+    ],
+    "portraitAlt": "Fictional musician Busker Biscuit in a small club with ticket-punch harmonica set."
+  },
+  {
+    "id": "fictional-nashville-05-fringe-dente",
+    "name": "Fringe Dente",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Music Row",
+    "tagline": "Extra sauce on the chorus",
+    "instrument": [
+      "guitar",
+      "vocals"
+    ],
+    "genres": [
+      "Honky-Tonk",
+      "Country Pop"
+    ],
+    "bio": "The guitar strings are pasta, so she keeps a spare box backstage. Her songs are built for shout-along choruses and the first dance after the heartbreak song.",
+    "lookingFor": "A bass player comfortable with fast two-steps and tight stops.",
+    "availability": "Tue and Sat evenings",
+    "gear": [
+      "Spaghetti-string electric guitar",
+      "Compact delay"
+    ],
+    "portraitAlt": "Fictional musician Fringe Dente in a small club with spaghetti-string electric guitar."
+  },
+  {
+    "id": "fictional-nashville-06-roadcase-rae",
+    "name": "Roadcase Rae",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Wedgewood-Houston",
+    "tagline": "Absolutely no cymbal bag",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Indie Rock",
+      "Alt-Country"
+    ],
+    "bio": "Learned to tune ratchets, handles and road-case wheels while loading bands in. Now she can set up a good-sounding kit in two minutes, including the squeaky kick pedal.",
+    "lookingFor": "A bassist and a singer for a portable rehearsal setup.",
+    "availability": "Mon through Wed evenings",
+    "gear": [
+      "Rolling flight-case kit",
+      "Brushes and mallets"
+    ],
+    "portraitAlt": "Fictional musician Roadcase Rae in a small club with rolling flight-case kit."
+  },
+  {
+    "id": "fictional-nashville-07-fiddle-fern",
+    "name": "Fiddle Fern",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Donelson",
+    "tagline": "Water twice a week in D major",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Old-Time",
+      "Chamber Folk"
+    ],
+    "bio": "His case grows a new fern frond every time he nails a double stop. He likes old dance tunes with long gaps to let the room breathe.",
+    "lookingFor": "A clawhammer banjo player for quiet old-time sessions.",
+    "availability": "Sat mornings and Sun afternoons",
+    "gear": [
+      "Fern-lined fiddle case",
+      "Octave pedal"
+    ],
+    "portraitAlt": "Fictional musician Fiddle Fern in a small club with fern-lined fiddle case."
+  },
+  {
+    "id": "fictional-nashville-08-velvet-frequency",
+    "name": "Velvet Frequency",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Germantown",
+    "tagline": "Still broadcasting from heartbreak",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Country Soul",
+      "Americana"
+    ],
+    "bio": "Sings like a late-night radio host reading a love letter through a busted console. A neon heart hangs over the mic and dims when somebody sings flat.",
+    "lookingFor": "A pedal steel player and a pianist for a harmony-heavy country soul trio.",
+    "availability": "Thu evenings and Sun mornings",
+    "gear": [
+      "Broadcast microphone",
+      "Tape echo"
+    ],
+    "portraitAlt": "Fictional musician Velvet Frequency in a small club with broadcast microphone."
+  },
+  {
+    "id": "fictional-nashville-09-pickle-pocket",
+    "name": "Pickle Pocket",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Woodbine",
+    "tagline": "The brine is the metronome",
+    "instrument": [
+      "drums",
+      "vocals"
+    ],
+    "genres": [
+      "Latin Folk",
+      "Roots"
+    ],
+    "bio": "Each jar is filled to a different pitch, and no one is allowed to eat tomorrow’s downbeat. Her sets move from kitchen-table songs to dancing without changing the tempo.",
+    "lookingFor": "An acoustic guitarist and a second singer for bilingual folk harmonies.",
+    "availability": "Friday evenings",
+    "gear": [
+      "Pickle-jar shakers",
+      "Cajón"
+    ],
+    "portraitAlt": "Fictional musician Pickle Pocket in a small club with pickle-jar shakers."
+  },
+  {
+    "id": "fictional-nashville-10-mando-forecast",
+    "name": "Mando Forecast",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Sylvan Park",
+    "tagline": "Sixty percent chance of chops",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Progressive Bluegrass",
+      "Folk"
+    ],
+    "bio": "Checks his mandolin’s weather vane before picking a key. Wants to record a batch of two-minute tunes that sound like summer storms rolling over the Cumberland.",
+    "lookingFor": "A flatpicker who likes trading lead breaks and writing quick instrumentals.",
+    "availability": "Tue lunches and Sat mornings",
+    "gear": [
+      "Weather-vane mandolin",
+      "Portable recorder"
+    ],
+    "portraitAlt": "Fictional musician Mando Forecast in a small club with weather-vane mandolin."
+  },
+  {
+    "id": "fictional-nashville-11-ironing-chords",
+    "name": "Ironing Chords",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Belmont-Hillsboro",
+    "tagline": "Press flat before playing",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Gospel",
+      "R&B"
+    ],
+    "bio": "Found the perfect stand in the laundry room, then spent a decade figuring out one four-note voicing. Hears the bass line before she hears the melody.",
+    "lookingFor": "A bass player and drummer for a Rhodes-style soul trio.",
+    "availability": "Mon and Fri evenings",
+    "gear": [
+      "Ironing-board keyboard",
+      "Rotary speaker simulator"
+    ],
+    "portraitAlt": "Fictional musician Ironing Chords in a small club with ironing-board keyboard."
+  },
+  {
+    "id": "fictional-nashville-12-motel-lowline",
+    "name": "Motel Lowline",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "The Nations",
+    "tagline": "Room 404 is in a groove",
+    "instrument": [
+      "bass",
+      "vocals"
+    ],
+    "genres": [
+      "Funk",
+      "Alt-Country"
+    ],
+    "bio": "Her bass doubles as the key to a room that doesn’t exist. She has a stack of wiry country-funk sketches and needs a band that knows when to stay on the one.",
+    "lookingFor": "A drummer who likes short funky tunes and a guitarist who leaves space.",
+    "availability": "Wed after 7 PM",
+    "gear": [
+      "Motel-fob bass",
+      "Envelope filter"
+    ],
+    "portraitAlt": "Fictional musician Motel Lowline in a small club with motel-fob bass."
+  },
+  {
+    "id": "fictional-nashville-13-kick-in-a-case",
+    "name": "Kick In A Case",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Berry Hill",
+    "tagline": "The socks are acoustic treatment",
+    "instrument": [
+      "drums",
+      "producer"
+    ],
+    "genres": [
+      "Americana",
+      "Indie Folk"
+    ],
+    "bio": "The suitcase kick is stuffed with unmatched socks, each with a different damping curve. He records full takes and keeps the chair noises if they land in rhythm.",
+    "lookingFor": "A songwriter with a quiet voice who wants to record live takes.",
+    "availability": "Weekday lunchtimes",
+    "gear": [
+      "Suitcase kick drum",
+      "Stereo field recorder"
+    ],
+    "portraitAlt": "Fictional musician Kick In A Case in a small club with suitcase kick drum."
+  },
+  {
+    "id": "fictional-nashville-14-dialtone-dottie",
+    "name": "Dialtone Dottie",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "East Nashville",
+    "tagline": "Operator, give me the chorus",
+    "instrument": [
+      "synth",
+      "keys"
+    ],
+    "genres": [
+      "Synthpop",
+      "Country Pop"
+    ],
+    "bio": "Routes the lead synth through an old switchboard and answers wrong numbers in harmony. The best new songs started as voicemails she forgot to delete.",
+    "lookingFor": "A guitarist and harmony singer for twangy synth-pop.",
+    "availability": "Tue and Wed evenings",
+    "gear": [
+      "Patch-cord synth",
+      "Four-track cassette recorder"
+    ],
+    "portraitAlt": "Fictional musician Dialtone Dottie in a small club with patch-cord synth."
+  },
+  {
+    "id": "fictional-nashville-15-baritone-shortstack",
+    "name": "Baritone Shortstack",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "West Nashville",
+    "tagline": "A short stack and a long scale",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Outlaw Country",
+      "Desert Rock"
+    ],
+    "bio": "Writes riffs in the booth while the second pot of coffee brews. Plays low and dry, then adds one ridiculous turnaround just to see who is listening.",
+    "lookingFor": "A drummer for slow desert grooves and a bass player who likes drop tunings.",
+    "availability": "Sat after 5 PM",
+    "gear": [
+      "Baritone electric guitar",
+      "Slapback delay"
+    ],
+    "portraitAlt": "Fictional musician Baritone Shortstack in a small club with baritone electric guitar."
+  },
+  {
+    "id": "fictional-nashville-16-jukebox-june-bug",
+    "name": "Jukebox June Bug",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "12 South",
+    "tagline": "Sixty songs and four strings",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Chamber Pop",
+      "Americana"
+    ],
+    "bio": "Took the guts out of a jukebox and learned to bow the shell. Collects songs with three chords and writes counter-melodies that turn up again in the outro.",
+    "lookingFor": "A vocalist and acoustic guitarist for arrangements that leave space for cello.",
+    "availability": "Wed and Sun afternoons",
+    "gear": [
+      "Jukebox-body cello",
+      "Contact mic"
+    ],
+    "portraitAlt": "Fictional musician Jukebox June Bug in a small club with jukebox-body cello."
+  },
+  {
+    "id": "fictional-nashville-17-cone-solo-cal",
+    "name": "Cone Solo Cal",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Hermitage",
+    "tagline": "Merge left at the vocal break",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Country Rock",
+      "Soul"
+    ],
+    "bio": "Sings harmony so loudly the city issued him a spare traffic cone. He is happiest playing a B-side with a long organ solo rather than doing a set of hits.",
+    "lookingFor": "A rhythm guitarist and keys player for loose country-soul sessions.",
+    "availability": "Thu evenings",
+    "gear": [
+      "Traffic-cone vocal mic",
+      "Compact PA"
+    ],
+    "portraitAlt": "Fictional musician Cone Solo Cal in a small club with traffic-cone vocal mic."
+  },
+  {
+    "id": "fictional-nashville-18-the-tiny-pedal-choir",
+    "name": "The Tiny Pedal Choir",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Edgehill",
+    "tagline": "Eight tiny boxes and a tenor",
+    "instrument": [
+      "vocals",
+      "producer"
+    ],
+    "genres": [
+      "Gospel Pop",
+      "Art Pop"
+    ],
+    "bio": "Builds tiny choirs with pedals and assigns each pedal its own part. Wants to bring in real voices, keep all the imperfections and make the chorus big enough to rattle the stage.",
+    "lookingFor": "Two singers for harmony experiments and live vocal loops.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Miniature vocal-loop pedals",
+      "Handheld recorder"
+    ],
+    "portraitAlt": "Fictional musician The Tiny Pedal Choir in a small club with miniature vocal-loop pedals."
+  },
+  {
+    "id": "fictional-nashville-19-lamp-shade-lynn",
+    "name": "Lamp Shade Lynn",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Green Hills",
+    "tagline": "The shade goes on at showtime",
+    "instrument": [
+      "guitar",
+      "vocals"
+    ],
+    "genres": [
+      "Folk",
+      "Country"
+    ],
+    "bio": "Her lampshade hat doubles as a lyric prompt. Each panel has a first line written inside, and the audience picks which panel she has to sing from.",
+    "lookingFor": "A harmony singer who likes classic country storytelling and soft fingerpicking.",
+    "availability": "Fri evenings and Sun afternoons",
+    "gear": [
+      "Flat-top acoustic guitar",
+      "Capo collection"
+    ],
+    "portraitAlt": "Fictional musician Lamp Shade Lynn in a small club with flat-top acoustic guitar."
+  },
+  {
+    "id": "fictional-nashville-20-bubble-squeezebox",
+    "name": "Bubble Squeezebox",
+    "city": "Nashville",
+    "cityId": "nashville",
+    "state": "TN",
+    "cityColor": "#fcc14b",
+    "neighborhood": "Antioch",
+    "tagline": "The bellow runs on soap",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Zydeco",
+      "Roots"
+    ],
+    "bio": "Put a bubble valve on his bellows because dry rehearsals felt too serious. Writes fast dance tunes with clear endings that even a tired drummer can hear.",
+    "lookingFor": "A washboard player and a fiddler for two-step dance tunes.",
+    "availability": "Thu and Sat evenings",
+    "gear": [
+      "Bubble-valve button accordion",
+      "Washboard"
+    ],
+    "portraitAlt": "Fictional musician Bubble Squeezebox in a small club with bubble-valve button accordion."
+  },
+  {
+    "id": "fictional-austin-01-taco-tremolo",
+    "name": "Taco Tremolo",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "East Austin",
+    "tagline": "Breakfast combo in E",
+    "instrument": [
+      "guitar",
+      "vocals"
+    ],
+    "genres": [
+      "Rockabilly",
+      "Tex-Mex"
+    ],
+    "bio": "Keeps a breakfast taco plugged into the amp so the tremolo smells like eggs by the second chorus. Every verse has to fit inside two minutes.",
+    "lookingFor": "An upright bassist and drummer for fast, sweaty rockabilly sets.",
+    "availability": "Sat mornings and Thu nights",
+    "gear": [
+      "Breakfast-taco guitar",
+      "Spring reverb"
+    ],
+    "portraitAlt": "Fictional musician Taco Tremolo in a small club with breakfast-taco guitar."
+  },
+  {
+    "id": "fictional-austin-02-bicycle-bell-bea",
+    "name": "Bicycle Bell Bea",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Hyde Park",
+    "tagline": "Ring once for the bridge",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Indie Pop",
+      "Folk"
+    ],
+    "bio": "Built a tambourine from retired bike bells. She reminds everyone that a wrong note is only a wrong note if you don’t play it again in verse two.",
+    "lookingFor": "A keyboard player and singer for short indie-pop songs.",
+    "availability": "Tuesday evenings",
+    "gear": [
+      "Bicycle-bell tambourine",
+      "Brush snare"
+    ],
+    "portraitAlt": "Fictional musician Bicycle Bell Bea in a small club with bicycle-bell tambourine."
+  },
+  {
+    "id": "fictional-austin-03-register-ruckus",
+    "name": "Register Ruckus",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Montopolis",
+    "tagline": "Make change on the backbeat",
+    "instrument": [
+      "drums",
+      "producer"
+    ],
+    "genres": [
+      "Hip-Hop",
+      "Funk"
+    ],
+    "bio": "The cash drawer is his kick and the receipt printer is his hi-hat. He keeps the register’s bell for transitions, because a chorus should earn that ding.",
+    "lookingFor": "A bass player for a live beat set with quick changes and long grooves.",
+    "availability": "Wed after 6 PM",
+    "gear": [
+      "Cash-register drum kit",
+      "Pocket sampler"
+    ],
+    "portraitAlt": "Fictional musician Register Ruckus in a small club with cash-register drum kit."
+  },
+  {
+    "id": "fictional-austin-04-prickly-fuzz",
+    "name": "Prickly Fuzz",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "North Loop",
+    "tagline": "Wear gloves for the stomp",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Psych Rock",
+      "Garage Rock"
+    ],
+    "bio": "Built a fuzz box that literally bites if stomped wrong. Tracks riffs before breakfast and votes against any pedal that needs more than two knobs.",
+    "lookingFor": "A bassist and drummer who like low-volume psych jams and big endings.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Cactus-spike fuzz pedal",
+      "Offset electric guitar"
+    ],
+    "portraitAlt": "Fictional musician Prickly Fuzz in a small club with cactus-spike fuzz pedal."
+  },
+  {
+    "id": "fictional-austin-05-brisket-belter",
+    "name": "Brisket Belter",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "South Congress",
+    "tagline": "Smoked low notes only",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Blues",
+      "Soul"
+    ],
+    "bio": "The barbecue fork is a stage mic with a handle long enough to point at soloists. She saves her highest note for the point where the guitarist finally turns down.",
+    "lookingFor": "A pianist and drummer for slow blues, soul shuffles and big harmonies.",
+    "availability": "Fri and Sat evenings",
+    "gear": [
+      "Barbecue-fork mic",
+      "Tweed combo amp"
+    ],
+    "portraitAlt": "Fictional musician Brisket Belter in a small club with barbecue-fork mic."
+  },
+  {
+    "id": "fictional-austin-06-meter-maid-midi",
+    "name": "Meter Maid MIDI",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "East Cesar Chavez",
+    "tagline": "Feeds quarters to the sequencer",
+    "instrument": [
+      "producer",
+      "synth"
+    ],
+    "genres": [
+      "Electro",
+      "House"
+    ],
+    "bio": "She bought an obsolete meter and replaced its guts with an eight-track sampler. When it flashes expired the group has to improvise a new bass line.",
+    "lookingFor": "A bassist or horn player for live house jams around 120 BPM.",
+    "availability": "Mon evenings",
+    "gear": [
+      "Parking-meter sampler",
+      "Step sequencer"
+    ],
+    "portraitAlt": "Fictional musician Meter Maid MIDI in a small club with parking-meter sampler."
+  },
+  {
+    "id": "fictional-austin-07-sax-fan-shai",
+    "name": "Sax Fan Shai",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Cherrywood",
+    "tagline": "The horn has three fan speeds",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Funk",
+      "Jazz"
+    ],
+    "bio": "The cooling fan was supposed to stop the horn fogging up, but she realized it made a good vibrato. Her ideal rehearsal has a groove you can hear from the sidewalk.",
+    "lookingFor": "A keyboardist and drummer for a funk trio with rotating solos.",
+    "availability": "Tue and Thu after 6 PM",
+    "gear": [
+      "Fan-cooled tenor sax",
+      "Pocket looper"
+    ],
+    "portraitAlt": "Fictional musician Sax Fan Shai in a small club with fan-cooled tenor sax."
+  },
+  {
+    "id": "fictional-austin-08-armadillo-arlo",
+    "name": "Armadillo Arlo",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "South Lamar",
+    "tagline": "Curl up on the downbeat",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Garage Rock",
+      "Psych Rock"
+    ],
+    "bio": "The shell lets him carry the bass on his back when the bus fills up. He can play a straight eighth-note part for an hour and make every fourth bar feel different.",
+    "lookingFor": "A drummer and guitarist for weird garage tunes with clean stops.",
+    "availability": "Wed nights",
+    "gear": [
+      "Armadillo-shell bass",
+      "Fuzz bass pedal"
+    ],
+    "portraitAlt": "Fictional musician Armadillo Arlo in a small club with armadillo-shell bass."
+  },
+  {
+    "id": "fictional-austin-09-batwing-bento",
+    "name": "Batwing Bento",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Red River District",
+    "tagline": "Echolocation in spring reverb",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Surf Rock",
+      "Garage Rock"
+    ],
+    "bio": "His tremolo has two rubber wings that make it sound faster than it is. Writes short instrumental songs named after things found under the bridge.",
+    "lookingFor": "A drummer and bass player for noisy instrumental surf rock.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Bat-wing tremolo",
+      "Baritone surf guitar"
+    ],
+    "portraitAlt": "Fictional musician Batwing Bento in a small club with bat-wing tremolo."
+  },
+  {
+    "id": "fictional-austin-10-fridge-magnet-fray",
+    "name": "Fridge Magnet Fray",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Bouldin Creek",
+    "tagline": "Chorus sold as individual letters",
+    "instrument": [
+      "vocals",
+      "synth"
+    ],
+    "genres": [
+      "Art Pop",
+      "Post-Punk"
+    ],
+    "bio": "Arranges the lyrics on a fridge and lets the magnets decide the order. It makes for crooked verses and remarkably tidy harmonies.",
+    "lookingFor": "A synth player and drummer for jagged pop songs with weird hooks.",
+    "availability": "Thu evenings",
+    "gear": [
+      "Fridge-magnet mic",
+      "Pocket synth"
+    ],
+    "portraitAlt": "Fictional musician Fridge Magnet Fray in a small club with fridge-magnet mic."
+  },
+  {
+    "id": "fictional-austin-11-porch-swing-keys",
+    "name": "Porch Swing Keys",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Allandale",
+    "tagline": "The bench keeps time",
+    "instrument": [
+      "keys",
+      "vocals"
+    ],
+    "genres": [
+      "Gospel",
+      "Soul"
+    ],
+    "bio": "Converted a porch swing into a keyboard stand, then found the squeak matched the kick. Likes big group choruses and songs that can survive a key change.",
+    "lookingFor": "A drummer and harmony singer for relaxed gospel-soul afternoons.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Porch-swing keyboard",
+      "Small Leslie cabinet"
+    ],
+    "portraitAlt": "Fictional musician Porch Swing Keys in a small club with porch-swing keyboard."
+  },
+  {
+    "id": "fictional-austin-12-chile-chord-chuy",
+    "name": "Chile Chord Chuy",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Govalle",
+    "tagline": "Extra hot tuning pegs",
+    "instrument": [
+      "guitar",
+      "vocals"
+    ],
+    "genres": [
+      "Conjunto",
+      "Tex-Mex"
+    ],
+    "bio": "Painted every tuning knob like a different pepper so he could tune by color in the dark. Wants to work up a little suite about the best late-night snacks in town.",
+    "lookingFor": "A button accordion player and bassist for conjunto dance tunes.",
+    "availability": "Tue and Fri evenings",
+    "gear": [
+      "Chili-knob bajo sexto",
+      "Small acoustic amp"
+    ],
+    "portraitAlt": "Fictional musician Chile Chord Chuy in a small club with chili-knob bajo sexto."
+  },
+  {
+    "id": "fictional-austin-13-pie-tin-pru",
+    "name": "Pie Tin Pru",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Brentwood",
+    "tagline": "Crust first and rimshots second",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Americana",
+      "Western Swing"
+    ],
+    "bio": "Built a snare from the loudest pie tin at a family cookout. She plays quieter than anybody in the room and still somehow sets the pace.",
+    "lookingFor": "An acoustic bassist and guitarist for low-volume swing sessions.",
+    "availability": "Sun mornings",
+    "gear": [
+      "Pie-tin snare",
+      "Wire brushes"
+    ],
+    "portraitAlt": "Fictional musician Pie Tin Pru in a small club with pie-tin snare."
+  },
+  {
+    "id": "fictional-austin-14-longhorn-lfo",
+    "name": "Longhorn LFO",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Riverside",
+    "tagline": "Careful with the modulation horns",
+    "instrument": [
+      "synth",
+      "keys"
+    ],
+    "genres": [
+      "Synthpop",
+      "Electro"
+    ],
+    "bio": "Bolted oversized horns onto the filter cutoff, which was great until the keyboard case stopped closing. He has forty patches and wants to write songs for three of them.",
+    "lookingFor": "A drum machine nerd and a vocalist for an electro duo that can play live.",
+    "availability": "Wed and Sat evenings",
+    "gear": [
+      "Longhorn-knob synthesizer",
+      "Analog drum machine"
+    ],
+    "portraitAlt": "Fictional musician Longhorn LFO in a small club with longhorn-knob synthesizer."
+  },
+  {
+    "id": "fictional-austin-15-pump-organ-pip",
+    "name": "Pump Organ Pip",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Crestview",
+    "tagline": "Regular unleaded slap bass",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Honky-Tonk",
+      "Rockabilly"
+    ],
+    "bio": "The pump dial charges by the slap, so she spends the first verse walking quarters. Keeps song forms simple and memorizes the singers’ cues.",
+    "lookingFor": "A singer and a small-kit drummer for roadhouse-style rockabilly.",
+    "availability": "Thu evenings",
+    "gear": [
+      "Gas-pump upright bass",
+      "Clip-on pickup"
+    ],
+    "portraitAlt": "Fictional musician Pump Organ Pip in a small club with gas-pump upright bass."
+  },
+  {
+    "id": "fictional-austin-16-cooler-beats-cole",
+    "name": "Cooler Beats Cole",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Windsor Park",
+    "tagline": "Keep hot beats on ice",
+    "instrument": [
+      "producer",
+      "drums"
+    ],
+    "genres": [
+      "Boom Bap",
+      "Hip-Hop"
+    ],
+    "bio": "Cools his equipment with imaginary ice and writes the track list on the lid. Has enough unfinished beats for three records and wants to finish five with other players.",
+    "lookingFor": "A rapper or bassist for short tape sets and live beat swaps.",
+    "availability": "Friday afternoons",
+    "gear": [
+      "Ice-chest sampler",
+      "Clip launcher"
+    ],
+    "portraitAlt": "Fictional musician Cooler Beats Cole in a small club with ice-chest sampler."
+  },
+  {
+    "id": "fictional-austin-17-umbrella-clarinet",
+    "name": "Umbrella Clarinet",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Tarrytown",
+    "tagline": "Shade at the solo break",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Trad Jazz",
+      "Folk"
+    ],
+    "bio": "The bell opens if it rains, making a little roof over the reed. Her favorite musicians can play softly enough for someone to order a coffee mid-song.",
+    "lookingFor": "A guitarist and upright bass player for patio clarinet sets.",
+    "availability": "Sat before noon",
+    "gear": [
+      "Umbrella-bell clarinet",
+      "Portable music stand"
+    ],
+    "portraitAlt": "Fictional musician Umbrella Clarinet in a small club with umbrella-bell clarinet."
+  },
+  {
+    "id": "fictional-austin-18-staple-gun-sami",
+    "name": "Staple Gun Sami",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "North Austin",
+    "tagline": "Fasten the verse to the chorus",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Post-Punk",
+      "Indie Rock"
+    ],
+    "bio": "Staples the chord charts to the wall by key. The capo looks like the office stapler, which is why he keeps losing it to the print shop downstairs.",
+    "lookingFor": "A bassist and drummer who like tight eighth notes and sharp transitions.",
+    "availability": "Mon and Thu nights",
+    "gear": [
+      "Staple-shaped capo",
+      "Solid-body electric guitar"
+    ],
+    "portraitAlt": "Fictional musician Staple Gun Sami in a small club with staple-shaped capo."
+  },
+  {
+    "id": "fictional-austin-19-thunder-mic-taz",
+    "name": "Thunder Mic Taz",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Pleasant Valley",
+    "tagline": "Rain delay in the middle eight",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Neo-Soul",
+      "Art Pop"
+    ],
+    "bio": "Keeps a small storm inside the microphone grille. She tries new parts by whispering them first, then lets the drums decide which parts deserve thunder.",
+    "lookingFor": "A keyboardist and drummer who enjoy shifting between spoken and sung lines.",
+    "availability": "Wed after 7 PM",
+    "gear": [
+      "Storm-globe vocal mic",
+      "Loop station"
+    ],
+    "portraitAlt": "Fictional musician Thunder Mic Taz in a small club with storm-globe vocal mic."
+  },
+  {
+    "id": "fictional-austin-20-icehouse-inez",
+    "name": "Icehouse Inez",
+    "city": "Austin",
+    "cityId": "austin",
+    "state": "TX",
+    "cityColor": "#f87561",
+    "neighborhood": "Barton Hills",
+    "tagline": "Keep bow below freezing",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Chamber Folk",
+      "Ambient"
+    ],
+    "bio": "The bow squeaks whenever the ice compartment opens. She uses the sound as an accidental cue for every fade and keeps the recording if it happens twice.",
+    "lookingFor": "A nylon-string guitarist and vocalist for spare, spacious arrangements.",
+    "availability": "Sun evenings",
+    "gear": [
+      "Roadside-ice-machine cello",
+      "Contact pickup"
+    ],
+    "portraitAlt": "Fictional musician Icehouse Inez in a small club with roadside-ice-machine cello."
+  },
+  {
+    "id": "fictional-la-01-star-mirror-sabine",
+    "name": "Star Mirror Sabine",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Leimert Park",
+    "tagline": "A vanity mirror with an oscillator",
+    "instrument": [
+      "synth",
+      "vocals"
+    ],
+    "genres": [
+      "Neo-Soul",
+      "Art Pop"
+    ],
+    "bio": "Bought a vanity mirror at a prop sale and wired its bulbs to the synth envelope. The nicest chords light up one corner at a time.",
+    "lookingFor": "A bassist and a quiet drummer for late-night synth soul sets.",
+    "availability": "Wed evenings",
+    "gear": [
+      "Star-mirror synthesizer",
+      "Spring delay"
+    ],
+    "portraitAlt": "Fictional musician Star Mirror Sabine in a small club with star-mirror synthesizer."
+  },
+  {
+    "id": "fictional-la-02-red-light-riff",
+    "name": "Red Light Riff",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Boyle Heights",
+    "tagline": "Stop on the red chord",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Latin Rock",
+      "Garage Rock"
+    ],
+    "bio": "His amp changes the signal depending on how hard he strums. He likes riffs that can hold up through a whole intersection without a solo.",
+    "lookingFor": "A drummer and bassist for short Latin garage songs with split-second breaks.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Traffic-signal amp",
+      "Orange offset guitar"
+    ],
+    "portraitAlt": "Fictional musician Red Light Riff in a small club with traffic-signal amp."
+  },
+  {
+    "id": "fictional-la-03-hubcap-harvey",
+    "name": "Hubcap Harvey",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "North Hollywood",
+    "tagline": "The brake dust is original",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Hard Rock",
+      "Garage Rock"
+    ],
+    "bio": "Bought a drum kit one hubcap at a time. Each one has a different ding, and he keeps the shallowest for parts that need room under the vocals.",
+    "lookingFor": "A bass player and singer for a grimy live-room rock recording.",
+    "availability": "Tue and Fri evenings",
+    "gear": [
+      "Chrome hubcap drums",
+      "Splash cymbal"
+    ],
+    "portraitAlt": "Fictional musician Hubcap Harvey in a small club with chrome hubcap drums."
+  },
+  {
+    "id": "fictional-la-04-bendy-straw-bex",
+    "name": "Bendy Straw Bex",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Little Tokyo",
+    "tagline": "Slurp the harmony",
+    "instrument": [
+      "synth",
+      "vocals"
+    ],
+    "genres": [
+      "Funk",
+      "Electro"
+    ],
+    "bio": "The talkbox hose rotates with every vowel, so she has perfected breath control while untangling it. Her songs should feel like machines telling a joke they barely understand.",
+    "lookingFor": "A guitarist or bassist who wants to write danceable talkbox songs.",
+    "availability": "Thu after 7 PM",
+    "gear": [
+      "Bendy-straw talkbox",
+      "Vocoder keyboard"
+    ],
+    "portraitAlt": "Fictional musician Bendy Straw Bex in a small club with bendy-straw talkbox."
+  },
+  {
+    "id": "fictional-la-05-palm-tenor-pax",
+    "name": "Palm Tenor Pax",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "West Adams",
+    "tagline": "Needs very little watering",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Jazz",
+      "Funk"
+    ],
+    "bio": "A palm frond on the bell gives him a visible cue when he starts playing too loud. Wants a group that can vamp until everybody has found something interesting to say.",
+    "lookingFor": "A keys player for a groove trio with room for horn solos.",
+    "availability": "Sat evenings",
+    "gear": [
+      "Palm-tree tenor sax",
+      "Velcro stand mount"
+    ],
+    "portraitAlt": "Fictional musician Palm Tenor Pax in a small club with palm-tree tenor sax."
+  },
+  {
+    "id": "fictional-la-06-gaffer-bass-gia",
+    "name": "Gaffer Bass Gia",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Highland Park",
+    "tagline": "No two repairs match",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Post-Punk",
+      "New Wave"
+    ],
+    "bio": "Fixed the bass with different tape for every section of the song. Her favorite parts are one note played at exactly the right moment.",
+    "lookingFor": "A drummer and rhythm guitarist for clipped, punchy post-punk.",
+    "availability": "Tue nights",
+    "gear": [
+      "Gaffer-taped bass",
+      "Mini compression pedal"
+    ],
+    "portraitAlt": "Fictional musician Gaffer Bass Gia in a small club with gaffer-taped bass."
+  },
+  {
+    "id": "fictional-la-07-foam-crooner-cruz",
+    "name": "Foam Crooner Cruz",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Koreatown",
+    "tagline": "A microphone with no guts",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Lounge",
+      "Indie Pop"
+    ],
+    "bio": "Took a foam mic from a set because the weight felt right. Belts straight to the back wall anyway, then rewrites the bridge on the bus home.",
+    "lookingFor": "A pianist and guitarist who like lounge covers turned sideways.",
+    "availability": "Sunday afternoons",
+    "gear": [
+      "Foam movie-prop mic",
+      "Portable recorder"
+    ],
+    "portraitAlt": "Fictional musician Foam Crooner Cruz in a small club with foam movie-prop mic."
+  },
+  {
+    "id": "fictional-la-08-clapperboard-cal",
+    "name": "Clapperboard Cal",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Glendale",
+    "tagline": "Take two has better slides",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Hawaiian",
+      "Western Swing"
+    ],
+    "bio": "Slips a tiny clapperboard onto his finger as a slide. Musicians think he is asking them to start over when he is actually trying to play the sixth.",
+    "lookingFor": "An acoustic guitarist for instrumental swing and lap steel tunes.",
+    "availability": "Wed mornings and Fri afternoons",
+    "gear": [
+      "Clapperboard lap steel",
+      "Volume pedal"
+    ],
+    "portraitAlt": "Fictional musician Clapperboard Cal in a small club with clapperboard lap steel."
+  },
+  {
+    "id": "fictional-la-09-pigeon-pads-paloma",
+    "name": "Pigeon Pads Paloma",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Echo Park",
+    "tagline": "Pigeons get the first take",
+    "instrument": [
+      "producer",
+      "synth"
+    ],
+    "genres": [
+      "Hip-Hop",
+      "Downtempo"
+    ],
+    "bio": "Two plastic pigeons peck the sampler buttons in remarkable time. She makes hazy drum loops and wants to give another player room to hijack one.",
+    "lookingFor": "A spoken-word artist or sax player to trade ideas over dusty beats.",
+    "availability": "Mon and Thu evenings",
+    "gear": [
+      "Toy-pigeon sampler",
+      "Pad controller"
+    ],
+    "portraitAlt": "Fictional musician Pigeon Pads Paloma in a small club with toy-pigeon sampler."
+  },
+  {
+    "id": "fictional-la-10-ticket-stack-tilda",
+    "name": "Ticket Stack Tilda",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Silver Lake",
+    "tagline": "The fines are in F-sharp",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Punk",
+      "New Wave"
+    ],
+    "bio": "Sheets of tickets cushion the keys she used to hit too hard. She rehearses in fifteen-minute bursts and treats a two-note hook like a civic duty.",
+    "lookingFor": "A guitarist and bassist for fast songs that fit inside a parking meter.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Parking-ticket keyboard",
+      "Overdrive pedal"
+    ],
+    "portraitAlt": "Fictional musician Ticket Stack Tilda in a small club with parking-ticket keyboard."
+  },
+  {
+    "id": "fictional-la-11-fishbowl-fable",
+    "name": "Fishbowl Fable",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Altadena",
+    "tagline": "The acoustics are mostly water",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Art Pop",
+      "Ambient Pop"
+    ],
+    "bio": "Uses the empty fishbowl as a head-sized echo chamber. Her songs start with an overheard sentence and end in a high harmony no one saw coming.",
+    "lookingFor": "A keys player for strange pop songs with unusual harmonies.",
+    "availability": "Wed and Sat evenings",
+    "gear": [
+      "Fishbowl vocal helmet",
+      "Loop station"
+    ],
+    "portraitAlt": "Fictional musician Fishbowl Fable in a small club with fishbowl vocal helmet."
+  },
+  {
+    "id": "fictional-la-12-saucer-scratcher",
+    "name": "Saucer Scratcher",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Inglewood",
+    "tagline": "The left deck won’t re-enter",
+    "instrument": [
+      "producer"
+    ],
+    "genres": [
+      "Turntablism",
+      "Electro"
+    ],
+    "bio": "Both decks look like they could leave the room at an irresponsible speed. He builds routines where the quietest scratch marks the biggest transition.",
+    "lookingFor": "A percussionist or MC for short sets built around live cuts.",
+    "availability": "Fri evenings",
+    "gear": [
+      "Flying-saucer turntables",
+      "Battle mixer"
+    ],
+    "portraitAlt": "Fictional musician Saucer Scratcher in a small club with flying-saucer turntables."
+  },
+  {
+    "id": "fictional-la-13-takeout-treble",
+    "name": "Takeout Treble",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Sawtelle",
+    "tagline": "Never bring the tall stack",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Chamber Pop",
+      "Math Rock"
+    ],
+    "bio": "Stacks takeout boxes to measure the length of a rehearsal. She writes string parts that pull against the drums and loves when a crooked phrase turns catchy.",
+    "lookingFor": "A percussionist and guitarist for short arrangements in uneven meters.",
+    "availability": "Thu evenings",
+    "gear": [
+      "Violin",
+      "Takeout-box practice mute"
+    ],
+    "portraitAlt": "Fictional musician Takeout Treble in a small club with violin."
+  },
+  {
+    "id": "fictional-la-14-gas-pedal-gospel",
+    "name": "Gas Pedal Gospel",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Pico-Union",
+    "tagline": "Clutch out on the turnaround",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Gospel",
+      "Soul"
+    ],
+    "bio": "Rewired the organ bass pedals using parts from a car that never ran. He can hold a verse together with his left foot while someone else learns the form.",
+    "lookingFor": "A vocalist and drummer for organ trio jams.",
+    "availability": "Sunday afternoons",
+    "gear": [
+      "Car-pedal organ",
+      "Rotary speaker"
+    ],
+    "portraitAlt": "Fictional musician Gas Pedal Gospel in a small club with car-pedal organ."
+  },
+  {
+    "id": "fictional-la-15-freeway-firmware",
+    "name": "Freeway Firmware",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Mid-City",
+    "tagline": "No lane changes after bar eight",
+    "instrument": [
+      "producer",
+      "drums"
+    ],
+    "genres": [
+      "House",
+      "Broken Beat"
+    ],
+    "bio": "The roads on her drum machine show traffic flow for every pattern. Nothing sounds quite right until at least one lane is backed up.",
+    "lookingFor": "A horn player or bassist for live dance tracks with jagged drums.",
+    "availability": "Tue and Thu nights",
+    "gear": [
+      "Freeway drum machine",
+      "Pocket sequencer"
+    ],
+    "portraitAlt": "Fictional musician Freeway Firmware in a small club with freeway drum machine."
+  },
+  {
+    "id": "fictional-la-16-patch-cable-pete",
+    "name": "Patch Cable Pete",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Burbank",
+    "tagline": "Every string is an input",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Noise Rock",
+      "Sludge"
+    ],
+    "bio": "Wove a guitar out of a drawerful of faulty cables. His riffs are slow and heavy, but he takes notes in a neat little ruled notebook.",
+    "lookingFor": "A drummer for riff rehearsals and a bassist who enjoys tuning low.",
+    "availability": "Sat mornings",
+    "gear": [
+      "Patch-cable baritone guitar",
+      "Fuzz box"
+    ],
+    "portraitAlt": "Fictional musician Patch Cable Pete in a small club with patch-cable baritone guitar."
+  },
+  {
+    "id": "fictional-la-17-red-carpet-rita",
+    "name": "Red Carpet Rita",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "East Hollywood",
+    "tagline": "Premiering the chorus tonight",
+    "instrument": [
+      "keys",
+      "vocals"
+    ],
+    "genres": [
+      "Latin Folk",
+      "Cabaret"
+    ],
+    "bio": "The case opens like a tiny awards ceremony, even in a laundromat. She plays old dance songs with new verses about everybody’s commute.",
+    "lookingFor": "A hand percussionist for bilingual accordion-and-vocal sets.",
+    "availability": "Fri evenings",
+    "gear": [
+      "Red-carpet accordion",
+      "Compact vocal amp"
+    ],
+    "portraitAlt": "Fictional musician Red Carpet Rita in a small club with red-carpet accordion."
+  },
+  {
+    "id": "fictional-la-18-whistle-stop-wren",
+    "name": "Whistle Stop Wren",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Palms",
+    "tagline": "Pedestrians have the bridge",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Ska",
+      "Brass Band"
+    ],
+    "bio": "She glued a whistle to the bell to mark the skanks without shouting. Can make a four-note melody sound good on the first pass with strangers.",
+    "lookingFor": "A trombonist and drummer for bouncy porch-volume brass tunes.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Traffic-whistle trumpet",
+      "Practice mute"
+    ],
+    "portraitAlt": "Fictional musician Whistle Stop Wren in a small club with traffic-whistle trumpet."
+  },
+  {
+    "id": "fictional-la-19-camera-case-crash",
+    "name": "Camera Case Crash",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Van Nuys",
+    "tagline": "Four cases and a good racket",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Power Pop",
+      "Indie Rock"
+    ],
+    "bio": "Builds her kit from film equipment cases left over from shoots. The kick takes a surprising amount of tuning, but the carrying handles are unbeatable.",
+    "lookingFor": "A bassist and songwriter for three-minute guitar-pop songs.",
+    "availability": "Mon and Wed evenings",
+    "gear": [
+      "Film-case drum kit",
+      "Low-volume cymbals"
+    ],
+    "portraitAlt": "Fictional musician Camera Case Crash in a small club with film-case drum kit."
+  },
+  {
+    "id": "fictional-la-20-moon-peg-marcus",
+    "name": "Moon Peg Marcus",
+    "city": "Los Angeles",
+    "cityId": "la",
+    "state": "CA",
+    "cityColor": "#a297fc",
+    "neighborhood": "Crenshaw",
+    "tagline": "Tides in the low register",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Jazz",
+      "Ambient"
+    ],
+    "bio": "The moon-shaped tuning peg is too large to leave in the case. His playing is patient and quiet, with slightly dramatic bowed notes at the end of a phrase.",
+    "lookingFor": "A pianist or horn player for spacious jazz arrangements.",
+    "availability": "Sun nights",
+    "gear": [
+      "Moon-peg upright bass",
+      "Bow and pickup"
+    ],
+    "portraitAlt": "Fictional musician Moon Peg Marcus in a small club with moon-peg upright bass."
+  },
+  {
+    "id": "fictional-nyc-01-turnstile-tenor",
+    "name": "Turnstile Tenor",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Harlem",
+    "tagline": "One swipe per chorus",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Bebop",
+      "Hard Bop"
+    ],
+    "bio": "The horn clicks once every time he plays a major seventh. He calls the noise a feature and asks for the melody at least twice before anyone solos.",
+    "lookingFor": "A pianist and bassist to trade heads on fast bebop tunes.",
+    "availability": "Tue and Thu evenings",
+    "gear": [
+      "Turnstile tenor sax",
+      "Hard rubber mouthpiece"
+    ],
+    "portraitAlt": "Fictional musician Turnstile Tenor in a small club with turnstile tenor sax."
+  },
+  {
+    "id": "fictional-nyc-02-pizza-peel-pia",
+    "name": "Pizza Peel Pia",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Bushwick",
+    "tagline": "Serve the chorus by the slice",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Punk",
+      "Disco"
+    ],
+    "bio": "The mic is long enough to pass over the front row. She changes the middle of a song every week, trusting the group to remember the hook.",
+    "lookingFor": "A synth player and drummer for fast songs with dance beats.",
+    "availability": "Fri after 7 PM",
+    "gear": [
+      "Pizza-peel microphone",
+      "Tape delay"
+    ],
+    "portraitAlt": "Fictional musician Pizza Peel Pia in a small club with pizza-peel microphone."
+  },
+  {
+    "id": "fictional-nyc-03-till-beat-theo",
+    "name": "Till Beat Theo",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Ridgewood",
+    "tagline": "Receipt says the snare is free",
+    "instrument": [
+      "producer",
+      "drums"
+    ],
+    "genres": [
+      "Boom Bap",
+      "Hip-Hop"
+    ],
+    "bio": "The bodega drawer locks on the first beat so the rest of the pattern can move around. He keeps a notebook full of samples he could swear he heard in a stairwell.",
+    "lookingFor": "An MC or bassist for sketching beats into three-minute songs.",
+    "availability": "Mon and Wed evenings",
+    "gear": [
+      "Bodega till drum machine",
+      "Portable sampler"
+    ],
+    "portraitAlt": "Fictional musician Till Beat Theo in a small club with bodega till drum machine."
+  },
+  {
+    "id": "fictional-nyc-04-crane-bow-kit",
+    "name": "Crane Bow Kit",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Long Island City",
+    "tagline": "Construction ends at bar four",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Experimental Folk",
+      "Chamber Pop"
+    ],
+    "bio": "The skyline crane bow can only just fit through the practice-room door. They prefer small melodies played slowly enough to hear the room change around them.",
+    "lookingFor": "A guitarist or percussionist to collaborate on quiet instrumentals.",
+    "availability": "Sat mornings",
+    "gear": [
+      "Crane-arm violin bow",
+      "Stereo pickup"
+    ],
+    "portraitAlt": "Fictional musician Crane Bow Kit in a small club with crane-arm violin bow."
+  },
+  {
+    "id": "fictional-nyc-05-folding-keys-frankie",
+    "name": "Folding Keys Frankie",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Fort Greene",
+    "tagline": "Packs flat after the encore",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Jazz",
+      "Soul"
+    ],
+    "bio": "Can fold her entire piano into a square that fits under the kitchen table. Plays the first verse with two fingers, then shows exactly why she held back.",
+    "lookingFor": "A vocalist and upright bassist for jazz standards rearranged as soul tunes.",
+    "availability": "Thursdays after 6 PM",
+    "gear": [
+      "Folding-chair grand piano",
+      "Soft pedal"
+    ],
+    "portraitAlt": "Fictional musician Folding Keys Frankie in a small club with folding-chair grand piano."
+  },
+  {
+    "id": "fictional-nyc-06-bagel-bell-bess",
+    "name": "Bagel Bell Bess",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Upper West Side",
+    "tagline": "Everything seasoning in G minor",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Klezmer",
+      "Trad Jazz"
+    ],
+    "bio": "The bagel got stuck during soundcheck and now she claims it improves her low notes. Plays dance tunes slowly for new players, then sees how far they can push the tempo.",
+    "lookingFor": "An accordionist and upright bassist for klezmer and swing transitions.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Bagel-bell clarinet",
+      "Spare reeds"
+    ],
+    "portraitAlt": "Fictional musician Bagel Bell Bess in a small club with bagel-bell clarinet."
+  },
+  {
+    "id": "fictional-nyc-07-radiator-rai",
+    "name": "Radiator Rai",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Jackson Heights",
+    "tagline": "Heat comes on in the bridge",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Post-Punk",
+      "Indie Rock"
+    ],
+    "bio": "His bass makes a little knock as it warms up. He sets the rehearsal heater to the same key and writes long verses for bands that want room to move.",
+    "lookingFor": "A drummer and guitarist for angular songs and long instrumental intros.",
+    "availability": "Wed nights",
+    "gear": [
+      "Radiator bass",
+      "Loop pedal"
+    ],
+    "portraitAlt": "Fictional musician Radiator Rai in a small club with radiator bass."
+  },
+  {
+    "id": "fictional-nyc-08-hydrant-hands-hana",
+    "name": "Hydrant Hands Hana",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Washington Heights",
+    "tagline": "Street pressure on the clave",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Salsa",
+      "Latin Jazz"
+    ],
+    "bio": "Painted the congas red to keep strangers from taking them home after sessions. Reads percussion charts fast and will happily show a newcomer the bell pattern.",
+    "lookingFor": "A pianist and bassist for small-group salsa arrangements.",
+    "availability": "Tue and Sat evenings",
+    "gear": [
+      "Fire-hydrant congas",
+      "Handheld cowbell"
+    ],
+    "portraitAlt": "Fictional musician Hydrant Hands Hana in a small club with fire-hydrant congas."
+  },
+  {
+    "id": "fictional-nyc-09-disco-ballad-dot",
+    "name": "Disco Ballad Dot",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Bed-Stuy",
+    "tagline": "Tiny mirrors and middle notes",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Disco",
+      "Art Pop"
+    ],
+    "bio": "The mic throws light around the room when their voice hits a long note. They have a ballad collection and want to see which songs can survive a four-on-the-floor beat.",
+    "lookingFor": "A bassist and keyboardist for theatrical dance ballads.",
+    "availability": "Friday evenings",
+    "gear": [
+      "Spiked disco-ball mic",
+      "Stereo delay"
+    ],
+    "portraitAlt": "Fictional musician Disco Ballad Dot in a small club with spiked disco-ball mic."
+  },
+  {
+    "id": "fictional-nyc-10-receipt-synth-ren",
+    "name": "Receipt Synth Ren",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Astoria",
+    "tagline": "Take a number for the solo",
+    "instrument": [
+      "synth",
+      "producer"
+    ],
+    "genres": [
+      "Electro",
+      "New Wave"
+    ],
+    "bio": "The synth prints a ticket every time she saves a patch. Her bandmates are allowed to pull a number and demand that sound on the next song.",
+    "lookingFor": "A singer and drum programmer for clever, minimal synth-pop.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Deli-ticket synth",
+      "Desktop sequencer"
+    ],
+    "portraitAlt": "Fictional musician Receipt Synth Ren in a small club with deli-ticket synth."
+  },
+  {
+    "id": "fictional-nyc-11-subway-slide-sol",
+    "name": "Subway Slide Sol",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "East Harlem",
+    "tagline": "Stand clear of the closing slide",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Salsa",
+      "Brass Band"
+    ],
+    "bio": "The slide makes a satisfying clunk between positions. He stopped trying to hide it and now builds his best riffs around the door sound.",
+    "lookingFor": "A trumpet player and a drummer for street-volume brass arrangements.",
+    "availability": "Sat evenings",
+    "gear": [
+      "Subway-door trombone",
+      "Cup mute"
+    ],
+    "portraitAlt": "Fictional musician Subway Slide Sol in a small club with subway-door trombone."
+  },
+  {
+    "id": "fictional-nyc-12-quarter-drop-quinn",
+    "name": "Quarter Drop Quinn",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Crown Heights",
+    "tagline": "Spin cycle in four-four",
+    "instrument": [
+      "producer"
+    ],
+    "genres": [
+      "House",
+      "Disco"
+    ],
+    "bio": "Uses quarters as counters for loop lengths and always runs out in the final song. They like drums that build slowly enough for dancers to surprise themselves.",
+    "lookingFor": "A bassist or percussionist to build live house sets with long transitions.",
+    "availability": "Thu and Sun evenings",
+    "gear": [
+      "Laundry-quarter DJ mixer",
+      "Loop sampler"
+    ],
+    "portraitAlt": "Fictional musician Quarter Drop Quinn in a small club with laundry-quarter dj mixer."
+  },
+  {
+    "id": "fictional-nyc-13-broken-brolly-noor",
+    "name": "Broken Brolly Noor",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Bay Ridge",
+    "tagline": "The bow folds on the rest",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Chamber Folk",
+      "Ambient"
+    ],
+    "bio": "Replaced a broken bow with an umbrella rib and decided it sounded better. She writes long notes underneath short verses and keeps the takes where the room is audible.",
+    "lookingFor": "A fingerstyle guitarist and singer for two-part acoustic arrangements.",
+    "availability": "Weekday evenings",
+    "gear": [
+      "Umbrella-bow cello",
+      "Contact pickup"
+    ],
+    "portraitAlt": "Fictional musician Broken Brolly Noor in a small club with umbrella-bow cello."
+  },
+  {
+    "id": "fictional-nyc-14-takeout-tom-tom",
+    "name": "Takeout Tom-Tom",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Flushing",
+    "tagline": "Comes with a side of hi-hat",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Funk",
+      "Hip-Hop"
+    ],
+    "bio": "Rates cup lids by how long they ring after a rimshot. He can build a convincing beat from your takeout order and still leave enough space for a bass line.",
+    "lookingFor": "A bassist for dry funk grooves with plenty of space for the drums.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Takeout-cup percussion",
+      "Cocktail shaker"
+    ],
+    "portraitAlt": "Fictional musician Takeout Tom-Tom in a small club with takeout-cup percussion."
+  },
+  {
+    "id": "fictional-nyc-15-taxi-meter-max",
+    "name": "Taxi Meter Max",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Lower East Side",
+    "tagline": "Pay by the power chord",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Punk",
+      "No Wave"
+    ],
+    "bio": "The pickup counts down every time someone says one more take. She keeps riffs short and votes to stop a rehearsal while everyone is still excited.",
+    "lookingFor": "A drummer and bassist for fast, abrasive two-minute songs.",
+    "availability": "Wed evenings",
+    "gear": [
+      "Taxi-meter guitar pickup",
+      "Short-scale guitar"
+    ],
+    "portraitAlt": "Fictional musician Taxi Meter Max in a small club with taxi-meter guitar pickup."
+  },
+  {
+    "id": "fictional-nyc-16-moving-box-min",
+    "name": "Moving Box Min",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Sunnyside",
+    "tagline": "Fragile chords on top",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Indie Pop",
+      "Neo-Soul"
+    ],
+    "bio": "His keyboard has been packed for an imaginary move for three years. Pulls ideas from whatever old set lists he ends up using for box padding.",
+    "lookingFor": "A drummer and singer for new songs that start from chord loops.",
+    "availability": "Tue nights",
+    "gear": [
+      "Moving-box keyboard stand",
+      "Compact stage piano"
+    ],
+    "portraitAlt": "Fictional musician Moving Box Min in a small club with moving-box keyboard stand."
+  },
+  {
+    "id": "fictional-nyc-17-fire-escape-eve",
+    "name": "Fire Escape Eve",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Bushwick",
+    "tagline": "Take the stairs to the high note",
+    "instrument": [
+      "vocals",
+      "synth"
+    ],
+    "genres": [
+      "Indie Rock",
+      "Art Pop"
+    ],
+    "bio": "The mic cable runs up a miniature fire escape before reaching the PA. She writes songs with a good first line and rehearses the last harmony until it sticks.",
+    "lookingFor": "A drummer and bassist for vocal-forward guitar music with strange bridges.",
+    "availability": "Fri nights",
+    "gear": [
+      "Fire-escape patch-cable mic",
+      "Vocal looper"
+    ],
+    "portraitAlt": "Fictional musician Fire Escape Eve in a small club with fire-escape patch-cable mic."
+  },
+  {
+    "id": "fictional-nyc-18-stoop-scoop-luz",
+    "name": "Stoop Scoop Luz",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Park Slope",
+    "tagline": "Three steps to the groove",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Soul",
+      "Funk"
+    ],
+    "bio": "The instrument has three small steps carved into the body. She uses each step for a slightly different thumb attack and refuses to put extra fills under a good lyric.",
+    "lookingFor": "A percussionist and guitar player for slow summer soul tunes.",
+    "availability": "Sunday mornings",
+    "gear": [
+      "Brownstone-stoop bass",
+      "Flatwound strings"
+    ],
+    "portraitAlt": "Fictional musician Stoop Scoop Luz in a small club with brownstone-stoop bass."
+  },
+  {
+    "id": "fictional-nyc-19-platform-brush-benny",
+    "name": "Platform Brush Benny",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Woodside",
+    "tagline": "Next stop is the turnaround",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Trad Jazz",
+      "Country Swing"
+    ],
+    "bio": "Built two brushes from miniature station brooms. He sweeps the snare in broad circles and keeps an index card of songs everybody knows in a different key.",
+    "lookingFor": "An upright bassist and acoustic guitarist for swing at conversation volume.",
+    "availability": "Sat before lunch",
+    "gear": [
+      "Subway-broom brushes",
+      "Shallow snare"
+    ],
+    "portraitAlt": "Fictional musician Platform Brush Benny in a small club with subway-broom brushes."
+  },
+  {
+    "id": "fictional-nyc-20-elevator-reed-arun",
+    "name": "Elevator Reed Arun",
+    "city": "New York",
+    "cityId": "nyc",
+    "state": "NY",
+    "cityColor": "#72d9ff",
+    "neighborhood": "Richmond Hill",
+    "tagline": "Third floor and a drone",
+    "instrument": [
+      "keys",
+      "vocals"
+    ],
+    "genres": [
+      "Qawwali Fusion",
+      "Ambient"
+    ],
+    "bio": "The harmonium bellows rise and fall like an ancient elevator. Their songs start low and bring in more people one phrase at a time.",
+    "lookingFor": "A hand drummer and a chorus singer for long, patient modal jams.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Elevator harmonium",
+      "Handheld recorder"
+    ],
+    "portraitAlt": "Fictional musician Elevator Reed Arun in a small club with elevator harmonium."
+  },
+  {
+    "id": "fictional-chicago-01-lightning-lick-leon",
+    "name": "Lightning Lick Leon",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Bronzeville",
+    "tagline": "The bends are weatherproof",
+    "instrument": [
+      "guitar",
+      "vocals"
+    ],
+    "genres": [
+      "Chicago Blues",
+      "Soul"
+    ],
+    "bio": "Bolted a little lightning rod to the guitar after a surprise outdoor storm. He’d rather hear a groove develop than run through a dozen songs nobody remembers.",
+    "lookingFor": "A bassist and harp player for slow Chicago blues and loud turnarounds.",
+    "availability": "Thu after 6 PM",
+    "gear": [
+      "Lightning-rod electric guitar",
+      "Winter gloves"
+    ],
+    "portraitAlt": "Fictional musician Lightning Lick Leon in a small club with lightning-rod electric guitar."
+  },
+  {
+    "id": "fictional-chicago-02-deep-dish-di",
+    "name": "Deep Dish Di",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Avondale",
+    "tagline": "Extra cheese on the high note",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Power Pop",
+      "Garage Rock"
+    ],
+    "bio": "Sawed a pizza cutter into a microphone stand and never took it off. She writes sharp little songs about chores, then sings the last line like it matters more than anything.",
+    "lookingFor": "A guitarist and drummer for crunchy pop songs and harmonized bridges.",
+    "availability": "Sun evenings",
+    "gear": [
+      "Pizza-cutter microphone",
+      "Tape echo"
+    ],
+    "portraitAlt": "Fictional musician Deep Dish Di in a small club with pizza-cutter microphone."
+  },
+  {
+    "id": "fictional-chicago-03-snow-day-sequencer",
+    "name": "Snow Day Sequencer",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "South Shore",
+    "tagline": "Salt the rimshots",
+    "instrument": [
+      "producer",
+      "drums"
+    ],
+    "genres": [
+      "Chicago House",
+      "Acid House"
+    ],
+    "bio": "The drum machine freezes on a pattern if you stop turning the knobs. He keeps the groove steady enough for dancers while changing everything underneath it.",
+    "lookingFor": "A bassist or singer for long house jams with live drums.",
+    "availability": "Fri late evenings",
+    "gear": [
+      "Snowflake drum machine",
+      "Analog bass synth"
+    ],
+    "portraitAlt": "Fictional musician Snow Day Sequencer in a small club with snowflake drum machine."
+  },
+  {
+    "id": "fictional-chicago-04-wind-chime-wil",
+    "name": "Wind Chime Wil",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Pilsen",
+    "tagline": "The bell keeps its own time",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Latin Jazz",
+      "Funk"
+    ],
+    "bio": "The end of his horn is a wind chime that rings after he stops a phrase. He uses long rests until everybody hears where the tune wants to go next.",
+    "lookingFor": "A percussionist and pianist to write horn hooks for funk and Latin jazz.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Wind-chime baritone sax",
+      "Clip-on mic"
+    ],
+    "portraitAlt": "Fictional musician Wind Chime Wil in a small club with wind-chime baritone sax."
+  },
+  {
+    "id": "fictional-chicago-05-drawbridge-dee",
+    "name": "Drawbridge Dee",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Bridgeport",
+    "tagline": "Raise the bridge at the bridge",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Post-Punk",
+      "Math Rock"
+    ],
+    "bio": "A toy drawbridge lifts from the bass neck whenever she hits its switch. She wraps jagged rhythms around a strong downbeat and likes to leave the difficult part until the end.",
+    "lookingFor": "A guitarist and drummer to write three angular instrumentals.",
+    "availability": "Monday evenings",
+    "gear": [
+      "Drawbridge bass",
+      "Octave fuzz"
+    ],
+    "portraitAlt": "Fictional musician Drawbridge Dee in a small club with drawbridge bass."
+  },
+  {
+    "id": "fictional-chicago-06-radiator-rhodes-rox",
+    "name": "Radiator Rhodes Rox",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Hyde Park",
+    "tagline": "Heat up the low notes first",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Soul",
+      "Jazz"
+    ],
+    "bio": "Set her piano on a cast-iron radiator that ticks in the rests. She uses the sound as a pulse and isn’t afraid to let a one-chord intro go on until everyone settles in.",
+    "lookingFor": "A singer and drummer for gospel-flavored jazz songs.",
+    "availability": "Sun afternoons",
+    "gear": [
+      "Radiator-stand electric piano",
+      "Soft tremolo"
+    ],
+    "portraitAlt": "Fictional musician Radiator Rhodes Rox in a small club with radiator-stand electric piano."
+  },
+  {
+    "id": "fictional-chicago-07-windup-willa",
+    "name": "Windup Willa",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Little Village",
+    "tagline": "Parking expires at the chorus",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Cumbia",
+      "Funk"
+    ],
+    "bio": "Her shaker runs for exactly four minutes before it needs to be wound again. She paces a set by the ratchet and always gives the bass player room to answer.",
+    "lookingFor": "A bassist and accordionist for dance tunes built around the percussion.",
+    "availability": "Wed evenings",
+    "gear": [
+      "Wind-up meter percussion",
+      "Congas"
+    ],
+    "portraitAlt": "Fictional musician Windup Willa in a small club with wind-up meter percussion."
+  },
+  {
+    "id": "fictional-chicago-08-gate-arm-gary",
+    "name": "Gate Arm Gary",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Logan Square",
+    "tagline": "Wait for the noise to pass",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Noise Rock",
+      "Post-Hardcore"
+    ],
+    "bio": "The pickup works fine until he drops the crossing gate on the strings. He gives a riff three tries, then cuts it in half and plays that part twice.",
+    "lookingFor": "A drummer to build tense instrumental songs with sudden quiet sections.",
+    "availability": "Fri nights",
+    "gear": [
+      "Train gate tremolo arm",
+      "Offset guitar"
+    ],
+    "portraitAlt": "Fictional musician Gate Arm Gary in a small club with train gate tremolo arm."
+  },
+  {
+    "id": "fictional-chicago-09-electric-mitten-mox",
+    "name": "Electric Mitten Mox",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Uptown",
+    "tagline": "Gloved hand on the lead break",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Nu Jazz",
+      "Brass Band"
+    ],
+    "bio": "The trumpet stays warm because the mitten plugs into its bell. They play small musical arguments with the drummer and leave the reply hanging for a chorus.",
+    "lookingFor": "A trombonist and percussionist for a compact street brass group.",
+    "availability": "Tue and Thu evenings",
+    "gear": [
+      "Electric-mitten trumpet",
+      "Pocket mute"
+    ],
+    "portraitAlt": "Fictional musician Electric Mitten Mox in a small club with electric-mitten trumpet."
+  },
+  {
+    "id": "fictional-chicago-10-relish-vibes-val",
+    "name": "Relish Vibes Val",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "West Town",
+    "tagline": "Neon relish and minor sevenths",
+    "instrument": [
+      "keys"
+    ],
+    "genres": [
+      "Lounge",
+      "Jazz"
+    ],
+    "bio": "Swapped the vibraphone bars for glowing green ones after losing the third octave in a dim club. She likes melodies that can be played as a question or an answer.",
+    "lookingFor": "An upright bassist and guitarist for quiet jazz with unusual melodies.",
+    "availability": "Sat before 6 PM",
+    "gear": [
+      "Relish-green vibraphone",
+      "Soft mallets"
+    ],
+    "portraitAlt": "Fictional musician Relish Vibes Val in a small club with relish-green vibraphone."
+  },
+  {
+    "id": "fictional-chicago-11-buoy-bang-beto",
+    "name": "Buoy Bang Beto",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Back of the Yards",
+    "tagline": "Channel marker in a mosh pit",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Punk",
+      "Hardcore"
+    ],
+    "bio": "The buckets have enough ring to hear across the lake. He gets the group through a full set in rehearsal and still leaves time to argue about the last song.",
+    "lookingFor": "A bassist and singer for loud songs that end on time.",
+    "availability": "Mon and Thu nights",
+    "gear": [
+      "Lake-buoy bucket drums",
+      "Ankle bells"
+    ],
+    "portraitAlt": "Fictional musician Buoy Bang Beto in a small club with lake-buoy bucket drums."
+  },
+  {
+    "id": "fictional-chicago-12-spark-plug-slip",
+    "name": "Spark Plug Slip",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "North Lawndale",
+    "tagline": "The backfire is on purpose",
+    "instrument": [
+      "horns",
+      "vocals"
+    ],
+    "genres": [
+      "Chicago Blues",
+      "Roots"
+    ],
+    "bio": "The harmonica rattles like an engine that’s almost ready to turn over. His best parts are little two-bar answers to lyrics about people who missed their train.",
+    "lookingFor": "A guitarist and drummer for electric blues and country shuffles.",
+    "availability": "Wed afternoons",
+    "gear": [
+      "Sparkplug harmonica",
+      "Bullet mic"
+    ],
+    "portraitAlt": "Fictional musician Spark Plug Slip in a small club with sparkplug harmonica."
+  },
+  {
+    "id": "fictional-chicago-13-dibs-desk-drea",
+    "name": "Dibs Desk Drea",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Albany Park",
+    "tagline": "That groove has dibs",
+    "instrument": [
+      "producer",
+      "synth"
+    ],
+    "genres": [
+      "Chicago House",
+      "Electro"
+    ],
+    "bio": "Keeps a tiny folding chair on top of the sampler so other producers know which desk is hers. Loves taking a catchy one-bar melody through an unreasonable number of drum patterns.",
+    "lookingFor": "A vocalist or percussionist for warm house songs with short hooks.",
+    "availability": "Fri and Sat late evenings",
+    "gear": [
+      "Parking-chair sampler",
+      "Compact controller"
+    ],
+    "portraitAlt": "Fictional musician Dibs Desk Drea in a small club with parking-chair sampler."
+  },
+  {
+    "id": "fictional-chicago-14-derby-doorstop",
+    "name": "Derby Doorstop",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Rogers Park",
+    "tagline": "Elbow pads for the chorus",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Riot Grrrl",
+      "Punk"
+    ],
+    "bio": "Broke three pedals by stomping, then solved it with a chunk of rubber from a door. Wears derby pads because the rehearsal rug keeps sliding across the floor.",
+    "lookingFor": "A bassist and drummer for loud rehearsals and short sets.",
+    "availability": "Tue evenings",
+    "gear": [
+      "Doorstop distortion pedal",
+      "Purple short-scale guitar"
+    ],
+    "portraitAlt": "Fictional musician Derby Doorstop in a small club with doorstop distortion pedal."
+  },
+  {
+    "id": "fictional-chicago-15-lamppost-lulu",
+    "name": "Lamppost Lulu",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Austin",
+    "tagline": "The streetlight follows the vocal",
+    "instrument": [
+      "vocals"
+    ],
+    "genres": [
+      "Soul",
+      "Disco"
+    ],
+    "bio": "The lamp buzzes when the mic is on, which made the opening note easy to find. They sing the last verse for whoever had to wait for the bus in the rain.",
+    "lookingFor": "A bassist and pianist to arrange quiet verses and big dance choruses.",
+    "availability": "Thu evenings",
+    "gear": [
+      "Street-lamp mic",
+      "Plate reverb"
+    ],
+    "portraitAlt": "Fictional musician Lamppost Lulu in a small club with street-lamp mic."
+  },
+  {
+    "id": "fictional-chicago-16-pothole-pizz-piper",
+    "name": "Pothole Pizz Piper",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Edgewater",
+    "tagline": "Mind the gap under the endpin",
+    "instrument": [
+      "strings"
+    ],
+    "genres": [
+      "Chamber Folk",
+      "Post-Rock"
+    ],
+    "bio": "The cello endpin fits perfectly in a piece of broken road. She drags a bow across two strings for a whole verse, then answers with a spare pizzicato line.",
+    "lookingFor": "A drummer and guitarist for instrumental sketches that build slowly.",
+    "availability": "Sunday afternoons",
+    "gear": [
+      "Pothole-pin cello",
+      "Octave pedal"
+    ],
+    "portraitAlt": "Fictional musician Pothole Pizz Piper in a small club with pothole-pin cello."
+  },
+  {
+    "id": "fictional-chicago-17-plow-tempo-parth",
+    "name": "Plow Tempo Parth",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "West Ridge",
+    "tagline": "Clears the snow in seven",
+    "instrument": [
+      "drums"
+    ],
+    "genres": [
+      "Tabla Fusion",
+      "Jazz"
+    ],
+    "bio": "Stuck a toy plow on his bigger drum and insists it clears away beats that aren’t working. He writes concise rhythm charts and leaves room for somebody to ignore them.",
+    "lookingFor": "A keyboardist or bassist for modal jams with shifting meters.",
+    "availability": "Sat afternoons",
+    "gear": [
+      "Snowplow tabla",
+      "Travel dayan"
+    ],
+    "portraitAlt": "Fictional musician Plow Tempo Parth in a small club with snowplow tabla."
+  },
+  {
+    "id": "fictional-chicago-18-coil-string-coral",
+    "name": "Coil String Coral",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Woodlawn",
+    "tagline": "Watch the low string bounce",
+    "instrument": [
+      "bass"
+    ],
+    "genres": [
+      "Jazz",
+      "Avant-Garde"
+    ],
+    "bio": "Replaced two strings with silver springs and now has to catch the notes before they bounce away. Plays big quiet phrases and thinks the best solos usually end early.",
+    "lookingFor": "A reed player and drummer for improvised music with a clear pulse.",
+    "availability": "Mon evenings",
+    "gear": [
+      "Spring-strung upright bass",
+      "Bow pickup"
+    ],
+    "portraitAlt": "Fictional musician Coil String Coral in a small club with spring-strung upright bass."
+  },
+  {
+    "id": "fictional-chicago-19-lunch-counter-lou",
+    "name": "Lunch Counter Lou",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "Jefferson Park",
+    "tagline": "The slide comes with coffee",
+    "instrument": [
+      "guitar"
+    ],
+    "genres": [
+      "Americana",
+      "Western Swing"
+    ],
+    "bio": "The pedal steel table looks like a two-seat lunch counter, complete with a napkin holder. Lou keeps a small book of songs that deserve a steel part and brings extra charts.",
+    "lookingFor": "A vocalist and upright bassist for lap-and-pedal-steel swing tunes.",
+    "availability": "Fri after 5 PM",
+    "gear": [
+      "Lunch-counter pedal steel",
+      "Volume pedal"
+    ],
+    "portraitAlt": "Fictional musician Lunch Counter Lou in a small club with lunch-counter pedal steel."
+  },
+  {
+    "id": "fictional-chicago-20-life-raft-lark",
+    "name": "Life Raft Lark",
+    "city": "Chicago",
+    "cityId": "chicago",
+    "state": "IL",
+    "cityColor": "#59e3ac",
+    "neighborhood": "South Loop",
+    "tagline": "Carry a spare for the bridge",
+    "instrument": [
+      "horns"
+    ],
+    "genres": [
+      "Brass Band",
+      "Jazz"
+    ],
+    "bio": "A tiny life raft dangles from the trumpet bell so she can point it at whoever is rushing. Knows exactly how far a quiet horn can carry in a small room.",
+    "lookingFor": "A percussionist and trombonist to rehearse neighborhood brass tunes.",
+    "availability": "Sun mornings",
+    "gear": [
+      "Life-raft trumpet",
+      "Flugelhorn mouthpiece"
+    ],
+    "portraitAlt": "Fictional musician Life Raft Lark in a small club with life-raft trumpet."
+  }
+]
