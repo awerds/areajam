@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Star, Volume2, VolumeX } from 'lucide-react';
 import { startListingLoop, stopCardPreview } from '../lib/audioPreview';
+import { subscribeColorScheme } from '../lib/colorScheme';
 import { getMediaObjectUrl } from '../lib/mediaStorage';
 import type { Listing, MediaClip } from '../types';
 import { CardArtwork } from './CardArtwork';
@@ -43,6 +44,7 @@ export function ClipPlayer({
   const [clipIndex, setClipIndex] = useState(0);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [schemeTick, setSchemeTick] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -53,6 +55,12 @@ export function ClipPlayer({
   const activeClip = clips[safeIndex];
   const featuredId = listing.featuredClipId || clips[0]?.id;
   const isMainClip = activeClip?.id === featuredId;
+  const hasRealVideo = activeClip?.kind === 'video' && Boolean(mediaUrl);
+  const paletteIdx = Math.abs(listing.visualSeed) % 6;
+
+  useEffect(() => {
+    return subscribeColorScheme(() => setSchemeTick((n) => n + 1));
+  }, []);
 
   useEffect(() => {
     setClipIndex(0);
@@ -124,15 +132,21 @@ export function ClipPlayer({
   }, [activeClip?.clipVariation, activeClip?.kind, activeClip?.mediaId, isActive, listing, safeIndex, soundEnabled]);
 
   useEffect(() => {
-    if (activeClip?.kind === 'video' && mediaUrl) return;
+    if (hasRealVideo) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const cs = getComputedStyle(canvas);
+    const accent =
+      (listing.side === 'jam' ? cs.getPropertyValue('--art-primary') : cs.getPropertyValue('--art-secondary')).trim() ||
+      (listing.side === 'jam' ? '#ff3b6b' : '#10e88a');
+    const secondary =
+      cs.getPropertyValue('--art-rim').trim() ||
+      (listing.side === 'jam' ? '#ff8a5b' : '#38bdf8');
+
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const accent = listing.side === 'jam' ? '#ff3b6b' : '#10e88a';
-    const secondary = listing.side === 'jam' ? '#ff8a5b' : '#38bdf8';
     const durationMs = Math.max(4000, (activeClip?.durationSec || 8) * 1000);
     const startTs = performance.now();
     let rafId = 0;
@@ -150,7 +164,7 @@ export function ClipPlayer({
 
       const barCount = 28;
       const barW = w / (barCount * 1.8);
-      const centerY = h * 0.44;
+      const centerY = h * 0.54;
       const seedOffset = listing.visualSeed * 0.45 + safeIndex * 1.9;
 
       for (let i = 0; i < barCount; i++) {
@@ -161,13 +175,13 @@ export function ClipPlayer({
         const amp = (soundEnabled && isActive ? 42 : 24) * Math.max(0.2, wave);
         const x = (w / barCount) * i + barW * 0.4;
         ctx.fillStyle = i % 3 === 0 ? accent : secondary;
-        ctx.globalAlpha = soundEnabled && isActive ? 0.56 : 0.34;
+        ctx.globalAlpha = soundEnabled && isActive ? 0.62 : 0.38;
         ctx.beginPath();
         ctx.roundRect(x, centerY - amp / 2, barW, amp, barW / 2);
         ctx.fill();
       }
 
-      ctx.globalAlpha = soundEnabled && isActive ? 0.32 : 0.16;
+      ctx.globalAlpha = soundEnabled && isActive ? 0.36 : 0.2;
       ctx.strokeStyle = accent;
       ctx.lineWidth = 2;
       const pulseR = 54 + Math.sin(t * 3.1 + seedOffset) * 10;
@@ -186,7 +200,7 @@ export function ClipPlayer({
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [activeClip?.durationSec, activeClip?.kind, isActive, listing.side, listing.visualSeed, mediaUrl, safeIndex, soundEnabled]);
+  }, [activeClip?.durationSec, hasRealVideo, isActive, listing.side, listing.visualSeed, safeIndex, schemeTick, soundEnabled]);
 
   const handleMediaTimeUpdate = (el: HTMLMediaElement) => {
     if (!el.duration || !Number.isFinite(el.duration)) return;
@@ -194,10 +208,15 @@ export function ClipPlayer({
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
-      <CardArtwork listing={listing} areaCode={areaCode} compact={compact} />
+    <div className={`card-art-${paletteIdx} relative h-full w-full overflow-hidden`}>
+      <CardArtwork
+        listing={listing}
+        areaCode={areaCode}
+        compact={compact}
+        showTopBadges={false}
+      />
 
-      {activeClip?.kind === 'video' && mediaUrl ? (
+      {hasRealVideo && mediaUrl ? (
         <video
           ref={videoRef}
           src={mediaUrl}
@@ -212,7 +231,7 @@ export function ClipPlayer({
         <canvas
           ref={canvasRef}
           width={360}
-          height={640}
+          height={420}
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full"
         />
@@ -229,16 +248,16 @@ export function ClipPlayer({
         />
       )}
 
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: compact
-            ? 'linear-gradient(180deg, rgba(7,8,13,0.34) 0%, rgba(7,8,13,0.08) 45%, rgba(7,8,13,0.75) 100%)'
-            : 'linear-gradient(180deg, rgba(7,8,13,0.48) 0%, rgba(7,8,13,0.06) 28%, rgba(7,8,13,0.78) 65%, rgba(7,8,13,0.96) 100%)',
-        }}
-      />
+      {hasRealVideo && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(7,8,13,0.52) 0%, rgba(7,8,13,0) 38%)',
+          }}
+        />
+      )}
 
-      <div className="absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2.5">
+      <div className="absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2">
         <div className="flex items-center gap-1.5">
           {clips.map((clip, idx) => {
             const fill = idx < safeIndex ? 100 : idx === safeIndex ? Math.round(progress * 100) : 0;
@@ -255,12 +274,21 @@ export function ClipPlayer({
                 aria-label={`Play clip ${idx + 1}: ${clip.title}`}
                 className="group relative h-6 flex-1 cursor-pointer py-2.5"
               >
-                <span className="block h-1 w-full overflow-hidden rounded-full bg-white/25">
+                <span
+                  className={`block h-1 w-full overflow-hidden rounded-full ${
+                    hasRealVideo ? 'bg-white/30' : 'bg-[var(--card-track-bg)]'
+                  }`}
+                >
                   <span
                     className="block h-full rounded-full transition-[width] duration-100"
                     style={{
                       width: `${fill}%`,
-                      backgroundColor: idx === safeIndex ? 'var(--accent)' : '#ffffff',
+                      backgroundColor:
+                        idx === safeIndex
+                          ? 'var(--accent)'
+                          : hasRealVideo
+                            ? '#ffffff'
+                            : 'var(--ink)',
                     }}
                   />
                 </span>
@@ -271,7 +299,13 @@ export function ClipPlayer({
 
         {showMetadataOverlay && (
           <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md ${
+                hasRealVideo
+                  ? 'border-white/20 bg-black/55 text-white'
+                  : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)]'
+              }`}
+            >
               {isMainClip ? (
                 <Star className="h-3 w-3 fill-current text-[var(--accent)]" aria-hidden="true" />
               ) : (
@@ -284,7 +318,9 @@ export function ClipPlayer({
               )}
               <span>{activeClip?.title || 'Intro reel'}</span>
               {isMainClip && clips.length > 1 && (
-                <span className="text-[10px] text-white/70">(Main)</span>
+                <span className={`text-[10px] ${hasRealVideo ? 'text-white/75' : 'text-[var(--muted)]'}`}>
+                  (Main)
+                </span>
               )}
             </span>
 
@@ -297,7 +333,11 @@ export function ClipPlayer({
                 }}
                 aria-pressed={soundEnabled}
                 aria-label={soundEnabled ? 'Mute reel audio' : 'Unmute reel audio'}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md transition hover:bg-black/75"
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md transition ${
+                  hasRealVideo
+                    ? 'border-white/20 bg-black/55 text-white hover:bg-black/75'
+                    : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] hover:bg-[var(--surface-solid)]'
+                }`}
               >
                 {soundEnabled ? (
                   <>

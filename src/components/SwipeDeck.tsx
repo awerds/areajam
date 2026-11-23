@@ -23,6 +23,11 @@ interface SwipeDeckProps {
   onGoToPost: () => void;
 }
 
+function sideBadgeLabel(listing: Listing): string {
+  if (listing.side === 'jam') return 'Jam session';
+  return listing.gigSubtype === 'open-gig' ? 'Open gig slot' : 'Band for hire';
+}
+
 export function SwipeDeck({
   cards,
   mode,
@@ -306,27 +311,29 @@ export function SwipeDeck({
 
   return (
     <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
-      <div className="deck-perspective relative h-[min(68dvh,36rem)] w-full select-none md:h-[min(64dvh,34rem)]">
+      <div className="deck-perspective relative h-[min(74dvh,39rem)] w-full select-none md:h-[min(68dvh,37rem)]">
         {nextCard && (
           <article
             ref={nextCardRef}
             aria-hidden="true"
-            className="dark-stage glass-surface pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem] bg-[#0b0d14]"
+            className="pointer-events-none absolute inset-0 flex flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)]"
             style={{
               transform: 'translate3d(0, 14px, 0) scale(0.94)',
               opacity: 0.65,
             }}
           >
-            <ClipPlayer
-              listing={nextCard}
-              areaCode={getRegionAreaCode(nextCard.regionId)}
-              isActive={false}
-              soundEnabled={false}
-              showMetadataOverlay={false}
-            />
-            <div className="absolute inset-x-0 bottom-0 p-5">
-              <h3 className="font-display text-2xl font-bold text-white">{nextCard.title}</h3>
-              <p className="mt-1 text-sm text-white/75">{nextCard.subtitle}</p>
+            <div className="relative min-h-[12rem] flex-1 overflow-hidden">
+              <ClipPlayer
+                listing={nextCard}
+                areaCode={getRegionAreaCode(nextCard.regionId)}
+                isActive={false}
+                soundEnabled={false}
+                showMetadataOverlay={false}
+              />
+            </div>
+            <div className="shrink-0 border-t border-[var(--border)] bg-[var(--surface-solid)] p-5">
+              <h3 className="font-display text-2xl font-bold text-[var(--ink)]">{nextCard.title}</h3>
+              <p className="mt-1 text-sm text-[var(--muted)]">{nextCard.subtitle}</p>
             </div>
           </article>
         )}
@@ -338,130 +345,142 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="dark-stage glass-surface absolute inset-0 flex touch-pan-y cursor-grab flex-col justify-end overflow-hidden rounded-[2rem] bg-[#0b0d14] active:cursor-grabbing"
+          className="absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <ClipPlayer
-            listing={topCard}
-            areaCode={getRegionAreaCode(topCard.regionId)}
-            isActive={!flyDir}
-            soundEnabled={soundEnabled}
-            onToggleSound={onToggleSound}
-          />
+          {/* Zone 1: Adaptive video / artwork media stage */}
+          <div className="relative min-h-[12.5rem] flex-1 overflow-hidden">
+            <ClipPlayer
+              listing={topCard}
+              areaCode={getRegionAreaCode(topCard.regionId)}
+              isActive={!flyDir}
+              soundEnabled={soundEnabled}
+              onToggleSound={onToggleSound}
+            />
 
-          <div ref={glareRef} className="card-glare absolute inset-0 opacity-0" aria-hidden="true" />
+            <div ref={glareRef} className="card-glare absolute inset-0 opacity-0" aria-hidden="true" />
 
-          {/* Floating glass swipe decision badges */}
-          <div
-            aria-hidden="true"
-            className="font-display pointer-events-none absolute left-5 top-20 -rotate-12 rounded-2xl border px-4 py-1.5 text-2xl font-bold backdrop-blur-md"
-            style={{
-              opacity: likeOpacity,
-              borderColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-              color: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-              backgroundColor: 'rgba(7, 8, 13, 0.72)',
-              boxShadow:
-                mode === 'jam'
-                  ? '0 0 28px rgba(255, 59, 107, 0.35)'
-                  : '0 0 28px rgba(16, 232, 138, 0.35)',
-            }}
-          >
-            {positiveLabel}
-          </div>
-          <div
-            aria-hidden="true"
-            className="font-display pointer-events-none absolute right-5 top-20 rotate-12 rounded-2xl border border-[var(--err)] bg-[#07080d]/75 px-4 py-1.5 text-2xl font-bold text-[var(--err)] backdrop-blur-md"
-            style={{ opacity: passOpacity }}
-          >
-            Pass
-          </div>
-
-          {/* Mobile TikTok right-edge vertical action rail */}
-          <div
-            onPointerDown={(e) => e.stopPropagation()}
-            className="absolute bottom-24 right-3 z-20 flex flex-col items-center gap-2.5 md:hidden"
-          >
-            <button
-              type="button"
-              onClick={() => triggerSwipe('like')}
-              aria-label={mode === 'jam' ? `Jam with ${topCard.title}` : `Book ${topCard.title}`}
-              className="inline-flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition active:scale-90"
+            {/* Floating swipe decision stamps */}
+            <div
+              aria-hidden="true"
+              className="font-display pointer-events-none absolute left-5 top-16 -rotate-12 rounded-2xl border bg-[var(--surface-solid)]/90 px-4 py-1.5 text-2xl font-bold backdrop-blur-md"
               style={{
-                backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                opacity: likeOpacity,
+                borderColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                color: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
               }}
             >
-              {mode === 'jam' ? (
-                <Flame className="h-6 w-6 fill-current" aria-hidden="true" />
-              ) : (
-                <Ticket className="h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => triggerSwipe('pass')}
-              aria-label={`Pass on ${topCard.title}`}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-[var(--err)] backdrop-blur-md active:scale-90"
+              {positiveLabel}
+            </div>
+            <div
+              aria-hidden="true"
+              className="font-display pointer-events-none absolute right-5 top-16 rotate-12 rounded-2xl border border-[var(--err)] bg-[var(--surface-solid)]/90 px-4 py-1.5 text-2xl font-bold text-[var(--err)] backdrop-blur-md"
+              style={{ opacity: passOpacity }}
             >
-              <X className="h-5 w-5" aria-hidden="true" />
-            </button>
+              Pass
+            </div>
 
-            <button
-              type="button"
-              onClick={() => onOpenProfile(topCard)}
-              aria-label={`Open full profile page for ${topCard.title}`}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md active:scale-90"
+            {/* Mobile right-edge action rail inside media stage */}
+            <div
+              onPointerDown={(e) => e.stopPropagation()}
+              className="absolute bottom-3 right-3 z-20 flex flex-col items-center gap-2 md:hidden"
             >
-              <Maximize2 className="h-4 w-4" aria-hidden="true" />
-            </button>
+              <button
+                type="button"
+                onClick={() => triggerSwipe('like')}
+                aria-label={mode === 'jam' ? `Jam with ${topCard.title}` : `Book ${topCard.title}`}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition active:scale-90"
+                style={{
+                  backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                  color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                }}
+              >
+                {mode === 'jam' ? (
+                  <Flame className="h-5 w-5 fill-current" aria-hidden="true" />
+                ) : (
+                  <Ticket className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
 
-            <button
-              type="button"
-              onClick={onToggleSound}
-              aria-pressed={soundEnabled}
-              aria-label={soundEnabled ? 'Mute sound' : 'Turn sound on'}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-md active:scale-90"
-            >
-              {soundEnabled ? (
-                <Volume2 className="h-5 w-5 text-[var(--accent)]" aria-hidden="true" />
-              ) : (
-                <VolumeX className="h-5 w-5" aria-hidden="true" />
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={() => triggerSwipe('pass')}
+                aria-label={`Pass on ${topCard.title}`}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--err)] backdrop-blur-md active:scale-90"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
 
-            <button
-              type="button"
-              onClick={onUndo}
-              disabled={!canUndo}
-              aria-label="Undo last swipe"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 backdrop-blur-md disabled:opacity-35"
-            >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            </button>
+              <button
+                type="button"
+                onClick={() => onOpenProfile(topCard)}
+                aria-label={`Open full profile page for ${topCard.title}`}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] backdrop-blur-md active:scale-90"
+              >
+                <Maximize2 className="h-4 w-4" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onToggleSound}
+                aria-pressed={soundEnabled}
+                aria-label={soundEnabled ? 'Mute sound' : 'Turn sound on'}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] backdrop-blur-md active:scale-90"
+              >
+                {soundEnabled ? (
+                  <Volume2 className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
+                ) : (
+                  <VolumeX className="h-4 w-4" aria-hidden="true" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={onUndo}
+                disabled={!canUndo}
+                aria-label="Undo last swipe"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] backdrop-blur-md disabled:opacity-35"
+              >
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
           </div>
 
-          {/* Card foreground info */}
-          <div className="relative z-10 flex flex-col gap-2.5 p-5 pr-16 md:pr-5">
-            {/* At-a-glance instrument icon pills */}
+          {/* Zone 2: Solid high-contrast card info panel */}
+          <div className="relative z-10 flex shrink-0 flex-col gap-2.5 border-t border-[var(--border)] bg-[var(--surface-solid)] p-5">
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink)]">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: topCard.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                  }}
+                />
+                <span>{sideBadgeLabel(topCard)}</span>
+              </span>
+              <span className="truncate font-medium text-[var(--muted)]">
+                {topCard.payOrSplit || `${topCard.neighborhood}, ${getRegionAreaCode(topCard.regionId)}`}
+              </span>
+            </div>
+
             <InstrumentBadgeRow instruments={topCard.instruments} compact max={4} />
 
             <div>
               <button
                 type="button"
                 onClick={() => onOpenProfile(topCard)}
-                className="text-left transition hover:opacity-85"
+                className="text-left transition hover:opacity-80"
               >
-                <h2 className="font-display text-3xl font-bold leading-tight tracking-tight text-white">
+                <h2 className="font-display text-2xl font-bold leading-tight tracking-tight text-[var(--ink)] sm:text-[1.7rem]">
                   {topCard.title}
                 </h2>
               </button>
-              <p className="mt-0.5 text-sm font-medium text-white/75">
+              <p className="mt-0.5 text-sm font-medium text-[var(--muted)]">
                 {topCard.subtitle}, {topCard.neighborhood}
               </p>
             </div>
 
-            <p className="line-clamp-2 text-sm font-medium leading-snug text-white/95">
+            <p className="line-clamp-2 text-sm font-medium leading-snug text-[var(--ink)]/90">
               {topCard.seekingOrOffer}
             </p>
 
@@ -470,7 +489,7 @@ export function SwipeDeck({
                 {topCard.genres.slice(0, 3).map((genre) => (
                   <span
                     key={genre}
-                    className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-xs font-medium text-white/90 backdrop-blur-xs"
+                    className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-medium text-[var(--ink)]"
                   >
                     {genre}
                   </span>
@@ -480,7 +499,7 @@ export function SwipeDeck({
               <button
                 type="button"
                 onClick={() => onOpenProfile(topCard)}
-                className="hidden shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/25 md:inline-flex"
+                className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:inline-flex"
               >
                 <Maximize2 className="h-3 w-3" aria-hidden="true" />
                 <span>Full page</span>

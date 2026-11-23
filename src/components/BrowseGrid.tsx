@@ -115,7 +115,7 @@ export function BrowseGrid({
                     onClick={() => void toggleCardPreview(item, 0)}
                     aria-pressed={isPlaying}
                     aria-label={isPlaying ? `Pause clip for ${item.title}` : `Play clip for ${item.title}`}
-                    className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
+                    className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-solid)]"
                   >
                     {isPlaying ? (
                       <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
