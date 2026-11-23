@@ -21,7 +21,7 @@ export function HowItWorksDialog({
       onClose={onClose}
       titleId="how-it-works-title"
       title="How AreaJam works"
-      subtitle="Interactive local preview — sample profiles & browser storage"
+      subtitle="Nashville (615) Jam pilot — open to every US city & state"
     >
       <div className="space-y-4">
         <div className="relative overflow-hidden rounded-2xl bg-[#10131d] px-5 py-5 text-white">
@@ -60,9 +60,9 @@ export function HowItWorksDialog({
             <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--gigs-soft)] text-[var(--gigs)]">
               <Ticket className="h-5 w-5" aria-hidden="true" />
             </div>
-            <h3 className="font-display text-base font-bold">Gigs side</h3>
+            <h3 className="font-display text-base font-bold">Gigs side (Coming soon)</h3>
             <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-              Switch modes to discover open local venue bills or browse gig-ready bands with soundcheck clips and rates.
+              Launching once local venues join with verified dates and bills. Sample cards can still be toggled on to preview the format.
             </p>
           </div>
         </div>
@@ -71,27 +71,27 @@ export function HowItWorksDialog({
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <Compass className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Browse free without an account</p>
+              <p className="font-semibold">Browse free across all cities</p>
               <p className="text-xs text-[var(--muted)]">
-                Pick who you are looking for, watch auto-playing clips in the reel deck or directory grid, and swipe right to connect.
+                Explore Nashville (615) or search any US state and city board. Inspect instruments, gear lockers, and linked Instagram/YouTube clips.
               </p>
             </div>
           </li>
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <Film className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Record a quick webcam intro or upload cuts</p>
+              <p className="font-semibold">Publish with linked social clips</p>
               <p className="text-xs text-[var(--muted)]">
-                When you are ready to post your own card, sign in with Apple or Google and record up to 30-second video intros straight in the browser.
+                Sign in with Google or Apple to publish a live shareable profile built from your existing Instagram Reels, YouTube, TikTok, or SoundCloud links.
               </p>
             </div>
           </li>
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Simulated matches &amp; browser-local drafts</p>
+              <p className="font-semibold">Invite to jam &amp; safety controls</p>
               <p className="text-xs text-[var(--muted)]">
-                Sample cards, match popups, and replies are simulated locally. Profile drafts, clips, and messages stay on this browser per signed-in account. Build{' '}
+                Accepting a Jam invite opens one private 1-on-1 thread backed by Firebase Auth and Firestore security rules, with instant Block and Report controls. Build{' '}
                 <code className="rounded bg-[var(--pill-bg)] px-1 py-0.5 text-[11px] text-[var(--ink)]">
                   {import.meta.env.VITE_BUILD_SHA || 'local'}
                 </code>

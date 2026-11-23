@@ -1,0 +1,580 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model (AreaJam — Cloud Firestore Standard Edition)
+// ===============================================================
+//
+// Collection: profiles/{profileId}
+// Document ID: profileId (string, 1..128 chars; matches data.id)
+// Fields (zero PII emails stored here; public discovery only for isPublished == true):
+//   - id: string (required, immutable, == profileId, 1..128)
+//   - ownerUid: string (required, immutable, == request.auth.uid on create, 1..128)
+//   - ownerName: string (required, 1..64)
+//   - side: string (required, 'jam' | 'gigs')
+//   - roleCategory: string (required, 1..48)
+//   - instruments: list<string> (required, 1..6 items, each 1..32)
+//   - regionId: string (required, 2..64)
+//   - regionLabel: string (optional, <= 80)
+//   - regionState: string (optional, <= 16)
+//   - neighborhood: string (required, 2..48)
+//   - title: string (required, 2..64)
+//   - subtitle: string (required, 2..64)
+//   - seekingOrOffer: string (required, 6..140)
+//   - genres: list<string> (required, 1..4 items, each 1..48)
+//   - tags: list<string> (required, 0..6 items, each 0..48)
+//   - bio: string (required, 12..600)
+//   - gearOrBackline: string (required, <= 400)
+//   - gearLocker: list<map> (required, 0..20 items)
+//   - availability: string (required, <= 80)
+//   - instagramHandle: string (optional, <= 32)
+//   - sampleLink: string (optional, <= 200)
+//   - clips: list<map> (required, 1..4 items)
+//   - featuredClipId: string (optional, <= 80)
+//   - profileStyle: map (required; allowed keys: themeId, moodStatus, soundsLike, bannerPattern)
+//   - visualSeed: int (required)
+//   - isPublished: bool (required)
+//   - createdAt: int (required, immutable, epoch ms)
+//   - updatedAt: int (required, >= createdAt, epoch ms)
+//
+// Subcollection: profiles/{profileId}/wallNotes/{noteId}
+// Fields (create-only; no update; delete by author or profile owner):
+//   - authorUid: string (required, == request.auth.uid)
+//   - authorName: string (required, 1..64)
+//   - text: string (required, 1..280)
+//   - createdAt: int (required)
+//
+// Collection: jamInvites/{inviteId}
+// Document ID: pairId(fromUid, toUid) == min(a,b) + '__' + max(a,b)
+// Fields:
+//   - participants: list<string> (required, immutable, size 2, sorted participants[0] < participants[1])
+//   - fromUid: string (required, in participants, != toUid)
+//   - toUid: string (required, in participants, != fromUid)
+//   - fromName: string (required, 1..64)
+//   - toName: string (required, 1..64)
+//   - targetProfileId: string (required, 1..80)
+//   - targetProfileTitle: string (required, 1..64)
+//   - regionId: string (required, 2..64)
+//   - note: string (required, 1..280)
+//   - status: string (required, 'pending' | 'accepted' | 'declined' | 'cancelled')
+//   - threadId: string (required, immutable, == inviteId)
+//   - createdAt: int (required, immutable)
+//   - updatedAt: int (required, >= createdAt)
+//
+// Collection: threads/{threadId}
+// Document ID: pairId(u1, u2) matching an accepted jamInvites/{threadId}
+// Fields:
+//   - participants: list<string> (required, immutable, size 2, sorted participants[0] < participants[1])
+//   - participantNames: map<string, string> (required, immutable, keys subset of participants)
+//   - profileId: string (required, immutable, 1..128)
+//   - profileTitle: string (required, immutable, 1..128)
+//   - regionId: string (required, immutable, 2..64)
+//   - lastMessageText: string (required, mutable only with lastMessageAt, <= 500)
+//   - lastMessageAt: int (required, mutable only with lastMessageText)
+//   - createdAt: int (required, immutable)
+//
+// Subcollection: threads/{threadId}/messages/{messageId}
+// Fields (append-only; no update or delete):
+//   - senderUid: string (required, == request.auth.uid)
+//   - senderName: string (required, 1..64)
+//   - text: string (required, 1..1000)
+//   - sentAt: int (required)
+//
+// Subcollection: users/{uid}/blocks/{blockedUid}
+// Fields (owner-only read/create/delete; no update; parent users/{uid} denied):
+//   - blockedUid: string (required, == blockedUid, != uid, 1..128)
+//   - blockedName: string (required, 1..64)
+//   - createdAt: int (required)
+//
+// Collection: reports/{reportId}
+// Fields (create-only by signed-in user; no client read/update/delete):
+//   - reporterUid: string (required, == request.auth.uid)
+//   - targetUid: string (required, != request.auth.uid, 1..128)
+//   - targetType: string (required, 'profile' | 'thread' | 'wallNote')
+//   - targetId: string (required, 1..128)
+//   - reason: string (required, 'spam' | 'harassment' | 'impersonation' | 'inappropriate' | 'other')
+//   - details: string (required, <= 500)
+//   - createdAt: int (required)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Core Auth, Pairing & Block Helpers
+    // ===============================================================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function pairId(a, b) {
+      return a < b ? a + '__' + b : b + '__' + a;
+    }
+
+    function notBlocked(a, b) {
+      return !exists(/databases/$(database)/documents/users/$(a)/blocks/$(b)) &&
+             !exists(/databases/$(database)/documents/users/$(b)/blocks/$(a));
+    }
+
+    // ===============================================================
+    // Generic Type & Bound Helpers
+    // ===============================================================
+
+    function isBoundedString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isOptionalString(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isValidStringList(arr, minCount, maxCount, minItemLen, maxItemLen) {
+      return arr is list &&
+             arr.size() >= minCount &&
+             arr.size() <= maxCount &&
+             (arr.size() < 1 || isBoundedString(arr[0], minItemLen, maxItemLen)) &&
+             (arr.size() < 2 || isBoundedString(arr[1], minItemLen, maxItemLen)) &&
+             (arr.size() < 3 || isBoundedString(arr[2], minItemLen, maxItemLen)) &&
+             (arr.size() < 4 || isBoundedString(arr[3], minItemLen, maxItemLen)) &&
+             (arr.size() < 5 || isBoundedString(arr[4], minItemLen, maxItemLen)) &&
+             (arr.size() < 6 || isBoundedString(arr[5], minItemLen, maxItemLen)) &&
+             (arr.size() < 7 || isBoundedString(arr[6], minItemLen, maxItemLen)) &&
+             (arr.size() < 8 || isBoundedString(arr[7], minItemLen, maxItemLen));
+    }
+
+    function isSortedPair(participants) {
+      return participants is list &&
+             participants.size() == 2 &&
+             isBoundedString(participants[0], 1, 128) &&
+             isBoundedString(participants[1], 1, 128) &&
+             participants[0] < participants[1];
+    }
+
+    // ===============================================================
+    // Profile Domain Validators
+    // ===============================================================
+
+    function isValidGearItem(item) {
+      return item is map &&
+             item.keys().hasOnly(['id', 'category', 'name', 'notes']) &&
+             (!('id' in item) || isBoundedString(item.id, 1, 80)) &&
+             (!('category' in item) || isBoundedString(item.category, 1, 48)) &&
+             (!('name' in item) || isBoundedString(item.name, 1, 100)) &&
+             (!('notes' in item) || isBoundedString(item.notes, 0, 200));
+    }
+
+    function isValidGearLocker(locker) {
+      return locker is list &&
+             locker.size() <= 20 &&
+             (locker.size() < 1 || isValidGearItem(locker[0])) &&
+             (locker.size() < 2 || isValidGearItem(locker[1])) &&
+             (locker.size() < 3 || isValidGearItem(locker[2])) &&
+             (locker.size() < 4 || isValidGearItem(locker[3])) &&
+             (locker.size() < 5 || isValidGearItem(locker[4])) &&
+             (locker.size() < 6 || isValidGearItem(locker[5])) &&
+             (locker.size() < 7 || isValidGearItem(locker[6])) &&
+             (locker.size() < 8 || isValidGearItem(locker[7])) &&
+             (locker.size() < 9 || isValidGearItem(locker[8])) &&
+             (locker.size() < 10 || isValidGearItem(locker[9])) &&
+             (locker.size() < 11 || isValidGearItem(locker[10])) &&
+             (locker.size() < 12 || isValidGearItem(locker[11])) &&
+             (locker.size() < 13 || isValidGearItem(locker[12])) &&
+             (locker.size() < 14 || isValidGearItem(locker[13])) &&
+             (locker.size() < 15 || isValidGearItem(locker[14])) &&
+             (locker.size() < 16 || isValidGearItem(locker[15])) &&
+             (locker.size() < 17 || isValidGearItem(locker[16])) &&
+             (locker.size() < 18 || isValidGearItem(locker[17])) &&
+             (locker.size() < 19 || isValidGearItem(locker[18])) &&
+             (locker.size() < 20 || isValidGearItem(locker[19]));
+    }
+
+    function isValidClip(clip) {
+      return clip is map &&
+             clip.keys().hasOnly([
+               'id', 'title', 'kind', 'mediaId', 'embedUrl', 'embedProvider',
+               'durationSec', 'clipVariation', 'storagePath', 'downloadUrl', 'url',
+               'contentType', 'mimeType', 'thumbnailUrl', 'sizeBytes', 'createdAt'
+             ]) &&
+             (!('id' in clip) || isBoundedString(clip.id, 1, 80)) &&
+             (!('title' in clip) || isBoundedString(clip.title, 1, 100)) &&
+             (!('kind' in clip) || (clip.kind is string && clip.kind in ['embed', 'video', 'audio', 'synth-reel'])) &&
+             (!('mediaId' in clip) || isBoundedString(clip.mediaId, 0, 128)) &&
+             (!('embedUrl' in clip) || (isBoundedString(clip.embedUrl, 1, 1000) && clip.embedUrl.matches('^https://.*'))) &&
+             (!('embedProvider' in clip) || (clip.embedProvider is string && clip.embedProvider in ['instagram', 'youtube', 'tiktok', 'vimeo', 'soundcloud', 'direct'])) &&
+             (!('durationSec' in clip) || (clip.durationSec is number && clip.durationSec >= 0 && clip.durationSec <= 600)) &&
+             (!('clipVariation' in clip) || clip.clipVariation is int) &&
+             (!('storagePath' in clip) || isBoundedString(clip.storagePath, 0, 300)) &&
+             (!('downloadUrl' in clip) || isBoundedString(clip.downloadUrl, 0, 1000)) &&
+             (!('url' in clip) || isBoundedString(clip.url, 0, 1000)) &&
+             (!('contentType' in clip) || isBoundedString(clip.contentType, 0, 64)) &&
+             (!('mimeType' in clip) || isBoundedString(clip.mimeType, 0, 64)) &&
+             (!('thumbnailUrl' in clip) || isBoundedString(clip.thumbnailUrl, 0, 1000)) &&
+             (!('sizeBytes' in clip) || (clip.sizeBytes is int && clip.sizeBytes >= 0)) &&
+             (!('createdAt' in clip) || clip.createdAt is int);
+    }
+
+    function isValidClips(clips) {
+      return clips is list &&
+             clips.size() >= 1 &&
+             clips.size() <= 4 &&
+             (clips.size() < 1 || isValidClip(clips[0])) &&
+             (clips.size() < 2 || isValidClip(clips[1])) &&
+             (clips.size() < 3 || isValidClip(clips[2])) &&
+             (clips.size() < 4 || isValidClip(clips[3]));
+    }
+
+    function isValidProfileStyle(style) {
+      return style is map &&
+             style.keys().hasOnly(['themeId', 'moodStatus', 'soundsLike', 'bannerPattern']) &&
+             (!('themeId' in style) || isBoundedString(style.themeId, 1, 40)) &&
+             (!('moodStatus' in style) || isBoundedString(style.moodStatus, 0, 160)) &&
+             (!('bannerPattern' in style) || isBoundedString(style.bannerPattern, 1, 32)) &&
+             (!('soundsLike' in style) || isValidStringList(style.soundsLike, 0, 8, 0, 64));
+    }
+
+    function isValidProfile(data, profileId) {
+      let allowedKeys = [
+        'id', 'ownerUid', 'ownerName', 'side', 'roleCategory', 'instruments',
+        'regionId', 'regionLabel', 'regionState', 'neighborhood', 'title',
+        'subtitle', 'seekingOrOffer', 'genres', 'tags', 'bio', 'gearOrBackline',
+        'gearLocker', 'availability', 'instagramHandle', 'sampleLink', 'clips',
+        'featuredClipId', 'profileStyle', 'visualSeed', 'isPublished',
+        'createdAt', 'updatedAt'
+      ];
+      let requiredKeys = [
+        'id', 'ownerUid', 'ownerName', 'side', 'roleCategory', 'instruments',
+        'regionId', 'neighborhood', 'title', 'subtitle', 'seekingOrOffer',
+        'genres', 'tags', 'bio', 'gearOrBackline', 'gearLocker', 'availability',
+        'clips', 'profileStyle', 'visualSeed', 'isPublished', 'createdAt', 'updatedAt'
+      ];
+      return data.keys().hasOnly(allowedKeys) &&
+             data.keys().hasAll(requiredKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             data.id == profileId &&
+             isBoundedString(data.ownerUid, 1, 128) &&
+             isBoundedString(data.ownerName, 1, 64) &&
+             data.side is string && data.side in ['jam', 'gigs'] &&
+             isBoundedString(data.roleCategory, 1, 48) &&
+             isValidStringList(data.instruments, 1, 6, 1, 32) &&
+             isBoundedString(data.regionId, 2, 64) &&
+             isOptionalString(data, 'regionLabel', 80) &&
+             isOptionalString(data, 'regionState', 16) &&
+             isBoundedString(data.neighborhood, 2, 48) &&
+             isBoundedString(data.title, 2, 64) &&
+             isBoundedString(data.subtitle, 2, 64) &&
+             isBoundedString(data.seekingOrOffer, 6, 140) &&
+             isValidStringList(data.genres, 1, 4, 1, 48) &&
+             isValidStringList(data.tags, 0, 6, 0, 48) &&
+             isBoundedString(data.bio, 12, 600) &&
+             isBoundedString(data.gearOrBackline, 0, 400) &&
+             isValidGearLocker(data.gearLocker) &&
+             isBoundedString(data.availability, 0, 80) &&
+             isOptionalString(data, 'instagramHandle', 32) &&
+             isOptionalString(data, 'sampleLink', 200) &&
+             isValidClips(data.clips) &&
+             isOptionalString(data, 'featuredClipId', 80) &&
+             isValidProfileStyle(data.profileStyle) &&
+             data.visualSeed is int &&
+             data.isPublished is bool &&
+             data.createdAt is int &&
+             data.updatedAt is int &&
+             data.updatedAt >= data.createdAt;
+    }
+
+    // ===============================================================
+    // Wall Notes Domain Validator
+    // ===============================================================
+
+    function isValidWallNote(data) {
+      let keys = ['authorUid', 'authorName', 'text', 'createdAt'];
+      return data.keys().hasOnly(keys) &&
+             data.keys().hasAll(keys) &&
+             data.authorUid is string &&
+             data.authorUid == request.auth.uid &&
+             isBoundedString(data.authorName, 1, 64) &&
+             isBoundedString(data.text, 1, 280) &&
+             data.createdAt is int;
+    }
+
+    // ===============================================================
+    // Jam Invites Domain Validators
+    // ===============================================================
+
+    function isValidInvite(data, inviteId) {
+      let keys = [
+        'participants', 'fromUid', 'toUid', 'fromName', 'toName',
+        'targetProfileId', 'targetProfileTitle', 'regionId', 'note',
+        'status', 'threadId', 'createdAt', 'updatedAt'
+      ];
+      return data.keys().hasOnly(keys) &&
+             data.keys().hasAll(keys) &&
+             isSortedPair(data.participants) &&
+             data.fromUid is string &&
+             data.toUid is string &&
+             data.fromUid != data.toUid &&
+             data.fromUid in data.participants &&
+             data.toUid in data.participants &&
+             inviteId == pairId(data.fromUid, data.toUid) &&
+             data.threadId is string &&
+             data.threadId == inviteId &&
+             isBoundedString(data.fromName, 1, 64) &&
+             isBoundedString(data.toName, 1, 64) &&
+             isBoundedString(data.targetProfileId, 1, 80) &&
+             isBoundedString(data.targetProfileTitle, 1, 64) &&
+             isBoundedString(data.regionId, 2, 64) &&
+             isBoundedString(data.note, 1, 280) &&
+             data.status is string &&
+             data.status in ['pending', 'accepted', 'declined', 'cancelled'] &&
+             data.createdAt is int &&
+             data.updatedAt is int &&
+             data.updatedAt >= data.createdAt;
+    }
+
+    function inviteMetadataUnchanged() {
+      return request.resource.data.fromUid == resource.data.fromUid &&
+             request.resource.data.toUid == resource.data.toUid &&
+             request.resource.data.fromName == resource.data.fromName &&
+             request.resource.data.toName == resource.data.toName &&
+             request.resource.data.targetProfileId == resource.data.targetProfileId &&
+             request.resource.data.targetProfileTitle == resource.data.targetProfileTitle &&
+             request.resource.data.regionId == resource.data.regionId &&
+             request.resource.data.note == resource.data.note;
+    }
+
+    function isValidInviteTransition() {
+      let prevStatus = resource.data.status;
+      let nextStatus = request.resource.data.status;
+      // 1) Accept: pending -> accepted by recipient, neither user blocked
+      let isAccept = prevStatus == 'pending' &&
+                     request.auth.uid == resource.data.toUid &&
+                     nextStatus == 'accepted' &&
+                     inviteMetadataUnchanged() &&
+                     notBlocked(resource.data.fromUid, resource.data.toUid);
+      // 2) Decline: pending -> declined by recipient
+      let isDecline = prevStatus == 'pending' &&
+                      request.auth.uid == resource.data.toUid &&
+                      nextStatus == 'declined' &&
+                      inviteMetadataUnchanged();
+      // 3) Cancel: pending -> cancelled by sender
+      let isCancel = prevStatus == 'pending' &&
+                     request.auth.uid == resource.data.fromUid &&
+                     nextStatus == 'cancelled' &&
+                     inviteMetadataUnchanged();
+      // 4) Re-invite: declined/cancelled -> pending by either participant, neither user blocked
+      let isReinvite = prevStatus in ['declined', 'cancelled'] &&
+                       nextStatus == 'pending' &&
+                       request.resource.data.fromUid == request.auth.uid &&
+                       request.resource.data.toUid in resource.data.participants &&
+                       request.resource.data.toUid != request.auth.uid &&
+                       notBlocked(request.resource.data.fromUid, request.resource.data.toUid);
+      return isAccept || isDecline || isCancel || isReinvite;
+    }
+
+    // ===============================================================
+    // Threads & Messages Domain Validators
+    // ===============================================================
+
+    function isValidParticipantNames(names, participants) {
+      return names is map &&
+             names.keys().hasOnly(participants) &&
+             (!(participants[0] in names) || isBoundedString(names[participants[0]], 0, 100)) &&
+             (!(participants[1] in names) || isBoundedString(names[participants[1]], 0, 100));
+    }
+
+    function isValidThread(data, threadId) {
+      let keys = [
+        'participants', 'participantNames', 'profileId', 'profileTitle',
+        'regionId', 'lastMessageText', 'lastMessageAt', 'createdAt'
+      ];
+      return data.keys().hasOnly(keys) &&
+             data.keys().hasAll(keys) &&
+             isSortedPair(data.participants) &&
+             threadId == data.participants[0] + '__' + data.participants[1] &&
+             isValidParticipantNames(data.participantNames, data.participants) &&
+             isBoundedString(data.profileId, 1, 128) &&
+             isBoundedString(data.profileTitle, 1, 128) &&
+             isBoundedString(data.regionId, 2, 64) &&
+             isBoundedString(data.lastMessageText, 0, 500) &&
+             data.lastMessageAt is int &&
+             data.createdAt is int;
+    }
+
+    function canAccessThreadData(threadData) {
+      return isSortedPair(threadData.participants) &&
+             request.auth.uid in threadData.participants &&
+             notBlocked(threadData.participants[0], threadData.participants[1]);
+    }
+
+    function isValidMessage(data) {
+      let keys = ['senderUid', 'senderName', 'text', 'sentAt'];
+      return data.keys().hasOnly(keys) &&
+             data.keys().hasAll(keys) &&
+             data.senderUid is string &&
+             data.senderUid == request.auth.uid &&
+             isBoundedString(data.senderName, 1, 64) &&
+             isBoundedString(data.text, 1, 1000) &&
+             data.sentAt is int;
+    }
+
+    // ===============================================================
+    // Blocks & Reports Domain Validators
+    // ===============================================================
+
+    function isValidBlock(data, blockedUid) {
+      let keys = ['blockedUid', 'blockedName', 'createdAt'];
+      return data.keys().hasOnly(keys) &&
+             data.keys().hasAll(keys) &&
+             isBoundedString(data.blockedUid, 1, 128) &&
+             data.blockedUid == blockedUid &&
+             isBoundedString(data.blockedName, 1, 64) &&
+             data.createdAt is int;
+    }
+
+    function isValidReport(data) {
+      let keys = [
+        'reporterUid', 'targetUid', 'targetType', 'targetId',
+        'reason', 'details', 'createdAt'
+      ];
+      return data.keys().hasOnly(keys) &&
+             data.keys().hasAll(keys) &&
+             data.reporterUid is string &&
+             data.reporterUid == request.auth.uid &&
+             isBoundedString(data.targetUid, 1, 128) &&
+             data.targetUid != request.auth.uid &&
+             data.targetType is string &&
+             data.targetType in ['profile', 'thread', 'wallNote'] &&
+             isBoundedString(data.targetId, 1, 128) &&
+             data.reason is string &&
+             data.reason in ['spam', 'harassment', 'impersonation', 'inappropriate', 'other'] &&
+             isBoundedString(data.details, 0, 500) &&
+             data.createdAt is int;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Public discovery for published musician/band profiles (no PII stored);
+    // unpublished drafts readable and all mutations restricted to ownerUid.
+    match /profiles/{profileId} {
+      allow read: if resource.data.isPublished == true ||
+                     (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+                       isValidProfile(request.resource.data, profileId) &&
+                       request.resource.data.ownerUid == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+                       resource.data.ownerUid == request.auth.uid &&
+                       request.resource.data.ownerUid == resource.data.ownerUid &&
+                       request.resource.data.id == resource.data.id &&
+                       request.resource.data.createdAt == resource.data.createdAt &&
+                       isValidProfile(request.resource.data, profileId);
+
+      allow delete: if isSignedIn() &&
+                       resource.data.ownerUid == request.auth.uid;
+
+      // Public wall notes on published profiles; create requires published parent
+      // and unblocked status; delete allowed by note author or profile owner.
+      match /wallNotes/{noteId} {
+        allow read: if exists(/databases/$(database)/documents/profiles/$(profileId)) &&
+                       (get(/databases/$(database)/documents/profiles/$(profileId)).data.isPublished == true ||
+                        (isSignedIn() && get(/databases/$(database)/documents/profiles/$(profileId)).data.ownerUid == request.auth.uid));
+
+        allow create: if isSignedIn() &&
+                         isValidWallNote(request.resource.data) &&
+                         exists(/databases/$(database)/documents/profiles/$(profileId)) &&
+                         get(/databases/$(database)/documents/profiles/$(profileId)).data.isPublished == true &&
+                         notBlocked(request.auth.uid, get(/databases/$(database)/documents/profiles/$(profileId)).data.ownerUid);
+
+        allow update: if false;
+
+        allow delete: if isSignedIn() &&
+                         (resource.data.authorUid == request.auth.uid ||
+                          (exists(/databases/$(database)/documents/profiles/$(profileId)) &&
+                           get(/databases/$(database)/documents/profiles/$(profileId)).data.ownerUid == request.auth.uid));
+      }
+    }
+
+    // Consent-gated jam/gig invites keyed deterministically by pairId(fromUid, toUid).
+    match /jamInvites/{inviteId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+
+      allow create: if isSignedIn() &&
+                       isValidInvite(request.resource.data, inviteId) &&
+                       request.resource.data.fromUid == request.auth.uid &&
+                       request.resource.data.status == 'pending' &&
+                       notBlocked(request.resource.data.fromUid, request.resource.data.toUid);
+
+      allow update: if isSignedIn() &&
+                       request.auth.uid in resource.data.participants &&
+                       request.resource.data.participants == resource.data.participants &&
+                       request.resource.data.threadId == resource.data.threadId &&
+                       request.resource.data.createdAt == resource.data.createdAt &&
+                       isValidInvite(request.resource.data, inviteId) &&
+                       isValidInviteTransition();
+
+      allow delete: if false;
+    }
+
+    // 1:1 messaging threads unlocked only once the matching jamInvite is accepted.
+    match /threads/{threadId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+
+      allow create: if isSignedIn() &&
+                       isValidThread(request.resource.data, threadId) &&
+                       request.auth.uid in request.resource.data.participants &&
+                       notBlocked(request.resource.data.participants[0], request.resource.data.participants[1]) &&
+                       existsAfter(/databases/$(database)/documents/jamInvites/$(threadId)) &&
+                       getAfter(/databases/$(database)/documents/jamInvites/$(threadId)).data.status == 'accepted';
+
+      allow update: if isSignedIn() &&
+                       request.auth.uid in resource.data.participants &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessageText', 'lastMessageAt']) &&
+                       isValidThread(request.resource.data, threadId) &&
+                       exists(/databases/$(database)/documents/jamInvites/$(threadId)) &&
+                       get(/databases/$(database)/documents/jamInvites/$(threadId)).data.status == 'accepted' &&
+                       notBlocked(resource.data.participants[0], resource.data.participants[1]);
+
+      allow delete: if false;
+
+      // Append-only messages inside an active unblocked thread.
+      match /messages/{messageId} {
+        allow read: if isSignedIn() &&
+                       exists(/databases/$(database)/documents/threads/$(threadId)) &&
+                       request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participants;
+
+        allow create: if isSignedIn() &&
+                         isValidMessage(request.resource.data) &&
+                         exists(/databases/$(database)/documents/threads/$(threadId)) &&
+                         canAccessThreadData(get(/databases/$(database)/documents/threads/$(threadId)).data);
+
+        allow update, delete: if false;
+      }
+    }
+
+    // Private per-user block list; parent users/{uid} remains denied.
+    match /users/{uid}/blocks/{blockedUid} {
+      allow read, delete: if isSignedIn() && request.auth.uid == uid;
+
+      allow create: if isSignedIn() &&
+                       request.auth.uid == uid &&
+                       blockedUid != uid &&
+                       isValidBlock(request.resource.data, blockedUid);
+
+      allow update: if false;
+    }
+
+    // Write-only moderation/safety reports from signed-in users.
+    match /reports/{reportId} {
+      allow create: if isSignedIn() && isValidReport(request.resource.data);
+      allow read, update, delete: if false;
+    }
+
+    // Default deny fallback for all unmatched collections and subcollections.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

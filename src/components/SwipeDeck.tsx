@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Flame, Info, Maximize2, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
-import type { AppMode, Listing, Region, SwipeDecision } from '../types';
+import { Flame, Info, Instagram, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
+import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
+import { getProfileActionState } from '../lib/firestorePilot';
 import { AreaJamMark } from './BrandLogo';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
@@ -13,13 +14,19 @@ interface SwipeDeckProps {
   allRegions: Region[];
   canUndo: boolean;
   includeNearbyRegions: boolean;
+  showSampleCards: boolean;
   soundEnabled: boolean;
+  currentUserUid?: string;
+  inviteByTargetUid?: Record<string, JamInvite>;
   onToggleSound: () => void;
   onSwipe: (listing: Listing, decision: SwipeDecision) => void;
   onUndo: () => void;
   onOpenDetails: (listing: Listing) => void;
   onOpenProfile: (listing: Listing) => void;
+  onInvite: (listing: Listing) => void;
+  onOpenInvites: (threadId?: string) => void;
   onEnableNearby: () => void;
+  onToggleSampleCards: () => void;
   onResetPassed: () => void;
   onGoToPost: () => void;
 }
@@ -36,13 +43,19 @@ export function SwipeDeck({
   allRegions,
   canUndo,
   includeNearbyRegions,
+  showSampleCards,
   soundEnabled,
+  currentUserUid,
+  inviteByTargetUid,
   onToggleSound,
   onSwipe,
   onUndo,
   onOpenDetails,
   onOpenProfile,
+  onInvite,
+  onOpenInvites,
   onEnableNearby,
+  onToggleSampleCards,
   onResetPassed,
   onGoToPost,
 }: SwipeDeckProps) {
@@ -108,9 +121,32 @@ export function SwipeDeck({
 
   const triggerSwipe = (decision: SwipeDecision) => {
     if (!topCard || flyDir) return;
-    setFlyDir(decision);
-
     const el = cardRef.current;
+
+    if (decision === 'like' && !topCard.isSample) {
+      if (el) {
+        gsap.to(el, {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          duration: 0.2,
+          ease: 'power2.out',
+        });
+      }
+      const action = getProfileActionState(topCard, currentUserUid, inviteByTargetUid);
+      if (action.kind === 'accepted') {
+        onOpenInvites(action.invite.threadId);
+      } else if (action.kind === 'incoming' || action.kind === 'sent') {
+        onOpenInvites();
+      } else if (action.kind === 'self') {
+        onOpenProfile(topCard);
+      } else {
+        onInvite(topCard);
+      }
+      return;
+    }
+
+    setFlyDir(decision);
     const nextEl = nextCardRef.current;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -262,50 +298,63 @@ export function SwipeDeck({
 
   if (!topCard) {
     return (
-      <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-14 text-center">
+      <div className="glass-surface mx-auto flex w-full max-w-[25rem] flex-col items-center justify-center rounded-[2rem] px-7 py-12 text-center">
         <AreaJamMark className="mb-3 h-10 w-10" />
         <span className="mb-4 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-1 text-xs font-medium text-[var(--muted)]">
-          {region.city} ({region.areaCode}) — {mode === 'jam' ? 'Jam' : 'Gigs'}
+          {region.label} — {mode === 'jam' ? 'Jam board' : 'Gigs (soon)'}
         </span>
         <h2 className="font-display text-2xl font-bold tracking-tight">
-          You have seen every matching {mode === 'jam' ? 'player' : 'gig'} here
+          {canUndo
+            ? `You have checked every ${mode === 'jam' ? 'musician' : 'listing'} here`
+            : `No live ${mode === 'jam' ? 'musicians' : 'listings'} posted in ${region.city} yet`}
         </h2>
         <p className="mt-2.5 max-w-xs text-sm leading-relaxed text-[var(--muted)]">
-          Expand to nearby cities, bring back passed cards, or pin your own video flyer in {region.city}.
+          Be one of the first players on {region.city}, widen to nearby cities, or turn on sample preview cards while local scenes grow.
         </p>
 
-        <div className="mt-7 flex w-full max-w-xs flex-col gap-2.5">
+        <div className="mt-6 flex w-full max-w-xs flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={onGoToPost}
+            className="rounded-2xl px-4 py-3 text-sm font-bold transition hover:opacity-90"
+            style={{
+              backgroundColor: 'var(--jam)',
+              color: 'var(--jam-ink)',
+            }}
+          >
+            Create live profile in {region.city}
+          </button>
           {!includeNearbyRegions && (
             <button
               type="button"
               onClick={onEnableNearby}
-              className="rounded-2xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
-              style={{
-                backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-              }}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
             >
-              Show nearby cities
+              Show players across US cities
             </button>
           )}
           <button
             type="button"
-            onClick={onResetPassed}
+            onClick={onToggleSampleCards}
             className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
           >
-            Review passed cards
+            {showSampleCards ? 'Hide sample preview cards' : 'Show sample preview cards'}
           </button>
-          <button
-            type="button"
-            onClick={onGoToPost}
-            className="rounded-2xl border border-transparent px-4 py-3 text-sm font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
-          >
-            Record intro and post card
-          </button>
+          {canUndo && (
+            <button
+              type="button"
+              onClick={onResetPassed}
+              className="rounded-2xl border border-transparent px-4 py-2 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+            >
+              Review passed cards
+            </button>
+          )}
         </div>
       </div>
     );
   }
+
+  const topAction = getProfileActionState(topCard, currentUserUid, inviteByTargetUid);
 
   const likeOpacity = flyDir === 'like' ? 1 : Math.min(1, Math.max(0, (dragState.x - 24) / 80));
   const passOpacity = flyDir === 'pass' ? 1 : Math.min(1, Math.max(0, (-dragState.x - 24) / 80));
@@ -462,11 +511,23 @@ export function SwipeDeck({
                   <span>{sideBadgeLabel(topCard)}</span>
                 </span>
                 <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-                  {topCard.isUserCreated ? 'Local draft' : 'Sample'}
+                  {topCard.isSample ? 'Sample demo' : 'Live'}
                 </span>
+                {topCard.instagramHandle && (
+                  <a
+                    href={`https://www.instagram.com/${topCard.instagramHandle}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 truncate rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--jam-text)] hover:bg-[var(--surface-hover)]"
+                  >
+                    <Instagram className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                    <span className="truncate">@{topCard.instagramHandle}</span>
+                  </a>
+                )}
               </div>
               <span className="truncate font-medium text-[var(--muted)]">
-                {topCard.payOrSplit || `${topCard.neighborhood}, ${getRegionAreaCode(topCard.regionId)}`}
+                {topCard.neighborhood}, {getRegionAreaCode(topCard.regionId)}
               </span>
             </div>
 
@@ -491,9 +552,12 @@ export function SwipeDeck({
               {topCard.seekingOrOffer}
             </p>
 
-            <div className="flex items-center justify-between gap-2 pt-0.5">
+            <div
+              onPointerDown={(e) => e.stopPropagation()}
+              className="flex flex-wrap items-center justify-between gap-2 pt-0.5"
+            >
               <div className="flex flex-wrap gap-1.5">
-                {topCard.genres.slice(0, 3).map((genre) => (
+                {topCard.genres.slice(0, 2).map((genre) => (
                   <span
                     key={genre}
                     className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink)] sm:py-1 sm:text-xs"
@@ -503,14 +567,51 @@ export function SwipeDeck({
                 ))}
               </div>
 
-              <button
-                type="button"
-                onClick={() => onOpenProfile(topCard)}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:px-3.5"
-              >
-                <Maximize2 className="h-3 w-3" aria-hidden="true" />
-                <span>Full page</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                {!topCard.isSample && topAction.kind !== 'self' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (topAction.kind === 'accepted') {
+                        onOpenInvites(topAction.invite.threadId);
+                      } else if (topAction.kind === 'incoming' || topAction.kind === 'sent') {
+                        onOpenInvites();
+                      } else {
+                        onInvite(topCard);
+                      }
+                    }}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition hover:opacity-90"
+                    style={
+                      topAction.kind === 'sent'
+                        ? {
+                            backgroundColor: 'var(--pill-bg)',
+                            color: 'var(--ink)',
+                            border: '1px solid var(--border-strong)',
+                          }
+                        : {
+                            backgroundColor: 'var(--jam)',
+                            color: 'var(--jam-ink)',
+                          }
+                    }
+                  >
+                    {topAction.kind === 'accepted' ? (
+                      <MessageCircle className="h-3 w-3" aria-hidden="true" />
+                    ) : (
+                      <Flame className="h-3 w-3 fill-current" aria-hidden="true" />
+                    )}
+                    <span>{topAction.label}</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => onOpenProfile(topCard)}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:px-3.5"
+                >
+                  <Maximize2 className="h-3 w-3" aria-hidden="true" />
+                  <span>Full page</span>
+                </button>
+              </div>
             </div>
           </div>
         </article>

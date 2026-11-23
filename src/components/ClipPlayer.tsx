@@ -1,10 +1,79 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Star, Volume2, VolumeX } from 'lucide-react';
+import { ExternalLink, Star, Volume2, VolumeX } from 'lucide-react';
 import { startListingLoop, stopCardPreview } from '../lib/audioPreview';
 import { subscribeColorScheme } from '../lib/colorScheme';
+import { embedProviderLabel } from '../lib/embedMedia';
 import { getMediaObjectUrl } from '../lib/mediaStorage';
 import type { Listing, MediaClip } from '../types';
 import { CardArtwork } from './CardArtwork';
+
+declare global {
+  interface Window {
+    instgrm?: {
+      Embeds?: {
+        process: (root?: HTMLElement) => void;
+      };
+    };
+  }
+}
+
+function ensureInstagramEmbeds(root?: HTMLElement | null) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  if (window.instgrm?.Embeds) {
+    window.instgrm.Embeds.process(root ?? undefined);
+    return;
+  }
+
+  const existing = document.querySelector<HTMLScriptElement>(
+    'script[data-areajam-ig-embed="true"]'
+  );
+  if (!existing) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.instagram.com/embed.js';
+    script.dataset.areajamIgEmbed = 'true';
+    script.onload = () => {
+      window.instgrm?.Embeds?.process();
+    };
+    document.body.appendChild(script);
+  }
+}
+
+function InstagramEmbedCard({ permalink, title }: { permalink: string; title: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    ensureInstagramEmbeds(containerRef.current);
+  }, [permalink]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="app-scroll absolute inset-0 flex flex-col items-center justify-start overflow-y-auto bg-[var(--surface-solid)] px-3 pb-10 pt-14"
+    >
+      <blockquote
+        key={permalink}
+        className="instagram-media w-full max-w-[22rem]"
+        data-instgrm-permalink={permalink}
+        data-instgrm-version="14"
+        style={{ margin: 0, width: '100%', minWidth: '220px' }}
+      >
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-center text-xs text-[var(--muted)]">
+          <p className="font-semibold text-[var(--ink)]">{title}</p>
+          <a
+            href={permalink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1 font-semibold text-[var(--accent-text)] underline underline-offset-2"
+          >
+            <span>Open on Instagram</span>
+            <ExternalLink className="h-3 w-3" aria-hidden="true" />
+          </a>
+        </div>
+      </blockquote>
+    </div>
+  );
+}
 
 interface ClipPlayerProps {
   listing: Listing;
@@ -42,7 +111,7 @@ export function ClipPlayer({
   }, [listing.clips, listing.featuredClipId, listing.id]);
 
   const [clipIndex, setClipIndex] = useState(0);
-  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [localMediaUrl, setLocalMediaUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [schemeTick, setSchemeTick] = useState(0);
 
@@ -55,7 +124,10 @@ export function ClipPlayer({
   const activeClip = clips[safeIndex];
   const featuredId = listing.featuredClipId || clips[0]?.id;
   const isMainClip = activeClip?.id === featuredId;
-  const hasRealVideo = activeClip?.kind === 'video' && Boolean(mediaUrl);
+  const isEmbed = activeClip?.kind === 'embed' && Boolean(activeClip.embedUrl);
+  const resolvedDirectUrl = activeClip?.embedUrl || localMediaUrl;
+  const hasRealVideo = activeClip?.kind === 'video' && Boolean(resolvedDirectUrl);
+  const hasRealAudio = activeClip?.kind === 'audio' && Boolean(resolvedDirectUrl);
   const paletteIdx = Math.abs(listing.visualSeed) % 6;
 
   useEffect(() => {
@@ -71,8 +143,8 @@ export function ClipPlayer({
     let revokedUrl: string | null = null;
     let cancelled = false;
 
-    if (!activeClip?.mediaId) {
-      setMediaUrl(null);
+    if (activeClip?.embedUrl || !activeClip?.mediaId) {
+      setLocalMediaUrl(null);
       return;
     }
 
@@ -83,18 +155,18 @@ export function ClipPlayer({
         return;
       }
       revokedUrl = url;
-      setMediaUrl(url);
+      setLocalMediaUrl(url);
     })();
 
     return () => {
       cancelled = true;
       if (revokedUrl) URL.revokeObjectURL(revokedUrl);
     };
-  }, [activeClip?.mediaId, activeClip?.id]);
+  }, [activeClip?.embedUrl, activeClip?.mediaId, activeClip?.id]);
 
   useEffect(() => {
     const vid = videoRef.current;
-    if (vid && activeClip?.kind === 'video' && mediaUrl) {
+    if (vid && activeClip?.kind === 'video' && resolvedDirectUrl) {
       vid.muted = !soundEnabled || !isActive;
       if (isActive) {
         vid.play().catch(() => {});
@@ -102,11 +174,11 @@ export function ClipPlayer({
         vid.pause();
       }
     }
-  }, [activeClip?.kind, isActive, mediaUrl, soundEnabled]);
+  }, [activeClip?.kind, isActive, resolvedDirectUrl, soundEnabled]);
 
   useEffect(() => {
     const aud = audioRef.current;
-    if (aud && activeClip?.kind === 'audio' && mediaUrl) {
+    if (aud && activeClip?.kind === 'audio' && resolvedDirectUrl) {
       aud.muted = !soundEnabled || !isActive;
       if (isActive) {
         aud.play().catch(() => {});
@@ -114,11 +186,12 @@ export function ClipPlayer({
         aud.pause();
       }
     }
-  }, [activeClip?.kind, isActive, mediaUrl, soundEnabled]);
+  }, [activeClip?.kind, isActive, resolvedDirectUrl, soundEnabled]);
 
   useEffect(() => {
     const usesSynthAudio =
-      activeClip?.kind === 'synth-reel' || (activeClip?.kind === 'audio' && !activeClip.mediaId);
+      activeClip?.kind === 'synth-reel' ||
+      (activeClip?.kind === 'audio' && !activeClip.mediaId && !activeClip.embedUrl);
 
     if (!isActive || !soundEnabled || !usesSynthAudio) {
       return;
@@ -129,10 +202,19 @@ export function ClipPlayer({
     return () => {
       stopCardPreview();
     };
-  }, [activeClip?.clipVariation, activeClip?.kind, activeClip?.mediaId, isActive, listing, safeIndex, soundEnabled]);
+  }, [
+    activeClip?.clipVariation,
+    activeClip?.embedUrl,
+    activeClip?.kind,
+    activeClip?.mediaId,
+    isActive,
+    listing,
+    safeIndex,
+    soundEnabled,
+  ]);
 
   useEffect(() => {
-    if (hasRealVideo) return;
+    if (hasRealVideo || isEmbed) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -140,11 +222,14 @@ export function ClipPlayer({
 
     const cs = getComputedStyle(canvas);
     const accent =
-      (listing.side === 'jam' ? cs.getPropertyValue('--art-primary') : cs.getPropertyValue('--art-secondary')).trim() ||
-      (listing.side === 'jam' ? '#ff3b6b' : '#10e88a');
+      (
+        listing.side === 'jam'
+          ? cs.getPropertyValue('--art-primary')
+          : cs.getPropertyValue('--art-secondary')
+      ).trim() || (listing.side === 'jam' ? '#d91b4c' : '#10e88a');
     const secondary =
       cs.getPropertyValue('--art-rim').trim() ||
-      (listing.side === 'jam' ? '#ff8a5b' : '#38bdf8');
+      (listing.side === 'jam' ? '#ff6b93' : '#38bdf8');
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const durationMs = Math.max(4000, (activeClip?.durationSec || 8) * 1000);
@@ -200,7 +285,17 @@ export function ClipPlayer({
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [activeClip?.durationSec, hasRealVideo, isActive, listing.side, listing.visualSeed, safeIndex, schemeTick, soundEnabled]);
+  }, [
+    activeClip?.durationSec,
+    hasRealVideo,
+    isActive,
+    isEmbed,
+    listing.side,
+    listing.visualSeed,
+    safeIndex,
+    schemeTick,
+    soundEnabled,
+  ]);
 
   const handleMediaTimeUpdate = (el: HTMLMediaElement) => {
     if (!el.duration || !Number.isFinite(el.duration)) return;
@@ -216,10 +311,25 @@ export function ClipPlayer({
         showTopBadges={false}
       />
 
-      {hasRealVideo && mediaUrl ? (
+      {isEmbed && activeClip?.embedUrl ? (
+        activeClip.embedProvider === 'instagram' ? (
+          <InstagramEmbedCard permalink={activeClip.embedUrl} title={activeClip.title} />
+        ) : (
+          <iframe
+            key={activeClip.embedUrl}
+            src={activeClip.embedUrl}
+            title={activeClip.title}
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0 bg-[#10131d]"
+          />
+        )
+      ) : hasRealVideo && resolvedDirectUrl ? (
         <video
           ref={videoRef}
-          src={mediaUrl}
+          src={resolvedDirectUrl}
           autoPlay={isActive}
           loop
           playsInline
@@ -237,10 +347,10 @@ export function ClipPlayer({
         />
       )}
 
-      {activeClip?.kind === 'audio' && mediaUrl && (
+      {hasRealAudio && resolvedDirectUrl && (
         <audio
           ref={audioRef}
-          src={mediaUrl}
+          src={resolvedDirectUrl}
           autoPlay={isActive}
           loop
           muted={!soundEnabled || !isActive}
@@ -252,15 +362,22 @@ export function ClipPlayer({
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: 'linear-gradient(180deg, rgba(7,8,13,0.52) 0%, rgba(7,8,13,0) 38%)',
+            background: 'linear-gradient(180deg, rgba(16,19,29,0.52) 0%, rgba(16,19,29,0) 38%)',
           }}
         />
       )}
 
-      <div className="absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2">
-        <div className="flex items-center gap-1.5">
+      <div className="pointer-events-none absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2">
+        <div className="pointer-events-auto flex items-center gap-1.5">
           {clips.map((clip, idx) => {
-            const fill = idx < safeIndex ? 100 : idx === safeIndex ? Math.round(progress * 100) : 0;
+            const fill =
+              isEmbed && idx === safeIndex
+                ? 100
+                : idx < safeIndex
+                  ? 100
+                  : idx === safeIndex
+                    ? Math.round(progress * 100)
+                    : 0;
             return (
               <button
                 key={clip.id}
@@ -276,7 +393,7 @@ export function ClipPlayer({
               >
                 <span
                   className={`block h-1 w-full overflow-hidden rounded-full ${
-                    hasRealVideo ? 'bg-white/30' : 'bg-[var(--card-track-bg)]'
+                    hasRealVideo || isEmbed ? 'bg-white/30' : 'bg-[var(--card-track-bg)]'
                   }`}
                 >
                   <span
@@ -286,7 +403,7 @@ export function ClipPlayer({
                       backgroundColor:
                         idx === safeIndex
                           ? 'var(--accent)'
-                          : hasRealVideo
+                          : hasRealVideo || isEmbed
                             ? '#ffffff'
                             : 'var(--ink)',
                     }}
@@ -300,9 +417,9 @@ export function ClipPlayer({
         {showMetadataOverlay && (
           <div className="flex items-center justify-between gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md ${
-                hasRealVideo
-                  ? 'border-white/20 bg-black/55 text-white'
+              className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md ${
+                hasRealVideo || isEmbed
+                  ? 'border-white/20 bg-black/65 text-white'
                   : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)]'
               }`}
             >
@@ -316,41 +433,54 @@ export function ClipPlayer({
                   }}
                 />
               )}
-              <span>{activeClip?.title || 'Intro reel'}</span>
-              {isMainClip && clips.length > 1 && (
-                <span className={`text-[10px] ${hasRealVideo ? 'text-white/75' : 'text-[var(--muted)]'}`}>
-                  (Main)
+              <span className="truncate">{activeClip?.title || 'Intro reel'}</span>
+              {activeClip?.embedProvider && (
+                <span className="text-[10px] text-white/75">
+                  ({embedProviderLabel(activeClip.embedProvider)})
                 </span>
               )}
             </span>
 
-            {onToggleSound && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleSound();
-                }}
-                aria-pressed={soundEnabled}
-                aria-label={soundEnabled ? 'Mute reel audio' : 'Unmute reel audio'}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md transition ${
-                  hasRealVideo
-                    ? 'border-white/20 bg-black/55 text-white hover:bg-black/75'
-                    : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] hover:bg-[var(--surface-solid)]'
-                }`}
+            {isEmbed && activeClip?.embedUrl ? (
+              <a
+                href={activeClip.embedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="pointer-events-auto inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
               >
-                {soundEnabled ? (
-                  <>
-                    <Volume2 className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
-                    <span>Sound on</span>
-                  </>
-                ) : (
-                  <>
-                    <VolumeX className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>Tap for sound</span>
-                  </>
-                )}
-              </button>
+                <span>Open</span>
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            ) : (
+              onToggleSound && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSound();
+                  }}
+                  aria-pressed={soundEnabled}
+                  aria-label={soundEnabled ? 'Mute reel audio' : 'Unmute reel audio'}
+                  className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md transition ${
+                    hasRealVideo
+                      ? 'border-white/20 bg-black/55 text-white hover:bg-black/75'
+                      : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] hover:bg-[var(--surface-solid)]'
+                  }`}
+                >
+                  {soundEnabled ? (
+                    <>
+                      <Volume2 className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
+                      <span>Sound on</span>
+                    </>
+                  ) : (
+                    <>
+                      <VolumeX className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Tap for sound</span>
+                    </>
+                  )}
+                </button>
+              )
             )}
           </div>
         )}

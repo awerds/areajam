@@ -24,19 +24,38 @@ import { BrowseGrid } from './components/BrowseGrid';
 import { DetailDialog } from './components/DetailDialog';
 import { HowItWorksDialog } from './components/HowItWorksDialog';
 import { InstrumentIconSprite } from './components/InstrumentIcons';
-import { MatchDialog } from './components/MatchDialog';
+import { JamInviteDialog } from './components/JamInviteDialog';
+import { SafetyDialog, type SafetyTarget } from './components/SafetyDialog';
 import { MatchesView } from './components/MatchesView';
 import { PostView } from './components/PostView';
 import { ProfilePage } from './components/ProfilePage';
 import { RegionDialog } from './components/RegionDialog';
 import { SwipeDeck } from './components/SwipeDeck';
-import { GIGS_PREFERENCES, JAM_PREFERENCES, STARTER_REGIONS } from './data/regions';
+import { DEFAULT_ALL_REGIONS, GIGS_PREFERENCES, JAM_PREFERENCES } from './data/regions';
+import {
+  addProfileWallNote,
+  blockUser,
+  cancelJamInvite,
+  deleteProfileWallNote,
+  deleteSharedProfile,
+  fetchProfileById,
+  respondToJamInvite,
+  saveSharedProfile,
+  sendJamInvite,
+  sendThreadMessage,
+  submitSafetyReport,
+  subscribeMyBlocks,
+  subscribeMyInvites,
+  subscribeMyThreads,
+  subscribeProfileWallNotes,
+  subscribePublishedProfiles,
+  unblockUser,
+} from './lib/firestorePilot';
 import { SEED_LISTINGS } from './data/seedListings';
 import { stopCardPreview } from './lib/audioPreview';
 import { signOutUser, subscribeAuth } from './lib/auth';
 import { subscribeColorScheme, toggleColorScheme } from './lib/colorScheme';
 import { detectLocationByIp } from './lib/location';
-import { deleteMediaBlob } from './lib/mediaStorage';
 import {
   loadState,
   parseUrlState,
@@ -48,10 +67,14 @@ import type {
   AppMode,
   AppState,
   AuthUser,
+  BlockedUser,
+  JamInvite,
   Listing,
   NavTab,
+  PrivateThread,
   Region,
   SwipeDecision,
+  WallComment,
 } from './types';
 
 function matchesPreferences(listing: Listing, selectedPrefs: string[]): boolean {
@@ -85,7 +108,7 @@ interface ScopedAppState {
 export function App() {
   const [scopedState, setScopedState] = useState<ScopedAppState>(() => ({
     scopeUid: null,
-    data: loadState(null),
+    data: { ...loadState(null), mode: 'jam' },
   }));
   const state = scopedState.data;
   const setState = (updater: AppState | ((prev: AppState) => AppState)) => {
@@ -96,6 +119,14 @@ export function App() {
   };
 
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [remoteProfiles, setRemoteProfiles] = useState<Listing[]>([]);
+  const [deepLinkProfile, setDeepLinkProfile] = useState<Listing | null>(null);
+  const [deepLinkLoading, setDeepLinkLoading] = useState<boolean>(false);
+  const [invites, setInvites] = useState<JamInvite[]>([]);
+  const [threads, setThreads] = useState<PrivateThread[]>([]);
+  const [blocks, setBlocks] = useState<BlockedUser[]>([]);
+  const [liveWallNotes, setLiveWallNotes] = useState<WallComment[]>([]);
+
   const [activeTab, setActiveTab] = useState<NavTab>('discover');
   const [activeProfileId, setActiveProfileId] = useState<string | null>(
     () => parseUrlState().profileId ?? null
@@ -108,21 +139,20 @@ export function App() {
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authReason, setAuthReason] = useState<string | undefined>(undefined);
-  const [pendingMessage, setPendingMessage] = useState<{ matchId: string; text: string } | null>(
-    null
-  );
+  const [pendingInviteTarget, setPendingInviteTarget] = useState<Listing | null>(null);
+  const [pendingSafetyTarget, setPendingSafetyTarget] = useState<SafetyTarget | null>(null);
   const [pendingWallNote, setPendingWallNote] = useState<{
     listingId: string;
     text: string;
   } | null>(null);
 
   const [detailListing, setDetailListing] = useState<Listing | null>(null);
-  const [matchPopupListing, setMatchPopupListing] = useState<Listing | null>(null);
-  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [inviteTarget, setInviteTarget] = useState<Listing | null>(null);
+  const [safetyTarget, setSafetyTarget] = useState<SafetyTarget | null>(null);
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const browseSectionRef = useRef<HTMLDivElement>(null);
-  const replyTimersRef = useRef<number[]>([]);
   const toastTimerRef = useRef<number | undefined>(undefined);
   const activeUidRef = useRef<string | null>(null);
 
@@ -136,20 +166,44 @@ export function App() {
 
       if (uidChanged) {
         stopCardPreview();
-        replyTimersRef.current.forEach((id) => window.clearTimeout(id));
-        replyTimersRef.current = [];
         setDetailListing(null);
-        setMatchPopupListing(null);
-        setSelectedMatchId(null);
-        // Clear any pending cross-account drafts on sign-out or account switch.
+        setInviteTarget(null);
+        setSafetyTarget(null);
+        setSelectedThreadId(null);
+        setInvites([]);
+        setThreads([]);
+        setBlocks([]);
+        // Clear pending cross-account intentions on sign-out or account switch.
         if (prevUid !== null || nextUid === null) {
-          setPendingMessage(null);
+          setPendingInviteTarget(null);
+          setPendingSafetyTarget(null);
           setPendingWallNote(null);
         }
-        setScopedState({ scopeUid: nextUid, data: loadState(nextUid) });
+        setScopedState({ scopeUid: nextUid, data: { ...loadState(nextUid), mode: 'jam' } });
       }
     });
   }, []);
+
+  useEffect(() => {
+    return subscribePublishedProfiles(setRemoteProfiles, () => {});
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setInvites([]);
+      setThreads([]);
+      setBlocks([]);
+      return;
+    }
+    const unsubInvites = subscribeMyInvites(user.uid, setInvites, () => {});
+    const unsubThreads = subscribeMyThreads(user.uid, setThreads, () => {});
+    const unsubBlocks = subscribeMyBlocks(user.uid, setBlocks, () => {});
+    return () => {
+      unsubInvites();
+      unsubThreads();
+      unsubBlocks();
+    };
+  }, [user?.uid]);
 
   useEffect(() => {
     return subscribeColorScheme(() => {});
@@ -158,24 +212,14 @@ export function App() {
   useEffect(() => {
     saveState(scopedState.data, scopedState.scopeUid);
     syncUrlState(scopedState.data.regionId, scopedState.data.mode, activeProfileId);
-    document.documentElement.style.setProperty(
-      '--accent',
-      scopedState.data.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)'
-    );
-    document.documentElement.style.setProperty(
-      '--accent-ink',
-      scopedState.data.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)'
-    );
-    document.documentElement.style.setProperty(
-      '--accent-text',
-      scopedState.data.mode === 'jam' ? 'var(--jam-text)' : 'var(--gigs)'
-    );
+    document.documentElement.style.setProperty('--accent', 'var(--jam)');
+    document.documentElement.style.setProperty('--accent-ink', 'var(--jam-ink)');
+    document.documentElement.style.setProperty('--accent-text', 'var(--jam-text)');
   }, [scopedState, activeProfileId]);
 
   useEffect(() => {
     return () => {
       stopCardPreview();
-      replyTimersRef.current.forEach((id) => window.clearTimeout(id));
       window.clearTimeout(toastTimerRef.current);
     };
   }, []);
@@ -197,31 +241,140 @@ export function App() {
     );
   };
 
-  const allRegions = useMemo<Region[]>(
-    () => [...STARTER_REGIONS, ...state.customRegions],
-    [state.customRegions]
+  const blockedUidSet = useMemo(
+    () => new Set(blocks.map((b) => b.blockedUid)),
+    [blocks]
   );
+
+  const inviteByTargetUid = useMemo(() => {
+    const map: Record<string, JamInvite> = {};
+    if (!user) return map;
+    for (const inv of invites) {
+      const otherUid = inv.participants.find((uid) => uid !== user.uid);
+      if (otherUid && !map[otherUid]) {
+        map[otherUid] = inv;
+      }
+    }
+    return map;
+  }, [invites, user]);
+
+  const visibleInvites = useMemo(
+    () => invites.filter((inv) => inv.participants.every((uid) => !blockedUidSet.has(uid))),
+    [invites, blockedUidSet]
+  );
+
+  const visibleThreads = useMemo(
+    () => threads.filter((t) => t.participants.every((uid) => !blockedUidSet.has(uid))),
+    [threads, blockedUidSet]
+  );
+
+  const incomingPendingCount = useMemo(
+    () =>
+      user
+        ? visibleInvites.filter((inv) => inv.status === 'pending' && inv.toUid === user.uid).length
+        : 0,
+    [visibleInvites, user]
+  );
+
+  const allRegions = useMemo<Region[]>(() => {
+    const map = new Map<string, Region>();
+    for (const r of DEFAULT_ALL_REGIONS) {
+      map.set(r.id, r);
+    }
+    for (const r of state.customRegions) {
+      map.set(r.id, r);
+    }
+    for (const profile of remoteProfiles) {
+      if (profile.regionId && !map.has(profile.regionId)) {
+        const label = profile.regionLabel || profile.regionId;
+        map.set(profile.regionId, {
+          id: profile.regionId,
+          city: label.split(',')[0]?.split('(')[0]?.trim() || profile.regionId,
+          state: profile.regionState || 'US',
+          areaCode: label.match(/\((\d{3})\)/)?.[1] || 'US',
+          label,
+          isCustom: true,
+        });
+      }
+    }
+    return Array.from(map.values());
+  }, [state.customRegions, remoteProfiles]);
 
   const currentRegion = useMemo<Region>(
     () => allRegions.find((r) => r.id === state.regionId) ?? allRegions[0],
     [allRegions, state.regionId]
   );
 
+  const visibleRemoteProfiles = useMemo<Listing[]>(
+    () => remoteProfiles.filter((l) => !l.ownerUid || !blockedUidSet.has(l.ownerUid)),
+    [remoteProfiles, blockedUidSet]
+  );
+
   const ownedUserListings = useMemo<Listing[]>(
-    () => (user ? state.userListings.filter((l) => l.ownerUid === user.uid) : []),
-    [state.userListings, user]
+    () => (user ? visibleRemoteProfiles.filter((l) => l.ownerUid === user.uid) : []),
+    [visibleRemoteProfiles, user]
   );
 
   const allListings = useMemo<Listing[]>(
-    () => [...ownedUserListings, ...SEED_LISTINGS],
-    [ownedUserListings]
+    () => [
+      ...visibleRemoteProfiles,
+      ...(state.showSampleCards ? SEED_LISTINGS.filter((l) => l.side === 'jam') : []),
+    ],
+    [visibleRemoteProfiles, state.showSampleCards]
   );
 
-  const activeProfile = useMemo<Listing | null>(
-    () => (activeProfileId ? allListings.find((l) => l.id === activeProfileId) ?? null : null),
-    [activeProfileId, allListings]
-  );
-  const hasMissingProfile = Boolean(activeProfileId && !activeProfile);
+  const activeProfile = useMemo<Listing | null>(() => {
+    if (!activeProfileId) return null;
+    const fromVisible = visibleRemoteProfiles.find((l) => l.id === activeProfileId);
+    if (fromVisible) return fromVisible;
+    const fromSample = SEED_LISTINGS.find((l) => l.id === activeProfileId);
+    if (fromSample) return fromSample;
+    if (deepLinkProfile && deepLinkProfile.id === activeProfileId) {
+      if (deepLinkProfile.ownerUid && blockedUidSet.has(deepLinkProfile.ownerUid)) return null;
+      return deepLinkProfile;
+    }
+    return null;
+  }, [activeProfileId, visibleRemoteProfiles, deepLinkProfile, blockedUidSet]);
+
+  const hasMissingProfile = Boolean(activeProfileId && !deepLinkLoading && !activeProfile);
+
+  useEffect(() => {
+    if (!activeProfileId) {
+      setDeepLinkProfile(null);
+      setDeepLinkLoading(false);
+      return;
+    }
+    const alreadyLoaded =
+      remoteProfiles.some((l) => l.id === activeProfileId) ||
+      SEED_LISTINGS.some((l) => l.id === activeProfileId);
+    if (alreadyLoaded) {
+      setDeepLinkLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setDeepLinkLoading(true);
+    fetchProfileById(activeProfileId)
+      .then((profile) => {
+        if (!cancelled) {
+          setDeepLinkProfile(profile);
+          setDeepLinkLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setDeepLinkLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeProfileId, remoteProfiles]);
+
+  useEffect(() => {
+    if (!activeProfile || activeProfile.isSample) {
+      setLiveWallNotes([]);
+      return;
+    }
+    return subscribeProfileWallNotes(activeProfile.id, setLiveWallNotes, () => {});
+  }, [activeProfile?.id, activeProfile?.isSample]);
 
   const activePrefs = state.mode === 'jam' ? state.lookingForJam : state.lookingForGigs;
   const prefChoices = state.mode === 'jam' ? JAM_PREFERENCES : GIGS_PREFERENCES;
@@ -311,11 +464,18 @@ export function App() {
   }, [activePrefs, allListings, chipFilter, state.includeNearbyRegions, state.mode, state.regionId]);
 
   const deckCards = useMemo(
-    () => regionalPool.filter((l) => !l.isUserCreated && !state.swiped[l.id]),
-    [regionalPool, state.swiped]
+    () =>
+      regionalPool.filter(
+        (l) => (!user || l.ownerUid !== user.uid) && !state.swiped[l.id]
+      ),
+    [regionalPool, state.swiped, user]
   );
 
   const handleModeChange = (nextMode: AppMode) => {
+    if (nextMode === 'gigs') {
+      showToast('Gigs board opens soon once local venues join — Jam pilot is live now!');
+      return;
+    }
     stopCardPreview();
     setActiveProfileId(null);
     setState((prev) => ({ ...prev, mode: nextMode }));
@@ -327,7 +487,7 @@ export function App() {
     setActiveProfileId(null);
     setActiveTab(nextTab);
     if (nextTab !== 'matches') {
-      setSelectedMatchId(null);
+      setSelectedThreadId(null);
     }
   };
 
@@ -340,40 +500,25 @@ export function App() {
 
   const handleSwipe = (listing: Listing, decision: SwipeDecision) => {
     stopCardPreview();
-    let createdMatch = false;
+
+    if (decision === 'like' && !listing.isSample) {
+      handleRequestInvite(listing);
+      return;
+    }
 
     setState((prev) => {
       if (prev.swiped[listing.id]) return prev;
-      const shouldMatch = decision === 'like' && listing.autoMatch;
-      const matchId = shouldMatch ? `match-${listing.id}` : undefined;
-      if (shouldMatch) createdMatch = true;
-
-      const nextMatches =
-        shouldMatch && !prev.matches.some((m) => m.listingId === listing.id)
-          ? [
-              {
-                id: matchId!,
-                listingId: listing.id,
-                side: listing.side,
-                matchedAt: Date.now(),
-                messages: [],
-              },
-              ...prev.matches,
-            ]
-          : prev.matches;
-
       return {
         ...prev,
         swiped: { ...prev.swiped, [listing.id]: decision },
-        history: [...prev.history, { listingId: listing.id, decision, createdMatchId: matchId }],
-        matches: nextMatches,
+        history: [...prev.history, { listingId: listing.id, decision }],
       };
     });
 
-    if (createdMatch) {
-      setMatchPopupListing(listing);
-    } else if (decision === 'like') {
-      showToast(`Saved local interest in ${listing.title} (sample demo).`);
+    if (decision === 'like' && listing.isSample) {
+      showToast(
+        `${listing.title} is a sample demo card — turn to Live profiles to send real Jam invites.`
+      );
     }
   };
 
@@ -455,76 +600,131 @@ export function App() {
     showToast(`Created regional board for ${newRegion.label}`);
   };
 
-  const deliverMessage = (matchId: string, text: string) => {
-    let shouldScheduleReply = false;
-    let replyText = '';
-
-    setState((prev) => {
-      const target = prev.matches.find((m) => m.id === matchId);
-      if (!target) return prev;
-      if (target.messages.length === 0) {
-        const listing = allListings.find((l) => l.id === target.listingId);
-        if (listing) {
-          shouldScheduleReply = true;
-          replyText = listing.autoReply;
-        }
-      }
-
-      const nextMatches = prev.matches.map((m) =>
-        m.id === matchId
-          ? {
-              ...m,
-              messages: [
-                ...m.messages,
-                { id: `msg-${Date.now()}`, sender: 'me' as const, text, sentAt: Date.now() },
-              ],
-            }
-          : m
-      );
-
-      return { ...prev, matches: nextMatches };
-    });
-
-    if (shouldScheduleReply && replyText) {
-      const scheduledUid = activeUidRef.current;
-      const timerId = window.setTimeout(() => {
-        if (activeUidRef.current !== scheduledUid) return;
-        setState((prev) => ({
-          ...prev,
-          matches: prev.matches.map((m) =>
-            m.id === matchId
-              ? {
-                  ...m,
-                  messages: [
-                    ...m.messages,
-                    {
-                      id: `reply-${Date.now()}`,
-                      sender: 'them' as const,
-                      text: replyText,
-                      sentAt: Date.now(),
-                      isSimulated: true,
-                    },
-                  ],
-                }
-              : m
-          ),
-        }));
-      }, 650);
-      replyTimersRef.current.push(timerId);
-    }
+  const handleOpenInvites = (threadId?: string) => {
+    stopCardPreview();
+    setActiveProfileId(null);
+    setDetailListing(null);
+    setActiveTab('matches');
+    setSelectedThreadId(threadId ?? null);
   };
 
-  const handleSendMessage = (matchId: string, text: string) => {
+  const handleRequestInvite = (listing: Listing) => {
+    if (listing.isSample || !listing.ownerUid) {
+      showToast('Sample preview cards cannot receive Jam invites. Browse or post live players.');
+      return;
+    }
     if (!user) {
-      setPendingMessage({ matchId, text });
-      setAuthReason('Sign in with Google or Apple so your match knows who is messaging them.');
+      setPendingInviteTarget(listing);
+      setAuthReason(`Sign in with Google or Apple to invite ${listing.title} to jam.`);
       setAuthModalOpen(true);
       return;
     }
-    deliverMessage(matchId, text);
+    if (listing.ownerUid === user.uid) {
+      handleOpenProfile(listing);
+      return;
+    }
+    const existing = inviteByTargetUid[listing.ownerUid];
+    if (existing?.status === 'accepted') {
+      handleOpenInvites(existing.threadId);
+      return;
+    }
+    if (existing?.status === 'pending') {
+      handleOpenInvites();
+      return;
+    }
+    setDetailListing(null);
+    setInviteTarget(listing);
   };
 
-  const deliverWallComment = (listingId: string, text: string, author: AuthUser) => {
+  const handleSubmitInvite = async (listing: Listing, note: string) => {
+    if (!user) return;
+    const outcome = await sendJamInvite({ fromUser: user, targetListing: listing, note });
+    if (outcome === 'already-accepted') {
+      showToast(`You already have a private thread with ${listing.title}.`);
+      handleOpenInvites();
+    } else if (outcome === 'incoming-pending') {
+      showToast(`${listing.title} already invited you — check Incoming invites!`);
+      handleOpenInvites();
+    } else if (outcome === 'already-pending') {
+      showToast(`Jam invite already pending for ${listing.title}.`);
+    } else {
+      showToast(`Sent jam invite to ${listing.title}.`);
+    }
+  };
+
+  const handleRespondInvite = async (
+    invite: JamInvite,
+    decision: 'accepted' | 'declined'
+  ) => {
+    if (!user) return;
+    const openedThreadId = await respondToJamInvite({ invite, responderUser: user, decision });
+    if (decision === 'accepted' && openedThreadId) {
+      setSelectedThreadId(openedThreadId);
+      showToast(`Private thread opened with ${invite.fromName}.`);
+    } else {
+      showToast(`Declined jam invite from ${invite.fromName}.`);
+    }
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    await cancelJamInvite(inviteId);
+    showToast('Withdrew jam invite.');
+  };
+
+  const handleSendMessage = async (threadId: string, text: string) => {
+    if (!user) {
+      setAuthReason('Sign in with Google or Apple to send messages.');
+      setAuthModalOpen(true);
+      return;
+    }
+    await sendThreadMessage({ threadId, user, text });
+  };
+
+  const handleSafetyAction = (target: SafetyTarget) => {
+    if (!user) {
+      setPendingSafetyTarget(target);
+      setAuthReason('Sign in with Google or Apple to submit a report or block a user.');
+      setAuthModalOpen(true);
+      return;
+    }
+    setSafetyTarget(target);
+  };
+
+  const handleConfirmBlock = async (blockedUid: string, blockedName: string) => {
+    if (!user) return;
+    await blockUser(user.uid, blockedUid, blockedName);
+    if (activeProfile?.ownerUid === blockedUid) {
+      setActiveProfileId(null);
+    }
+    setSelectedThreadId(null);
+    showToast(`Blocked ${blockedName}.`);
+  };
+
+  const handleUnblockUser = async (blockedUid: string) => {
+    if (!user) return;
+    await unblockUser(user.uid, blockedUid);
+    showToast('Account unblocked.');
+  };
+
+  const handleSubmitReport = async (params: {
+    targetUid: string;
+    targetType: 'profile' | 'thread' | 'wallNote';
+    targetId: string;
+    reason: import('./types').ReportReason;
+    details: string;
+  }) => {
+    if (!user) return;
+    await submitSafetyReport({ reporterUid: user.uid, ...params });
+    showToast('Safety report submitted. Thank you for helping keep AreaJam safe.');
+  };
+
+  const deliverWallComment = async (listingId: string, text: string, author: AuthUser) => {
+    const targetListing = allListings.find((l) => l.id === listingId) ?? activeProfile;
+    if (targetListing && !targetListing.isSample) {
+      await addProfileWallNote(listingId, author, text);
+      showToast('Posted public note to Firestore scene wall.');
+      return;
+    }
     setState((prev) => {
       const existing = prev.wallComments[listingId] ?? [];
       return {
@@ -544,7 +744,7 @@ export function App() {
         },
       };
     });
-    showToast('Posted note to scene wall.');
+    showToast('Saved local preview note on sample wall.');
   };
 
   const handleAddWallComment = (listingId: string, text: string) => {
@@ -554,29 +754,30 @@ export function App() {
       setAuthModalOpen(true);
       return;
     }
-    deliverWallComment(listingId, text, user);
+    void deliverWallComment(listingId, text, user);
   };
 
-  const handleUpdateUserListing = (updated: Listing) => {
+  const handleDeleteWallComment = async (listingId: string, noteId: string) => {
+    try {
+      await deleteProfileWallNote(listingId, noteId);
+      showToast('Deleted wall note.');
+    } catch {
+      showToast('Could not delete this wall note.');
+    }
+  };
+
+  const handleUpdateUserListing = async (updated: Listing) => {
     if (!user || updated.ownerUid !== user.uid) {
-      showToast('Only the creator can edit this local draft.');
+      showToast('Only the creator can edit this profile.');
       return;
     }
-    setState((prev) => ({
-      ...prev,
-      userListings: prev.userListings.map((l) =>
-        l.id === updated.id && l.ownerUid === user.uid ? updated : l
-      ),
-    }));
-  };
-
-  const handleOpenChatFromMatchPopup = (listing: Listing) => {
-    const found = state.matches.find((m) => m.listingId === listing.id);
-    setMatchPopupListing(null);
-    setActiveProfileId(null);
-    if (found) {
-      setSelectedMatchId(found.id);
-      setActiveTab('matches');
+    try {
+      const regionObj = allRegions.find((r) => r.id === updated.regionId);
+      const saved = await saveSharedProfile(updated, user, regionObj);
+      setRemoteProfiles((prev) => prev.map((l) => (l.id === saved.id ? saved : l)));
+      showToast('Saved profile changes to Firestore.');
+    } catch {
+      showToast('Could not save profile updates right now.');
     }
   };
 
@@ -586,10 +787,9 @@ export function App() {
   };
 
   const handleShareProfileUrl = (listing?: Listing | null) => {
-    const isLocalDraft = Boolean(listing?.isUserCreated);
-    const copiedToast = isLocalDraft
-      ? 'Copied link (local browser draft only — opens on this browser & account).'
-      : 'Copied sample demo profile link.';
+    const copiedToast = listing?.isSample
+      ? 'Copied sample demo profile link.'
+      : 'Copied live profile share link.';
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(window.location.href).then(
         () => showToast(copiedToast),
@@ -625,14 +825,14 @@ export function App() {
                   AreaJam
                 </span>
                 <span className="mt-0.5 block text-[10px] font-semibold leading-none text-[var(--muted)]">
-                  Interactive demo
+                  Nashville pilot
                 </span>
               </span>
 
               <span className="hidden items-center gap-2.5 sm:inline-flex">
                 <AreaJamLogo className="h-10 w-[164px] shrink-0 text-[var(--ink)]" />
                 <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--muted)]">
-                  Interactive demo
+                  Nashville pilot + all US cities
                 </span>
               </span>
             </button>
@@ -644,7 +844,10 @@ export function App() {
                   { id: 'browse', label: 'Browse players' },
                   {
                     id: 'matches',
-                    label: state.matches.length > 0 ? `Matches (${state.matches.length})` : 'Matches',
+                    label:
+                      incomingPendingCount + visibleThreads.length > 0
+                        ? `Invites (${incomingPendingCount + visibleThreads.length})`
+                        : 'Invites',
                   },
                   { id: 'post', label: 'Profile & studio' },
                 ] as const
@@ -698,17 +901,12 @@ export function App() {
               </button>
               <button
                 type="button"
-                aria-pressed={state.mode === 'gigs'}
+                aria-pressed={false}
                 onClick={() => handleModeChange('gigs')}
-                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition"
-                style={
-                  state.mode === 'gigs'
-                    ? { backgroundColor: 'var(--gigs)', color: 'var(--gigs-ink)' }
-                    : { color: 'var(--muted)' }
-                }
+                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
               >
                 <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Gigs</span>
+                <span>Gigs (Soon)</span>
               </button>
             </div>
 
@@ -813,18 +1011,34 @@ export function App() {
             allListings={allListings}
             allRegions={allRegions}
             user={user}
-            isMatched={state.matches.some((m) => m.listingId === activeProfile.id)}
+            inviteByTargetUid={inviteByTargetUid}
             soundEnabled={soundEnabled}
-            wallComments={state.wallComments[activeProfile.id] ?? []}
+            wallComments={
+              activeProfile.isSample ? (state.wallComments[activeProfile.id] ?? []) : liveWallNotes
+            }
             onToggleSound={() => setSoundEnabled((s) => !s)}
             onBack={() => setActiveProfileId(null)}
-            onSwipe={handleSwipe}
-            onOpenChat={handleOpenChatFromMatchPopup}
+            onInvite={handleRequestInvite}
+            onOpenInvites={handleOpenInvites}
+            onSafetyAction={handleSafetyAction}
             onOpenProfile={handleOpenProfile}
             onUpdateListing={handleUpdateUserListing}
             onAddWallComment={handleAddWallComment}
+            onDeleteWallComment={activeProfile.isSample ? undefined : handleDeleteWallComment}
             onShareUrl={() => handleShareProfileUrl(activeProfile)}
           />
+        ) : activeProfileId && deepLinkLoading ? (
+          <section className="mx-auto max-w-xl py-8 md:py-12">
+            <div className="glass-surface space-y-3 rounded-[2rem] p-6 text-center md:p-8">
+              <AreaJamMark className="mx-auto h-10 w-10" />
+              <h1 className="font-display text-xl font-bold text-[var(--ink)]">
+                Loading shared profile...
+              </h1>
+              <p className="text-xs text-[var(--muted)]">
+                Fetching public musician card <code className="rounded bg-[var(--pill-bg)] px-1.5 py-0.5 text-[var(--ink)]">{activeProfileId}</code> from Cloud Firestore.
+              </p>
+            </div>
+          </section>
         ) : hasMissingProfile ? (
           <section className="mx-auto max-w-xl py-8 md:py-12">
             <div className="glass-surface space-y-4 rounded-[2rem] p-6 md:p-8">
@@ -837,7 +1051,7 @@ export function App() {
                 This profile is unavailable
               </h1>
               <p className="text-sm leading-relaxed text-[var(--muted)]">
-                We could not open <code className="rounded bg-[var(--pill-bg)] px-1.5 py-0.5 text-xs text-[var(--ink)]">?profile={activeProfileId}</code>. User-created drafts in this demo are saved only in the browser and signed-in account where they were created, or the profile may have been removed.
+                We could not find <code className="rounded bg-[var(--pill-bg)] px-1.5 py-0.5 text-xs text-[var(--ink)]">?profile={activeProfileId}</code>. The profile may have been unpublished, deleted by its owner, or shared with an invalid link.
               </p>
               <div className="flex flex-wrap gap-2.5 pt-2">
                 <button
@@ -874,6 +1088,15 @@ export function App() {
                 <div className="grid grid-cols-1 items-start gap-2.5 md:gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
                   {/* Mobile single-row compact filter strip */}
                   <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:hidden">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState((prev) => ({ ...prev, showSampleCards: !prev.showSampleCards }))
+                      }
+                      className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--muted)]"
+                    >
+                      {state.showSampleCards ? 'Samples: On' : 'Samples: Off'}
+                    </button>
                     {activePrefs.length > 0 && (
                       <button
                         type="button"
@@ -921,40 +1144,45 @@ export function App() {
                           {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
                         </span>
                         <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)]">
-                          Interactive demo, sample profiles &amp; local storage
+                          Live Jam pilot across all US cities
                         </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setState((prev) => ({ ...prev, showSampleCards: !prev.showSampleCards }))
+                          }
+                          className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+                        >
+                          {state.showSampleCards ? 'Sample demos: On' : 'Sample demos: Off'}
+                        </button>
                       </div>
 
                       <h1 className="hero-title font-bold text-[var(--ink)]">
-                        {state.mode === 'jam'
-                          ? 'Find your people. Make some noise.'
-                          : 'More local stages. More live music.'}
+                        Find your people. Make some noise.
                       </h1>
 
                       <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
-                        {state.mode === 'jam'
-                          ? 'Spot instruments at a glance, watch intro clips, and open customizable sample artist pages. Matches, auto-replies, wall notes, and new drafts stay simulated in this browser.'
-                          : 'Explore the Gigs side of the preview with sample venue slots, bands for hire, backline details, and simulated inquiry threads saved in this browser.'}
+                        Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
                       <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Local by city</p>
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Nashville + all US</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Allow IP city detection or pick any metro board to keep sessions local.
+                          Spotlighting Nashville (615) first, with every US state and custom city searchable in one tap.
                         </p>
                       </div>
                       <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Watch &amp; inspect</p>
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Every card plays its main clip and opens into a customizable artist page.
+                          Paste public Reels, YouTube, TikTok, or SoundCloud links and showcase your Instagram handle.
                         </p>
                       </div>
                       <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Save a draft</p>
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Sign in with Google or Apple to record clips and showcase your gear locker.
+                          Accept or decline invites on your terms to open a single private 1-on-1 Firestore thread.
                         </p>
                       </div>
                     </div>
@@ -962,9 +1190,7 @@ export function App() {
                     <div className="glass-surface space-y-3 rounded-3xl p-5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h2 className="font-display text-base font-bold">
-                          {state.mode === 'jam'
-                            ? 'What kind of players are you looking to match with?'
-                            : 'What kind of gigs or bands are you looking for?'}
+                          What kind of players are you looking to jam with?
                         </h2>
                         {activePrefs.length > 0 && (
                           <button
@@ -1073,14 +1299,22 @@ export function App() {
                       allRegions={allRegions}
                       canUndo={canUndo}
                       includeNearbyRegions={state.includeNearbyRegions}
+                      showSampleCards={state.showSampleCards}
                       soundEnabled={soundEnabled}
+                      currentUserUid={user?.uid}
+                      inviteByTargetUid={inviteByTargetUid}
                       onToggleSound={() => setSoundEnabled((s) => !s)}
                       onSwipe={handleSwipe}
                       onUndo={handleUndo}
                       onOpenDetails={setDetailListing}
                       onOpenProfile={handleOpenProfile}
+                      onInvite={handleRequestInvite}
+                      onOpenInvites={handleOpenInvites}
                       onEnableNearby={() =>
                         setState((prev) => ({ ...prev, includeNearbyRegions: true }))
+                      }
+                      onToggleSampleCards={() =>
+                        setState((prev) => ({ ...prev, showSampleCards: !prev.showSampleCards }))
                       }
                       onResetPassed={handleResetPassed}
                       onGoToPost={() => handleTabChange('post')}
@@ -1098,9 +1332,13 @@ export function App() {
                     region={currentRegion}
                     allRegions={allRegions}
                     swiped={state.swiped}
+                    currentUserUid={user?.uid}
+                    inviteByTargetUid={inviteByTargetUid}
                     onInspect={setDetailListing}
                     onOpenProfile={handleOpenProfile}
                     onSwipe={handleSwipe}
+                    onInvite={handleRequestInvite}
+                    onOpenInvites={handleOpenInvites}
                   />
                 </div>
               </div>
@@ -1162,9 +1400,13 @@ export function App() {
                   region={currentRegion}
                   allRegions={allRegions}
                   swiped={state.swiped}
+                  currentUserUid={user?.uid}
+                  inviteByTargetUid={inviteByTargetUid}
                   onInspect={setDetailListing}
                   onOpenProfile={handleOpenProfile}
                   onSwipe={handleSwipe}
+                  onInvite={handleRequestInvite}
+                  onOpenInvites={handleOpenInvites}
                   onWatchInReels={() => handleTabChange('discover')}
                 />
               </div>
@@ -1172,13 +1414,19 @@ export function App() {
 
             {activeTab === 'matches' && (
               <MatchesView
-                matches={state.matches}
+                user={user}
+                invites={visibleInvites}
+                threads={visibleThreads}
                 listings={allListings}
                 regions={allRegions}
-                selectedMatchId={selectedMatchId}
-                onSelectMatch={setSelectedMatchId}
+                selectedThreadId={selectedThreadId}
+                onSelectThread={setSelectedThreadId}
+                onRespondInvite={handleRespondInvite}
+                onCancelInvite={handleCancelInvite}
                 onSendMessage={handleSendMessage}
                 onInspectListing={handleOpenProfile}
+                onSafetyAction={handleSafetyAction}
+                onRequireAuth={openAuthPrompt}
                 onBackToDiscover={() => handleTabChange('discover')}
               />
             )}
@@ -1190,44 +1438,36 @@ export function App() {
                 onSignOut={() => void signOutUser()}
                 defaultSide={state.mode}
                 region={currentRegion}
+                onOpenRegionPicker={() => setRegionModalOpen(true)}
                 userListings={ownedUserListings}
-                onCreateListing={(listing) => {
+                blockedUsers={blocks}
+                onPublishListing={async (listing) => {
                   if (!user) return;
-                  const ownedListing: Listing = {
-                    ...listing,
-                    ownerUid: user.uid,
-                    ownerName: user.displayName,
-                    isUserCreated: true,
-                  };
-                  setState((prev) => ({
-                    ...prev,
-                    userListings: [ownedListing, ...prev.userListings],
-                  }));
+                  const saved = await saveSharedProfile(listing, user, currentRegion);
+                  setRemoteProfiles((prev) => [
+                    saved,
+                    ...prev.filter((item) => item.id !== saved.id),
+                  ]);
+                  showToast(`Published ${saved.title} to ${currentRegion.label}.`);
                 }}
-                onDeleteListing={(listingId) => {
+                onDeleteListing={async (listingId) => {
                   if (!user) return;
-                  const target = state.userListings.find(
+                  const target = remoteProfiles.find(
                     (l) => l.id === listingId && l.ownerUid === user.uid
                   );
                   if (!target) {
-                    showToast('Only the creator can delete this local draft.');
+                    showToast('Only the creator can delete this profile.');
                     return;
                   }
-                  target.clips.forEach((clip) => {
-                    if (clip.mediaId) void deleteMediaBlob(clip.mediaId);
-                  });
-                  setState((prev) => ({
-                    ...prev,
-                    userListings: prev.userListings.filter(
-                      (l) => !(l.id === listingId && l.ownerUid === user.uid)
-                    ),
-                  }));
+                  await deleteSharedProfile(listingId);
+                  setRemoteProfiles((prev) => prev.filter((l) => l.id !== listingId));
                   if (activeProfileId === listingId) {
                     setActiveProfileId(null);
                   }
-                  showToast(`Removed ${target.title} from this browser.`);
+                  showToast(`Deleted ${target.title} from Firestore.`);
                 }}
                 onPreviewListing={handleOpenProfile}
+                onUnblockUser={handleUnblockUser}
               />
             )}
           </>
@@ -1268,19 +1508,19 @@ export function App() {
           >
             <span className="relative">
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              {state.matches.length > 0 && (
+              {incomingPendingCount + visibleThreads.length > 0 && (
                 <span
                   className="absolute -right-2.5 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
                   style={{
-                    backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                    color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                    backgroundColor: 'var(--jam)',
+                    color: 'var(--jam-ink)',
                   }}
                 >
-                  {state.matches.length}
+                  {incomingPendingCount + visibleThreads.length}
                 </span>
               )}
             </span>
-            <span>Matches</span>
+            <span>Invites</span>
           </button>
 
           <button
@@ -1331,17 +1571,26 @@ export function App() {
         reason={authReason}
         onClose={() => {
           setAuthModalOpen(false);
-          setPendingMessage(null);
+          setPendingInviteTarget(null);
+          setPendingSafetyTarget(null);
           setPendingWallNote(null);
         }}
         onAuthenticated={(signedUser) => {
           showToast(`Signed in as ${signedUser.displayName}`);
-          if (pendingMessage) {
-            deliverMessage(pendingMessage.matchId, pendingMessage.text);
-            setPendingMessage(null);
+          if (pendingInviteTarget) {
+            if (pendingInviteTarget.ownerUid === signedUser.uid) {
+              handleOpenProfile(pendingInviteTarget);
+            } else {
+              setInviteTarget(pendingInviteTarget);
+            }
+            setPendingInviteTarget(null);
+          }
+          if (pendingSafetyTarget) {
+            setSafetyTarget(pendingSafetyTarget);
+            setPendingSafetyTarget(null);
           }
           if (pendingWallNote) {
-            deliverWallComment(pendingWallNote.listingId, pendingWallNote.text, signedUser);
+            void deliverWallComment(pendingWallNote.listingId, pendingWallNote.text, signedUser);
             setPendingWallNote(null);
           }
         }}
@@ -1350,28 +1599,34 @@ export function App() {
       <DetailDialog
         listing={detailListing}
         region={detailListing ? allRegions.find((r) => r.id === detailListing.regionId) : undefined}
-        alreadyMatched={
-          detailListing
-            ? state.matches.some((m) => m.listingId === detailListing.id) ||
-              Boolean(detailListing.isUserCreated)
-            : false
-        }
+        currentUserUid={user?.uid}
+        inviteByTargetUid={inviteByTargetUid}
         soundEnabled={soundEnabled}
         onToggleSound={() => setSoundEnabled((s) => !s)}
         onClose={() => setDetailListing(null)}
         onOpenProfile={handleOpenProfile}
         onSwipe={handleSwipe}
+        onInvite={handleRequestInvite}
+        onOpenInvites={handleOpenInvites}
       />
 
-      <MatchDialog
-        listing={matchPopupListing}
-        region={
-          matchPopupListing
-            ? allRegions.find((r) => r.id === matchPopupListing.regionId)
+      <JamInviteDialog
+        listing={inviteTarget}
+        regionLabel={
+          inviteTarget
+            ? allRegions.find((r) => r.id === inviteTarget.regionId)?.label ??
+              inviteTarget.regionLabel
             : undefined
         }
-        onClose={() => setMatchPopupListing(null)}
-        onOpenChat={handleOpenChatFromMatchPopup}
+        onClose={() => setInviteTarget(null)}
+        onSubmit={handleSubmitInvite}
+      />
+
+      <SafetyDialog
+        target={safetyTarget}
+        onClose={() => setSafetyTarget(null)}
+        onConfirmBlock={handleConfirmBlock}
+        onSubmitReport={handleSubmitReport}
       />
     </div>
   );

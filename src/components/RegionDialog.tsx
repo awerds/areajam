@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { AlertCircle, Check, MapPin, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertCircle, Check, ChevronDown, MapPin, Plus, Search } from 'lucide-react';
+import { ALL_US_STATE_REGIONS, STARTER_REGIONS } from '../data/regions';
 import { attachFormValidation } from '../lib/formValidation';
 import type { Listing, Region } from '../types';
 import { NativeDialog } from './NativeDialog';
@@ -28,35 +28,39 @@ export function RegionDialog({
   onToggleNearby,
   onAddCustomRegion,
 }: RegionDialogProps) {
+  const [search, setSearch] = useState('');
+  const [showAllStates, setShowAllStates] = useState(false);
   const [city, setCity] = useState('');
   const [stateCode, setStateCode] = useState('');
   const [areaCode, setAreaCode] = useState('');
-  const formRef = useRef<HTMLFormElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
+  const [formNode, setFormNode] = useState<HTMLFormElement | null>(null);
 
   useEffect(() => {
-    if (!formRef.current) return;
-    return attachFormValidation(formRef.current);
-  }, [open]);
+    if (!open || !formNode) return;
+    return attachFormValidation(formNode);
+  }, [open, formNode]);
 
-  useLayoutEffect(() => {
-    if (!open || !gridRef.current) return;
-    const items = gridRef.current.querySelectorAll('.region-tile');
-    if (items.length === 0) return;
+  const countLiveFor = (regionId: string) =>
+    listings.filter((l) => l.regionId === regionId && l.side === 'jam' && !l.isSample).length;
 
-    const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(
-        items,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.28, stagger: 0.03, ease: 'power2.out' }
-      );
-    });
-    return () => mm.revert();
-  }, [open, regions.length]);
+  const q = search.trim().toLowerCase();
+  const matchesQuery = (r: Region) =>
+    !q ||
+    `${r.city} ${r.state} ${r.areaCode} ${r.label} ${r.id}`.toLowerCase().includes(q);
 
-  const countFor = (regionId: string, side: 'jam' | 'gigs') =>
-    listings.filter((l) => l.regionId === regionId && l.side === side).length;
+  const starterIds = new Set(STARTER_REGIONS.map((r) => r.id));
+  const stateIds = new Set(ALL_US_STATE_REGIONS.map((r) => r.id));
+  const customRegions = regions.filter((r) => !starterIds.has(r.id) && !stateIds.has(r.id));
+
+  const pilotRegion = STARTER_REGIONS.find((r) => r.isPilot);
+  const featuredRegions = [
+    ...(pilotRegion ? [pilotRegion] : []),
+    ...STARTER_REGIONS.filter((r) => !r.isPilot),
+    ...customRegions,
+  ].filter(matchesQuery);
+
+  const filteredStateRegions = ALL_US_STATE_REGIONS.filter(matchesQuery);
+  const statesExpanded = Boolean(q) || showAllStates;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -72,22 +76,82 @@ export function RegionDialog({
     onClose();
   };
 
+  const renderTile = (region: Region) => {
+    const active = region.id === currentRegionId;
+    const liveCount = countLiveFor(region.id);
+    return (
+      <button
+        key={region.id}
+        type="button"
+        onClick={() => {
+          onSelectRegion(region.id);
+          onClose();
+        }}
+        className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 text-left transition hover:bg-[var(--surface-hover)]"
+        style={{
+          borderColor: active ? 'var(--accent)' : 'var(--border)',
+          backgroundColor: active ? 'var(--surface-hover)' : 'var(--surface-subtle)',
+        }}
+      >
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+            <span className="truncate text-sm font-semibold">{region.city}</span>
+            {region.state && (
+              <span className="text-xs text-[var(--muted)]">{region.state}</span>
+            )}
+            {region.isPilot && (
+              <span
+                className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                style={{ backgroundColor: 'var(--jam-soft)', color: 'var(--jam-text)' }}
+              >
+                Pilot
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs text-[var(--muted)]">
+            Area {region.areaCode || 'local'}, {liveCount} {liveCount === 1 ? 'player' : 'players'}
+          </p>
+        </div>
+        {active && <Check className="h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />}
+      </button>
+    );
+  };
+
   return (
     <NativeDialog
       open={open}
       onClose={onClose}
       titleId="region-dialog-title"
-      title="Pick your local scene"
-      subtitle="Switch regional boards or open a board for your own city"
+      title="Pick your city or state"
+      subtitle="Nashville (615) is the pilot metro, and every US city & state board is open"
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
+        <div className="relative">
+          <label htmlFor="region-search-input" className="visually-hidden">
+            Search US cities, states, or area codes
+          </label>
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
+            aria-hidden="true"
+          />
+          <input
+            id="region-search-input"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search any US city, state, or area code..."
+            className="field-control pl-10 text-sm"
+          />
+        </div>
+
         <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-sm">
           <div>
             <span className="block font-semibold text-[var(--ink)]">
               Show other cities after local cards
             </span>
             <span className="block text-xs text-[var(--muted)]">
-              Expand beyond your metro when the local deck empties
+              Keep discovering players nationwide when your local city board is quiet
             </span>
           </div>
           <input
@@ -98,56 +162,57 @@ export function RegionDialog({
           />
         </label>
 
-        <div ref={gridRef} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {regions.map((region) => {
-            const active = region.id === currentRegionId;
-            const jams = countFor(region.id, 'jam');
-            const gigs = countFor(region.id, 'gigs');
-            return (
-              <button
-                key={region.id}
-                type="button"
-                onClick={() => {
-                  onSelectRegion(region.id);
-                  onClose();
-                }}
-                className="region-tile flex items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-left transition hover:bg-[var(--surface-hover)]"
-                style={{
-                  borderColor: active ? 'var(--accent)' : 'var(--border)',
-                  backgroundColor: active ? 'var(--surface-hover)' : 'var(--surface-subtle)',
-                }}
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--muted)]" aria-hidden="true" />
-                    <span className="truncate font-semibold">{region.city}</span>
-                    {region.state && (
-                      <span className="text-xs text-[var(--muted)]">{region.state}</span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    Area {region.areaCode || 'local'}, {jams} jam, {gigs} gigs
-                  </p>
-                </div>
-                {active && <Check className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />}
-              </button>
-            );
-          })}
+        {featuredRegions.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-[var(--muted)]">
+              Pilot &amp; featured music cities
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {featuredRegions.map(renderTile)}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <button
+            type="button"
+            aria-expanded={statesExpanded}
+            onClick={() => setShowAllStates((prev) => !prev)}
+            className="flex w-full items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3.5 py-2 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+          >
+            <span>All 50 US states &amp; DC ({filteredStateRegions.length})</span>
+            <ChevronDown
+              className={`h-4 w-4 text-[var(--muted)] transition ${statesExpanded ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
+
+          {statesExpanded && (
+            filteredStateRegions.length > 0 ? (
+              <div className="grid max-h-60 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 app-scroll">
+                {filteredStateRegions.map(renderTile)}
+              </div>
+            ) : (
+              <p className="text-xs text-[var(--muted)]">
+                No matching state board. Add your exact city below.
+              </p>
+            )
+          )}
         </div>
 
         <form
-          ref={formRef}
+          ref={setFormNode}
           onSubmit={handleSubmit}
           className="space-y-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-subtle)] p-4"
         >
-          <h3 className="font-display text-base font-bold">Start a board in your city</h3>
+          <h3 className="font-display text-base font-bold">Start a board in your town</h3>
 
           <div>
             <label htmlFor="custom-city" className="mb-1 block text-xs font-semibold">
               City name
             </label>
             <span id="custom-city-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-              Example: Denver, Asheville, New Orleans
+              Example: Knoxville, Denton, Athens
             </span>
             <input
               id="custom-city"
@@ -172,19 +237,15 @@ export function RegionDialog({
           <div className="grid grid-cols-2 gap-2.5">
             <div>
               <label htmlFor="custom-state" className="mb-1 block text-xs font-semibold">
-                State or region
+                State
               </label>
-              <span id="custom-state-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                2-letter code (e.g. CO)
-              </span>
               <input
                 id="custom-state"
                 type="text"
                 maxLength={8}
                 value={stateCode}
                 onChange={(e) => setStateCode(e.target.value)}
-                aria-describedby="custom-state-hint"
-                placeholder="CO"
+                placeholder="TN"
                 className="field-control"
               />
             </div>
@@ -193,9 +254,6 @@ export function RegionDialog({
               <label htmlFor="custom-area" className="mb-1 block text-xs font-semibold">
                 Area code
               </label>
-              <span id="custom-area-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                3 digits (e.g. 303)
-              </span>
               <input
                 id="custom-area"
                 type="text"
@@ -203,16 +261,15 @@ export function RegionDialog({
                 pattern="[0-9]{3}"
                 value={areaCode}
                 onChange={(e) => setAreaCode(e.target.value)}
-                aria-describedby="custom-area-hint"
                 data-error="custom-area-error"
-                placeholder="303"
+                placeholder="615"
                 className="field-control"
               />
               <div id="custom-area-error" className="error-msg">
                 <span role="img" aria-label="Error" className="inline-flex shrink-0">
                   <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
-                <span>Enter a 3-digit area code or leave blank.</span>
+                <span>3 digits or leave blank.</span>
               </div>
             </div>
           </div>
@@ -222,7 +279,7 @@ export function RegionDialog({
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            <span>Create and switch to city</span>
+            <span>Open board for this city</span>
           </button>
         </form>
       </div>

@@ -111,7 +111,12 @@ export async function detectLocationByIp(
     .replace(/^-|-$/g, '');
   const id = slugBase || `local-${Date.now()}`;
 
-  const matchedById = existingRegions.find((r) => r.id === id);
+  const matchedById = existingRegions.find(
+    (r) =>
+      r.id === id ||
+      (r.city.toLowerCase() === ip.city.toLowerCase() &&
+        (!ip.stateCode || r.state.toLowerCase() === ip.stateCode.toLowerCase()))
+  );
   if (matchedById) {
     return {
       region: matchedById,

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Flame, MapPin, Maximize2, Pause, Play, Search, Ticket } from 'lucide-react';
+import { Flame, Instagram, MapPin, Maximize2, MessageCircle, Pause, Play, Search } from 'lucide-react';
 import { getPlayingListingId, subscribeAudioState, toggleCardPreview } from '../lib/audioPreview';
-import type { AppMode, Listing, Region, SwipeDecision } from '../types';
+import { getProfileActionState } from '../lib/firestorePilot';
+import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { CardArtwork } from './CardArtwork';
 import { InstrumentBadgeRow } from './InstrumentIcons';
 
@@ -11,9 +12,13 @@ interface BrowseGridProps {
   region: Region;
   allRegions: Region[];
   swiped: Record<string, SwipeDecision>;
+  currentUserUid?: string;
+  inviteByTargetUid?: Record<string, JamInvite>;
   onInspect: (listing: Listing) => void;
   onOpenProfile: (listing: Listing) => void;
   onSwipe: (listing: Listing, decision: SwipeDecision) => void;
+  onInvite: (listing: Listing) => void;
+  onOpenInvites: (threadId?: string) => void;
   onWatchInReels?: () => void;
 }
 
@@ -22,9 +27,11 @@ export function BrowseGrid({
   mode,
   region,
   allRegions,
-  swiped,
+  currentUserUid,
+  inviteByTargetUid,
   onOpenProfile,
-  onSwipe,
+  onInvite,
+  onOpenInvites,
   onWatchInReels,
 }: BrowseGridProps) {
   const [query, setQuery] = useState('');
@@ -100,8 +107,8 @@ export function BrowseGrid({
           {filtered.map((item) => {
             const itemRegion = allRegions.find((r) => r.id === item.regionId);
             const isPlaying = playingId === item.id;
-            const decision = swiped[item.id];
-            const isJam = item.side === 'jam';
+            const action = getProfileActionState(item, currentUserUid, inviteByTargetUid);
+            const hasEmbed = item.clips.some((c) => c.kind === 'embed');
 
             return (
               <article
@@ -110,20 +117,27 @@ export function BrowseGrid({
               >
                 <div className="relative">
                   <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact />
-                  <button
-                    type="button"
-                    onClick={() => void toggleCardPreview(item, 0)}
-                    aria-pressed={isPlaying}
-                    aria-label={isPlaying ? `Pause clip for ${item.title}` : `Play clip for ${item.title}`}
-                    className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-solid)]"
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                    ) : (
+                  {hasEmbed ? (
+                    <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md">
                       <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                    )}
-                    <span>{isPlaying ? 'Playing' : `${item.clips.length} clips`}</span>
-                  </button>
+                      <span>{item.clips.length} linked {item.clips.length === 1 ? 'clip' : 'clips'}</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void toggleCardPreview(item, 0)}
+                      aria-pressed={isPlaying}
+                      aria-label={isPlaying ? `Pause clip for ${item.title}` : `Play clip for ${item.title}`}
+                      className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-solid)]"
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                      ) : (
+                        <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                      )}
+                      <span>{isPlaying ? 'Playing' : `${item.clips.length} clips`}</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex flex-1 flex-col justify-between gap-3 p-4">
@@ -131,13 +145,20 @@ export function BrowseGrid({
                     <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
                       <span className="flex min-w-0 items-center gap-1.5">
                         <span className="truncate font-medium">{item.roleCategory}</span>
-                        <span className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-                          {item.isUserCreated ? 'Local draft' : 'Sample'}
+                        <span
+                          className="shrink-0 rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold"
+                          style={
+                            item.isSample
+                              ? { backgroundColor: 'var(--pill-bg)', color: 'var(--muted)' }
+                              : { backgroundColor: 'var(--gigs-soft)', color: 'var(--gigs)' }
+                          }
+                        >
+                          {item.isSample ? 'Sample' : 'Live'}
                         </span>
                       </span>
                       <span className="inline-flex shrink-0 items-center gap-1">
                         <MapPin className="h-3 w-3" aria-hidden="true" />
-                        {itemRegion?.city ?? item.regionId}
+                        {itemRegion?.city ?? item.regionLabel ?? item.regionId}
                       </span>
                     </div>
 
@@ -151,8 +172,16 @@ export function BrowseGrid({
                           {item.title}
                         </h3>
                       </button>
-                      <p className="text-xs font-medium text-[var(--muted)]">
-                        {item.subtitle}, {item.neighborhood}
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-[var(--muted)]">
+                        <span className="truncate">
+                          {item.subtitle}, {item.neighborhood}
+                        </span>
+                        {item.instagramHandle && (
+                          <span className="inline-flex shrink-0 items-center gap-0.5 text-[var(--accent-text)]">
+                            <Instagram className="h-3 w-3" aria-hidden="true" />
+                            <span>@{item.instagramHandle}</span>
+                          </span>
+                        )}
                       </p>
                     </div>
 
@@ -173,23 +202,28 @@ export function BrowseGrid({
                       <span>View page</span>
                     </button>
 
-                    {!item.isUserCreated && (
+                    {action.kind === 'invite' && (
                       <button
                         type="button"
-                        disabled={decision === 'like'}
-                        onClick={() => onSwipe(item, 'like')}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition disabled:opacity-60"
-                        style={{
-                          backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
-                          color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                        }}
+                        onClick={() => onInvite(item)}
+                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition hover:opacity-90"
+                        style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
                       >
-                        {isJam ? (
-                          <Flame className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                        ) : (
-                          <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
-                        )}
-                        <span>{decision === 'like' ? 'Liked' : isJam ? 'Jam' : 'Book'}</span>
+                        <Flame className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                        <span>Invite to jam</span>
+                      </button>
+                    )}
+
+                    {(action.kind === 'accepted' || action.kind === 'incoming' || action.kind === 'sent') && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onOpenInvites(action.kind === 'accepted' ? action.invite.threadId : undefined)
+                        }
+                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-bold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>{action.label}</span>
                       </button>
                     )}
                   </div>

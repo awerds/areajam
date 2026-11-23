@@ -1,6 +1,7 @@
-import { Calendar, ExternalLink, Flame, MapPin, Maximize2, Speaker, Ticket, X } from 'lucide-react';
+import { Calendar, ExternalLink, Flame, Instagram, MapPin, Maximize2, MessageCircle, Speaker, X } from 'lucide-react';
 import { safeHttpsUrl } from '../data/themes';
-import type { Listing, Region, SwipeDecision } from '../types';
+import { getProfileActionState } from '../lib/firestorePilot';
+import type { JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
 import { NativeDialog } from './NativeDialog';
@@ -8,25 +9,34 @@ import { NativeDialog } from './NativeDialog';
 interface DetailDialogProps {
   listing: Listing | null;
   region?: Region;
-  alreadyMatched?: boolean;
+  currentUserUid?: string;
+  inviteByTargetUid?: Record<string, JamInvite>;
   soundEnabled: boolean;
   onToggleSound: () => void;
   onClose: () => void;
   onOpenProfile?: (listing: Listing) => void;
   onSwipe?: (listing: Listing, decision: SwipeDecision) => void;
+  onInvite?: (listing: Listing) => void;
+  onOpenInvites?: (threadId?: string) => void;
 }
 
 export function DetailDialog({
   listing,
   region,
-  alreadyMatched = false,
+  currentUserUid,
+  inviteByTargetUid,
   soundEnabled,
   onToggleSound,
   onClose,
   onOpenProfile,
   onSwipe,
+  onInvite,
+  onOpenInvites,
 }: DetailDialogProps) {
   const safeHref = safeHttpsUrl(listing?.sampleLink);
+  const action = listing
+    ? getProfileActionState(listing, currentUserUid, inviteByTargetUid)
+    : null;
 
   return (
     <NativeDialog
@@ -36,7 +46,7 @@ export function DetailDialog({
       title={listing ? listing.title : 'Listing details'}
       subtitle={
         listing
-          ? `${listing.isUserCreated ? 'Local draft (this browser)' : 'Sample profile (demo)'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}`
+          ? `${listing.isSample ? 'Sample preview card' : 'Live profile'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}`
           : undefined
       }
     >
@@ -106,6 +116,19 @@ export function DetailDialog({
             </div>
           </dl>
 
+          {listing.instagramHandle && (
+            <a
+              href={`https://www.instagram.com/${listing.instagramHandle}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+            >
+              <Instagram className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
+              <span>@{listing.instagramHandle}</span>
+              <ExternalLink className="h-3 w-3 text-[var(--muted)]" aria-hidden="true" />
+            </a>
+          )}
+
           {safeHref && (
             <a
               href={safeHref}
@@ -132,43 +155,57 @@ export function DetailDialog({
             </button>
           )}
 
-          {onSwipe && !alreadyMatched && (
+          {!listing.isSample && action && action.kind !== 'self' && (
             <div className="grid grid-cols-2 gap-3 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onSwipe(listing, 'pass');
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--err)] transition hover:bg-[var(--surface-hover)]"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-                <span>Pass</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onSwipe(listing, 'like');
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
-                style={{
-                  backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                  color: listing.side === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                }}
-              >
-                {listing.side === 'jam' ? (
-                  <>
-                    <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                    <span>Jam</span>
-                  </>
-                ) : (
-                  <>
-                    <Ticket className="h-4 w-4" aria-hidden="true" />
-                    <span>Book slot</span>
-                  </>
-                )}
-              </button>
+              {onSwipe && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onSwipe(listing, 'pass');
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--err)] transition hover:bg-[var(--surface-hover)]"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                  <span>Pass</span>
+                </button>
+              )}
+
+              {action.kind === 'invite' && onInvite ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onInvite(listing);
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
+                  style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
+                >
+                  <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+                  <span>Invite to jam</span>
+                </button>
+              ) : (
+                onOpenInvites && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenInvites(action.kind === 'accepted' ? action.invite.threadId : undefined);
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
+                    style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
+                  >
+                    <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                    <span>{action.label}</span>
+                  </button>
+                )
+              )}
+            </div>
+          )}
+
+          {listing.isSample && onSwipe && (
+            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-xs text-[var(--muted)]">
+              Sample preview profile for demonstration only. Sign in and browse live musician cards to send a real Jam invite.
             </div>
           )}
         </div>

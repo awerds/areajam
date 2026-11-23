@@ -1,26 +1,16 @@
 import type { AuthUser } from '../types';
-import { DEFAULT_FIREBASE_CONFIG } from './firebaseConfig';
+import {
+  getFirebaseAppInstance,
+  isFirebaseAuthConfigured,
+  readFirebaseConfig,
+} from './firebaseApp';
+
+export { isFirebaseAuthConfigured };
 
 const LOCAL_AUTH_KEY = 'areajam_v1_user';
 const authListeners = new Set<(user: AuthUser | null) => void>();
 
 let currentUser: AuthUser | null = null;
-
-function readFirebaseConfig() {
-  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY?.trim();
-  const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN?.trim();
-  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID?.trim();
-  const appId = import.meta.env.VITE_FIREBASE_APP_ID?.trim();
-
-  if (apiKey && authDomain && projectId) {
-    return { apiKey, authDomain, projectId, appId };
-  }
-  return DEFAULT_FIREBASE_CONFIG;
-}
-
-export function isFirebaseAuthConfigured(): boolean {
-  return Boolean(readFirebaseConfig());
-}
 
 function loadLocalPreviewUser(): AuthUser | null {
   try {
@@ -59,10 +49,9 @@ export function subscribeAuth(callback: (user: AuthUser | null) => void): () => 
 
   (async () => {
     try {
-      const { initializeApp, getApps, getApp } = await import('firebase/app');
+      const app = await getFirebaseAppInstance();
       const { getAuth, onAuthStateChanged } = await import('firebase/auth');
       if (cancelled) return;
-      const app = getApps().length ? getApp() : initializeApp(cfg);
       const auth = getAuth(app);
       unsubFirebase = onAuthStateChanged(auth, (fbUser) => {
         if (!fbUser) {
@@ -101,9 +90,8 @@ export async function signInWithProvider(
   const cfg = readFirebaseConfig();
 
   if (cfg) {
-    const { initializeApp, getApps, getApp } = await import('firebase/app');
+    const app = await getFirebaseAppInstance();
     const { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup } = await import('firebase/auth');
-    const app = getApps().length ? getApp() : initializeApp(cfg);
     const auth = getAuth(app);
 
     const authProvider =

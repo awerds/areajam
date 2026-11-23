@@ -3,7 +3,9 @@ import {
   ArrowLeft,
   Calendar,
   ExternalLink,
+  Flag,
   Flame,
+  Instagram,
   MapPin,
   MessageCircle,
   Palette,
@@ -11,10 +13,10 @@ import {
   Plus,
   Send,
   Share2,
+  ShieldBan,
   Sparkles,
   Speaker,
   Star,
-  Ticket,
   Trash2,
   Users,
 } from 'lucide-react';
@@ -24,18 +26,21 @@ import {
   PROFILE_THEME_LIST,
   safeHttpsUrl,
 } from '../data/themes';
+import { embedProviderLabel } from '../lib/embedMedia';
+import { getProfileActionState } from '../lib/firestorePilot';
 import type {
   AuthUser,
   GearCategory,
   GearItem,
+  JamInvite,
   Listing,
   ProfileThemeId,
   Region,
-  SwipeDecision,
   WallComment,
 } from '../types';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
+import type { SafetyTarget } from './SafetyDialog';
 
 interface ProfilePageProps {
   listing: Listing;
@@ -43,16 +48,18 @@ interface ProfilePageProps {
   allListings: Listing[];
   allRegions: Region[];
   user: AuthUser | null;
-  isMatched: boolean;
+  inviteByTargetUid?: Record<string, JamInvite>;
   soundEnabled: boolean;
   wallComments: WallComment[];
   onToggleSound: () => void;
   onBack: () => void;
-  onSwipe: (listing: Listing, decision: SwipeDecision) => void;
-  onOpenChat: (listing: Listing) => void;
+  onInvite: (listing: Listing) => void;
+  onOpenInvites: (threadId?: string) => void;
+  onSafetyAction: (target: SafetyTarget) => void;
   onOpenProfile: (listing: Listing) => void;
   onUpdateListing: (updated: Listing) => void;
   onAddWallComment: (listingId: string, text: string) => void;
+  onDeleteWallComment?: (listingId: string, noteId: string) => void;
   onShareUrl: () => void;
 }
 
@@ -62,22 +69,25 @@ export function ProfilePage({
   allListings,
   allRegions,
   user,
-  isMatched,
+  inviteByTargetUid,
   soundEnabled,
   wallComments,
   onToggleSound,
   onBack,
-  onSwipe,
-  onOpenChat,
+  onInvite,
+  onOpenInvites,
+  onSafetyAction,
   onOpenProfile,
   onUpdateListing,
   onAddWallComment,
+  onDeleteWallComment,
   onShareUrl,
 }: ProfilePageProps) {
   const theme = PROFILE_THEMES[listing.profileStyle?.themeId || 'stage-coral'];
   const canCustomize = Boolean(
-    listing.isUserCreated && user && listing.ownerUid === user.uid
+    !listing.isSample && user && listing.ownerUid === user.uid
   );
+  const actionState = getProfileActionState(listing, user?.uid, inviteByTargetUid);
 
   const orderedClips = (() => {
     const raw = listing.clips || [];
@@ -230,6 +240,43 @@ export function ProfilePage({
               </button>
             )}
 
+            {!listing.isSample && listing.ownerUid && user?.uid !== listing.ownerUid && (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSafetyAction({
+                      mode: 'report',
+                      targetUid: listing.ownerUid!,
+                      targetName: listing.ownerName || listing.title,
+                      targetType: 'profile',
+                      targetId: listing.id,
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--muted)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)] hover:text-[var(--ink)]"
+                >
+                  <Flag className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Report</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSafetyAction({
+                      mode: 'block',
+                      targetUid: listing.ownerUid!,
+                      targetName: listing.ownerName || listing.title,
+                      targetType: 'profile',
+                      targetId: listing.id,
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--err)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
+                >
+                  <ShieldBan className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Block</span>
+                </button>
+              </>
+            )}
+
             <button
               type="button"
               onClick={onShareUrl}
@@ -260,13 +307,22 @@ export function ProfilePage({
                   style={{ color: 'var(--pt-accent)' }}
                   aria-hidden="true"
                 />
-                {listing.neighborhood}, {region?.label ?? listing.regionId}
+                {listing.neighborhood}, {region?.label ?? listing.regionLabel ?? listing.regionId}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                {listing.isUserCreated
-                  ? 'Local draft (saved in this browser)'
-                  : 'Sample profile (demo)'}
+                {listing.isSample ? 'Sample profile (demo)' : 'Live profile (Firestore)'}
               </span>
+              {listing.instagramHandle && (
+                <a
+                  href={`https://www.instagram.com/${listing.instagramHandle}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)] hover:bg-[var(--pt-pill-hover)]"
+                >
+                  <Instagram className="h-3.5 w-3.5" style={{ color: 'var(--pt-accent)' }} aria-hidden="true" />
+                  <span>@{listing.instagramHandle}</span>
+                </a>
+              )}
               {listing.payOrSplit && (
                 <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
                   {listing.payOrSplit}
@@ -295,38 +351,49 @@ export function ProfilePage({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {isMatched ? (
+            {actionState.kind === 'accepted' ? (
               <button
                 type="button"
-                onClick={() => onOpenChat(listing)}
+                onClick={() => onOpenInvites(actionState.invite.threadId)}
                 className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
                 style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
                 <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                <span>Open match chat</span>
+                <span>Open private thread</span>
               </button>
-            ) : (
-              !listing.isUserCreated && (
-                <button
-                  type="button"
-                  onClick={() => onSwipe(listing, 'like')}
-                  className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
-                  style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
-                >
-                  {isJam ? (
-                    <>
-                      <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                      <span>Jam with {listing.title}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Ticket className="h-4 w-4" aria-hidden="true" />
-                      <span>Book or pitch slot</span>
-                    </>
-                  )}
-                </button>
-              )
-            )}
+            ) : actionState.kind === 'incoming' ? (
+              <button
+                type="button"
+                onClick={() => onOpenInvites()}
+                className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
+                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
+              >
+                <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+                <span>Respond to jam invite</span>
+              </button>
+            ) : actionState.kind === 'sent' ? (
+              <button
+                type="button"
+                onClick={() => onOpenInvites()}
+                className="inline-flex items-center gap-2 rounded-2xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-6 py-3.5 text-sm font-bold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
+              >
+                <span>Invite sent — view status</span>
+              </button>
+            ) : actionState.kind === 'invite' ? (
+              <button
+                type="button"
+                onClick={() => onInvite(listing)}
+                className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
+                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
+              >
+                <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+                <span>Invite to jam</span>
+              </button>
+            ) : actionState.kind === 'sample' ? (
+              <span className="rounded-2xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-4 py-2.5 text-xs font-semibold text-[var(--muted)]">
+                Sample preview card — invites unlock on live musician profiles
+              </span>
+            ) : null}
           </div>
         </div>
       </header>
@@ -488,11 +555,13 @@ export function ProfilePage({
                           {idx + 1}. {clip.title}
                         </p>
                         <p className="text-xs text-[var(--muted)]">
-                          {clip.kind === 'video'
-                            ? 'Video clip'
-                            : clip.kind === 'audio'
-                              ? 'Audio upload'
-                              : 'Studio groove'}
+                          {clip.kind === 'embed'
+                            ? `${embedProviderLabel(clip.embedProvider)} link`
+                            : clip.kind === 'video'
+                              ? 'Video clip'
+                              : clip.kind === 'audio'
+                                ? 'Audio clip'
+                                : 'Stage synth visual'}
                           , {clip.durationSec}s
                         </p>
                       </div>
@@ -837,7 +906,9 @@ export function ProfilePage({
             <div>
               <h2 className="font-display text-xl font-bold text-[var(--ink)]">Scene wall</h2>
               <p className="text-xs text-[var(--muted)]">
-                Preview wall notes for {listing.title}. Notes posted here are stored only in this browser.
+                {listing.isSample
+                  ? `Preview wall notes for ${listing.title} are stored locally for demo only.`
+                  : `Public scene wall for ${listing.title} backed by Cloud Firestore.`}
               </p>
             </div>
 
@@ -853,21 +924,66 @@ export function ProfilePage({
               </p>
             ) : (
               <ul className="space-y-2.5">
-                {wallComments.map((comment) => (
-                  <li
-                    key={comment.id}
-                    className="rounded-2xl border px-4 py-3"
-                    style={{
-                      backgroundColor: 'var(--pt-surface-inner)',
-                      borderColor: 'var(--pt-border-subtle)',
-                    }}
-                  >
-                    <p className="text-xs font-bold" style={{ color: 'var(--pt-accent)' }}>
-                      {comment.authorName}
-                    </p>
-                    <p className="mt-1 text-sm text-[var(--ink)]">{comment.text}</p>
-                  </li>
-                ))}
+                {wallComments.map((comment) => {
+                  const canDelete = Boolean(
+                    user &&
+                      ((comment.authorUid && comment.authorUid === user.uid) ||
+                        (listing.ownerUid && listing.ownerUid === user.uid))
+                  );
+                  const canReport = Boolean(
+                    !listing.isSample &&
+                      user &&
+                      comment.authorUid &&
+                      comment.authorUid !== user.uid
+                  );
+                  return (
+                    <li
+                      key={comment.id}
+                      className="rounded-2xl border px-4 py-3"
+                      style={{
+                        backgroundColor: 'var(--pt-surface-inner)',
+                        borderColor: 'var(--pt-border-subtle)',
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-bold" style={{ color: 'var(--pt-accent)' }}>
+                          {comment.authorName}
+                        </p>
+                        {(canDelete || canReport) && (
+                          <div className="flex items-center gap-2 text-[11px]">
+                            {canReport && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onSafetyAction({
+                                    mode: 'report',
+                                    targetUid: comment.authorUid!,
+                                    targetName: comment.authorName,
+                                    targetType: 'wallNote',
+                                    targetId: comment.id,
+                                  })
+                                }
+                                className="font-medium text-[var(--muted)] hover:text-[var(--ink)]"
+                              >
+                                Report
+                              </button>
+                            )}
+                            {canDelete && onDeleteWallComment && (
+                              <button
+                                type="button"
+                                onClick={() => onDeleteWallComment(listing.id, comment.id)}
+                                className="font-medium text-[var(--err)] hover:opacity-80"
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-[var(--ink)]">{comment.text}</p>
+                    </li>
+                  );
+                })}
               </ul>
             )}
 

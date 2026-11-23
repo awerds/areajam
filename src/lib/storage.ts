@@ -1,4 +1,4 @@
-import { STARTER_REGIONS } from '../data/regions';
+import { DEFAULT_ALL_REGIONS, PILOT_REGION_ID } from '../data/regions';
 import { PROFILE_THEMES } from '../data/themes';
 import type {
   AppMode,
@@ -71,9 +71,10 @@ export function syncUrlState(regionId: string, mode: AppMode, profileId?: string
 
 export function getDefaultState(): AppState {
   return {
-    regionId: 'austin',
+    regionId: PILOT_REGION_ID,
     mode: 'jam',
     includeNearbyRegions: false,
+    showSampleCards: false,
     locationConsent: 'unknown',
     detectedCityLabel: undefined,
     lookingForJam: [],
@@ -166,7 +167,7 @@ function buildStateFromParsed(
   fallback: AppState
 ): AppState {
   const knownRegions: Region[] = [
-    ...STARTER_REGIONS,
+    ...DEFAULT_ALL_REGIONS,
     ...(Array.isArray(parsed.customRegions) ? parsed.customRegions : []),
   ];
 
@@ -190,6 +191,7 @@ function buildStateFromParsed(
     regionId: resolvedRegionId,
     mode: urlOverride.mode ?? (parsed.mode === 'gigs' ? 'gigs' : 'jam'),
     includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
+    showSampleCards: Boolean(parsed.showSampleCards),
     locationConsent: consent,
     detectedCityLabel:
       typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,

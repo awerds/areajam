@@ -58,11 +58,21 @@ export interface WallComment {
   createdAt: number;
 }
 
+export type EmbedProvider =
+  | 'instagram'
+  | 'youtube'
+  | 'tiktok'
+  | 'vimeo'
+  | 'soundcloud'
+  | 'direct';
+
 export interface MediaClip {
   id: string;
   title: string;
-  kind: 'video' | 'audio' | 'synth-reel';
+  kind: 'embed' | 'video' | 'audio' | 'synth-reel';
   mediaId?: string;
+  embedUrl?: string;
+  embedProvider?: EmbedProvider;
   durationSec: number;
   clipVariation?: number;
 }
@@ -85,6 +95,7 @@ export interface Region {
   lat?: number;
   lng?: number;
   isCustom?: boolean;
+  isPilot?: boolean;
 }
 
 export interface Listing {
@@ -94,6 +105,8 @@ export interface Listing {
   roleCategory: string;
   instruments: InstrumentId[];
   regionId: string;
+  regionLabel?: string;
+  regionState?: string;
   neighborhood: string;
   title: string;
   subtitle: string;
@@ -105,6 +118,7 @@ export interface Listing {
   gearLocker: GearItem[];
   availability: string;
   payOrSplit?: string;
+  instagramHandle?: string;
   sampleLink?: string;
   visualSeed: number;
   clips: MediaClip[];
@@ -112,11 +126,61 @@ export interface Listing {
   profileStyle: ProfileStyle;
   autoMatch: boolean;
   autoReply: string;
+  isSample?: boolean;
+  isPublished?: boolean;
   isUserCreated?: boolean;
   ownerUid?: string;
   ownerName?: string;
   createdAt: number;
+  updatedAt?: number;
 }
+
+export type JamInviteStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
+
+export interface JamInvite {
+  id: string;
+  participants: [string, string];
+  fromUid: string;
+  toUid: string;
+  fromName: string;
+  toName: string;
+  targetProfileId: string;
+  targetProfileTitle: string;
+  regionId: string;
+  note: string;
+  status: JamInviteStatus;
+  threadId: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface PrivateThread {
+  id: string;
+  participants: [string, string];
+  participantNames: Record<string, string>;
+  profileId: string;
+  profileTitle: string;
+  regionId: string;
+  lastMessageText: string;
+  lastMessageAt: number;
+  createdAt: number;
+}
+
+export interface ThreadMessage {
+  id: string;
+  senderUid: string;
+  senderName: string;
+  text: string;
+  sentAt: number;
+}
+
+export interface BlockedUser {
+  blockedUid: string;
+  blockedName: string;
+  createdAt: number;
+}
+
+export type ReportReason = 'spam' | 'harassment' | 'impersonation' | 'inappropriate' | 'other';
 
 export interface ChatMessage {
   id: string;
@@ -144,6 +208,7 @@ export interface AppState {
   regionId: string;
   mode: AppMode;
   includeNearbyRegions: boolean;
+  showSampleCards: boolean;
   locationConsent: LocationConsent;
   detectedCityLabel?: string;
   lookingForJam: string[];
