@@ -1138,9 +1138,6 @@ export function App() {
                           {currentRegion.label}
                           {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
                         </span>
-                        <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)]">
-                          Live Jam pilot across all US cities
-                        </span>
                       </div>
 
                       <h1 className="hero-title font-bold text-[var(--ink)]">
@@ -1154,9 +1151,9 @@ export function App() {
 
                     <div className="grid grid-cols-3 gap-3">
                       <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Nashville + all US</p>
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Spotlighting Nashville (615) first, with every US state and custom city searchable in one tap.
+                          Matches your area first and shows the nearest musicians with rough distance whenever your town is quiet.
                         </p>
                       </div>
                       <div className="glass-surface brand-card-accent rounded-2xl p-4">

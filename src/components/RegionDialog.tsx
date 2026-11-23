@@ -52,12 +52,7 @@ export function RegionDialog({
   const stateIds = new Set(ALL_US_STATE_REGIONS.map((r) => r.id));
   const customRegions = regions.filter((r) => !starterIds.has(r.id) && !stateIds.has(r.id));
 
-  const pilotRegion = STARTER_REGIONS.find((r) => r.isPilot);
-  const featuredRegions = [
-    ...(pilotRegion ? [pilotRegion] : []),
-    ...STARTER_REGIONS.filter((r) => !r.isPilot),
-    ...customRegions,
-  ].filter(matchesQuery);
+  const featuredRegions = [...STARTER_REGIONS, ...customRegions].filter(matchesQuery);
 
   const filteredStateRegions = ALL_US_STATE_REGIONS.filter(matchesQuery);
   const statesExpanded = Boolean(q) || showAllStates;
@@ -100,14 +95,6 @@ export function RegionDialog({
             {region.state && (
               <span className="text-xs text-[var(--muted)]">{region.state}</span>
             )}
-            {region.isPilot && (
-              <span
-                className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                style={{ backgroundColor: 'var(--jam-soft)', color: 'var(--jam-text)' }}
-              >
-                Pilot
-              </span>
-            )}
           </div>
           <p className="mt-0.5 text-xs text-[var(--muted)]">
             Area {region.areaCode || 'local'}, {liveCount} {liveCount === 1 ? 'player' : 'players'}
@@ -124,7 +111,7 @@ export function RegionDialog({
       onClose={onClose}
       titleId="region-dialog-title"
       title="Pick your city or state"
-      subtitle="Nashville (615) is the pilot metro, and every US city & state board is open"
+      subtitle="Switch to another city, browse by state, or add your town below"
     >
       <div className="space-y-4">
         <div className="relative">
@@ -165,7 +152,7 @@ export function RegionDialog({
         {featuredRegions.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-semibold text-[var(--muted)]">
-              Pilot &amp; featured music cities
+              Featured music cities
             </p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {featuredRegions.map(renderTile)}

@@ -21,7 +21,7 @@ export function HowItWorksDialog({
       onClose={onClose}
       titleId="how-it-works-title"
       title="How AreaJam works"
-      subtitle="Nashville (615) Jam pilot — open to every US city & state"
+      subtitle="Find local musicians to jam with near you"
     >
       <div className="space-y-4">
         <div className="relative overflow-hidden rounded-2xl bg-[#10131d] px-5 py-5 text-white">
@@ -60,9 +60,9 @@ export function HowItWorksDialog({
             <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--jam-soft)] text-[var(--jam-text)]">
               <MapPin className="h-5 w-5" aria-hidden="true" />
             </div>
-            <h3 className="font-display text-base font-bold">Open across all US cities</h3>
+            <h3 className="font-display text-base font-bold">Local first, nearest nearby</h3>
             <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-              Spotlighting Nashville (615) first with every US state and custom city searchable. If no players are posted locally yet, nearest cities appear with rough distance.
+              Starts in your area and lets you switch or add any town. If no players are posted locally yet, the nearest musicians appear with rough distance.
             </p>
           </div>
         </div>
@@ -71,9 +71,9 @@ export function HowItWorksDialog({
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <Compass className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Browse free across all cities</p>
+              <p className="font-semibold">Browse players free</p>
               <p className="text-xs text-[var(--muted)]">
-                Explore Nashville (615) or search any US state and city board. Inspect instruments, gear lockers, and linked Instagram/YouTube clips.
+                Browse musicians in your area or switch to another city. Inspect instruments, gear lockers, and linked Instagram or YouTube clips.
               </p>
             </div>
           </li>

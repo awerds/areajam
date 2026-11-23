@@ -3,7 +3,7 @@ import type { Region } from '../types';
 export const PILOT_REGION_ID = 'nashville';
 
 export const STARTER_REGIONS: Region[] = [
-  { id: 'nashville', city: 'Nashville', state: 'TN', areaCode: '615', label: 'Nashville (615)', lat: 36.1627, lng: -86.7816, isPilot: true },
+  { id: 'nashville', city: 'Nashville', state: 'TN', areaCode: '615', label: 'Nashville (615)', lat: 36.1627, lng: -86.7816 },
   { id: 'austin', city: 'Austin', state: 'TX', areaCode: '512', label: 'Austin (512)', lat: 30.2672, lng: -97.7431 },
   { id: 'nyc', city: 'New York', state: 'NY', areaCode: '718', label: 'NYC / BK (718)', lat: 40.7128, lng: -74.006 },
   { id: 'la', city: 'Los Angeles', state: 'CA', areaCode: '213', label: 'Los Angeles (213)', lat: 34.0522, lng: -118.2437 },
