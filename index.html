@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#07080d" />
+    <script>
+      (function () {
+        var stored = null;
+        try {
+          stored = localStorage.getItem('color-scheme');
+        } catch (e) {}
+        var metaScheme = document.querySelector('meta[name="color-scheme"]');
+        if (metaScheme && (stored === 'light' || stored === 'dark')) {
+          metaScheme.content = stored;
+        }
+        var isDark =
+          stored === 'dark' ||
+          (stored !== 'light' &&
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) {
+          metaTheme.content = isDark ? '#07080d' : '#f6f4ef';
+        }
+      })();
+    </script>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AreaJam" />
+    <meta
+      name="description"
+      content="AreaJam — Spatial regional matching for local musicians to jam and bands to book gigs."
+    />
+    <title>AreaJam — Local Musicians &amp; Gigs</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="./assets/index-B9lwtiCr.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CKYZvCND.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

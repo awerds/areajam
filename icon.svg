@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AreaJam icon">
+  <rect width="512" height="512" rx="112" fill="#0e0d0b" />
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#2c2823" stroke-width="4" />
+  <circle cx="256" cy="256" r="164" fill="none" stroke="#24201c" stroke-width="3" />
+  <circle cx="256" cy="256" r="132" fill="none" stroke="#36312b" stroke-width="3" />
+  <circle cx="256" cy="256" r="88" fill="#ff5c2b" />
+  <circle cx="256" cy="256" r="18" fill="#0e0d0b" />
+  <path d="M138 352L188 164H224L274 352H238L228 310H184L174 352H138ZM191 278H221L206 210L191 278Z" fill="#f2ece1" />
+  <path d="M294 164H330V292C330 330 307 355 270 355C255 355 244 351 236 346L247 318C253 321 260 323 268 323C285 323 294 313 294 291V164Z" fill="#f2ece1" />
+  <rect x="352" y="210" width="12" height="92" rx="6" fill="#5b94ff" />
+  <rect x="376" y="182" width="12" height="148" rx="6" fill="#f2ece1" />
+  <rect x="400" y="232" width="12" height="48" rx="6" fill="#ff5c2b" />
+</svg>
