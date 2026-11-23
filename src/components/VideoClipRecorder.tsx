@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, Camera, Check, Film, Mic, RefreshCw, Square, Trash2, Upload, Video } from 'lucide-react';
+import { AlertCircle, Camera, Check, Film, Mic, RefreshCw, Square, Star, Trash2, Upload, Video } from 'lucide-react';
 import { deleteMediaBlob, getMediaObjectUrl, saveMediaBlob } from '../lib/mediaStorage';
 import type { MediaClip } from '../types';
 
 interface VideoClipRecorderProps {
   clips: MediaClip[];
+  featuredClipId?: string;
   onAddClip: (clip: MediaClip) => void;
   onRemoveClip: (clipId: string) => void;
+  onSetFeaturedClip: (clipId: string) => void;
   maxClips?: number;
 }
 
@@ -39,8 +41,10 @@ function measureFileDuration(url: string, isVideo: boolean): Promise<number> {
 
 export function VideoClipRecorder({
   clips,
+  featuredClipId,
   onAddClip,
   onRemoveClip,
+  onSetFeaturedClip,
   maxClips = 4,
 }: VideoClipRecorderProps) {
   const [studioTab, setStudioTab] = useState<'webcam' | 'upload'>('webcam');
@@ -88,7 +92,6 @@ export function VideoClipRecorder({
     };
   }, []);
 
-  // Load preview thumbnails for attached clips
   useEffect(() => {
     let active = true;
     const created: string[] = [];
@@ -236,13 +239,17 @@ export function VideoClipRecorder({
     const mediaId = `media-${id}`;
     await saveMediaBlob(mediaId, recordedBlob);
 
-    onAddClip({
+    const nextClip: MediaClip = {
       id,
       mediaId,
       title: clipTitle.trim() || `Intro clip ${clips.length + 1}`,
       kind: 'video',
       durationSec: Math.max(2, seconds || 6),
-    });
+    };
+    onAddClip(nextClip);
+    if (!featuredClipId || clips.length === 0) {
+      onSetFeaturedClip(nextClip.id);
+    }
 
     if (recordedPreviewUrl) URL.revokeObjectURL(recordedPreviewUrl);
     setRecordedBlob(null);
@@ -289,13 +296,17 @@ export function VideoClipRecorder({
     const mediaId = `media-${id}`;
     await saveMediaBlob(mediaId, uploadBlob.blob);
 
-    onAddClip({
+    const nextClip: MediaClip = {
       id,
       mediaId,
       title: clipTitle.trim() || uploadBlob.name || `Clip ${clips.length + 1}`,
       kind: uploadBlob.kind,
       durationSec: uploadBlob.duration,
-    });
+    };
+    onAddClip(nextClip);
+    if (!featuredClipId || clips.length === 0) {
+      onSetFeaturedClip(nextClip.id);
+    }
 
     if (uploadPreviewUrl) URL.revokeObjectURL(uploadPreviewUrl);
     setUploadBlob(null);
@@ -307,9 +318,14 @@ export function VideoClipRecorder({
     if (clip.mediaId) {
       await deleteMediaBlob(clip.mediaId);
     }
+    const remaining = clips.filter((c) => c.id !== clip.id);
     onRemoveClip(clip.id);
+    if (clip.id === featuredClipId && remaining.length > 0) {
+      onSetFeaturedClip(remaining[0].id);
+    }
   };
 
+  const activeFeaturedId = featuredClipId || clips[0]?.id;
   const atLimit = clips.length >= maxClips;
 
   return (
@@ -320,7 +336,7 @@ export function VideoClipRecorder({
             Intro video and performance clips ({clips.length}/{maxClips})
           </h3>
           <p className="text-xs text-[var(--muted)]">
-            Cards auto-play your first clip in the feed so local players hear your vibe immediately
+            Star your main clip so it plays first automatically on your swipe card and profile page
           </p>
         </div>
 
@@ -537,41 +553,62 @@ export function VideoClipRecorder({
 
       {clips.length > 0 && (
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {clips.map((clip, idx) => (
-            <li
-              key={clip.id}
-              className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-black/30 p-2.5"
-            >
-              <div className="flex min-w-0 items-center gap-2.5">
-                {clip.kind === 'video' && clipUrls[clip.id] ? (
-                  <video
-                    src={clipUrls[clip.id]}
-                    muted
-                    playsInline
-                    className="h-12 w-9 shrink-0 rounded-lg object-cover"
-                  />
-                ) : (
-                  <span className="inline-flex h-12 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[var(--accent)]">
-                    <Film className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                )}
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-[var(--ink)]">{clip.title}</p>
-                  <p className="text-[11px] text-[var(--muted)]">
-                    Clip {idx + 1}, {clip.kind}, {clip.durationSec}s
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => void handleDeleteSavedClip(clip)}
-                aria-label={`Remove ${clip.title}`}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-white/5 text-[var(--err)] hover:bg-white/10"
+          {clips.map((clip, idx) => {
+            const isMain = clip.id === activeFeaturedId;
+            return (
+              <li
+                key={clip.id}
+                className="flex items-center justify-between gap-2 rounded-xl border bg-black/30 p-2.5"
+                style={{ borderColor: isMain ? 'var(--accent)' : 'var(--border)' }}
               >
-                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
+                <div className="flex min-w-0 items-center gap-2.5">
+                  {clip.kind === 'video' && clipUrls[clip.id] ? (
+                    <video
+                      src={clipUrls[clip.id]}
+                      muted
+                      playsInline
+                      className="h-12 w-9 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span className="inline-flex h-12 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[var(--accent)]">
+                      <Film className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-[var(--ink)]">{clip.title}</p>
+                    <p className="text-[11px] text-[var(--muted)]">
+                      Clip {idx + 1}, {clip.kind}, {clip.durationSec}s
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5">
+                  {isMain ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[10px] font-bold text-[var(--accent)]">
+                      <Star className="h-3 w-3 fill-current" aria-hidden="true" />
+                      <span>Main</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onSetFeaturedClip(clip.id)}
+                      className="rounded-full border border-[var(--border)] bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-[var(--ink)] hover:bg-white/10"
+                    >
+                      Set main
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void handleDeleteSavedClip(clip)}
+                    aria-label={`Remove ${clip.title}`}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] bg-white/5 text-[var(--err)] hover:bg-white/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

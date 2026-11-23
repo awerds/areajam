@@ -22,7 +22,10 @@ async function fetchJsonWithTimeout(url: string, timeoutMs = 4000): Promise<unkn
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, {
+      signal: controller.signal,
+      referrerPolicy: 'no-referrer',
+    });
     if (!res.ok) return null;
     return await res.json();
   } catch {

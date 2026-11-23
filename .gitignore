@@ -9,6 +9,16 @@ dist
 dist-ssr
 *.local
 
+# Secrets & Certificates
+.env
+.env.*
+!.env.example
+*.p8
+*.pem
+*.key
+*firebase-adminsdk*.json
+*service-account*.json
+
 # Editor & OS
 .DS_Store
 .vscode/*

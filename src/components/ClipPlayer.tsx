@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Star, Volume2, VolumeX } from 'lucide-react';
 import { startListingLoop, stopCardPreview } from '../lib/audioPreview';
 import { getMediaObjectUrl } from '../lib/mediaStorage';
 import type { Listing, MediaClip } from '../types';
@@ -13,6 +13,8 @@ interface ClipPlayerProps {
   onToggleSound?: () => void;
   compact?: boolean;
   showMetadataOverlay?: boolean;
+  activeClipId?: string;
+  onActiveClipChange?: (clipId: string) => void;
 }
 
 export function ClipPlayer({
@@ -23,11 +25,20 @@ export function ClipPlayer({
   onToggleSound,
   compact = false,
   showMetadataOverlay = true,
+  activeClipId,
+  onActiveClipChange,
 }: ClipPlayerProps) {
-  const clips: MediaClip[] =
-    listing.clips && listing.clips.length > 0
-      ? listing.clips
-      : [{ id: `${listing.id}-default`, title: 'Intro reel', kind: 'synth-reel', durationSec: 8 }];
+  const clips = useMemo<MediaClip[]>(() => {
+    const raw: MediaClip[] =
+      listing.clips && listing.clips.length > 0
+        ? listing.clips
+        : [{ id: `${listing.id}-default`, title: 'Intro reel', kind: 'synth-reel', durationSec: 8 }];
+
+    if (!listing.featuredClipId) return raw;
+    const featuredIdx = raw.findIndex((c) => c.id === listing.featuredClipId);
+    if (featuredIdx <= 0) return raw;
+    return [raw[featuredIdx], ...raw.slice(0, featuredIdx), ...raw.slice(featuredIdx + 1)];
+  }, [listing.clips, listing.featuredClipId, listing.id]);
 
   const [clipIndex, setClipIndex] = useState(0);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
@@ -37,15 +48,17 @@ export function ClipPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const safeIndex = clipIndex < clips.length ? clipIndex : 0;
+  const controlledIdx = activeClipId ? clips.findIndex((c) => c.id === activeClipId) : -1;
+  const safeIndex = controlledIdx >= 0 ? controlledIdx : clipIndex < clips.length ? clipIndex : 0;
   const activeClip = clips[safeIndex];
+  const featuredId = listing.featuredClipId || clips[0]?.id;
+  const isMainClip = activeClip?.id === featuredId;
 
   useEffect(() => {
     setClipIndex(0);
     setProgress(0);
-  }, [listing.id]);
+  }, [listing.id, listing.featuredClipId]);
 
-  // Load IndexedDB media URL when clip has a recorded/uploaded Blob
   useEffect(() => {
     let revokedUrl: string | null = null;
     let cancelled = false;
@@ -71,7 +84,6 @@ export function ClipPlayer({
     };
   }, [activeClip?.mediaId, activeClip?.id]);
 
-  // Control real <video> / <audio> playback
   useEffect(() => {
     const vid = videoRef.current;
     if (vid && activeClip?.kind === 'video' && mediaUrl) {
@@ -96,7 +108,6 @@ export function ClipPlayer({
     }
   }, [activeClip?.kind, isActive, mediaUrl, soundEnabled]);
 
-  // Synchronize Web Audio synth loop for seeded / synth-reel cards
   useEffect(() => {
     const usesSynthAudio =
       activeClip?.kind === 'synth-reel' || (activeClip?.kind === 'audio' && !activeClip.mediaId);
@@ -105,13 +116,13 @@ export function ClipPlayer({
       return;
     }
 
-    void startListingLoop(listing, safeIndex);
+    const variation = activeClip.clipVariation ?? safeIndex;
+    void startListingLoop(listing, variation);
     return () => {
       stopCardPreview();
     };
-  }, [activeClip?.kind, activeClip?.mediaId, isActive, listing, safeIndex, soundEnabled]);
+  }, [activeClip?.clipVariation, activeClip?.kind, activeClip?.mediaId, isActive, listing, safeIndex, soundEnabled]);
 
-  // Animate visual performance canvas & clip timer for non-video reels
   useEffect(() => {
     if (activeClip?.kind === 'video' && mediaUrl) return;
     const canvas = canvasRef.current;
@@ -137,7 +148,6 @@ export function ClipPlayer({
         setProgress(elapsed / durationMs);
       }
 
-      // Live rhythmic equalizer ribbons in mid-upper stage
       const barCount = 28;
       const barW = w / (barCount * 1.8);
       const centerY = h * 0.44;
@@ -157,7 +167,6 @@ export function ClipPlayer({
         ctx.fill();
       }
 
-      // Orbiting harmonic pulse ring
       ctx.globalAlpha = soundEnabled && isActive ? 0.32 : 0.16;
       ctx.strokeStyle = accent;
       ctx.lineWidth = 2;
@@ -220,7 +229,6 @@ export function ClipPlayer({
         />
       )}
 
-      {/* Protective velvet scrim */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -230,7 +238,6 @@ export function ClipPlayer({
         }}
       />
 
-      {/* Top segmented TikTok / Stories clip bar */}
       <div className="absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2.5">
         <div className="flex items-center gap-1.5">
           {clips.map((clip, idx) => {
@@ -243,6 +250,7 @@ export function ClipPlayer({
                   e.stopPropagation();
                   setClipIndex(idx);
                   setProgress(0);
+                  onActiveClipChange?.(clip.id);
                 }}
                 aria-label={`Play clip ${idx + 1}: ${clip.title}`}
                 className="group relative h-6 flex-1 cursor-pointer py-2.5"
@@ -264,13 +272,20 @@ export function ClipPlayer({
         {showMetadataOverlay && (
           <div className="flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{
-                  backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                }}
-              />
-              {activeClip?.title || 'Intro reel'}
+              {isMainClip ? (
+                <Star className="h-3 w-3 fill-current text-[var(--accent)]" aria-hidden="true" />
+              ) : (
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                  }}
+                />
+              )}
+              <span>{activeClip?.title || 'Intro reel'}</span>
+              {isMainClip && clips.length > 1 && (
+                <span className="text-[10px] text-white/70">(Main)</span>
+              )}
             </span>
 
             {onToggleSound && (

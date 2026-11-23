@@ -1,6 +1,8 @@
-import { Calendar, ExternalLink, Flame, MapPin, Speaker, Ticket, X } from 'lucide-react';
+import { Calendar, ExternalLink, Flame, MapPin, Maximize2, Speaker, Ticket, X } from 'lucide-react';
+import { safeHttpsUrl } from '../data/themes';
 import type { Listing, Region, SwipeDecision } from '../types';
 import { ClipPlayer } from './ClipPlayer';
+import { InstrumentBadgeRow } from './InstrumentIcons';
 import { NativeDialog } from './NativeDialog';
 
 interface DetailDialogProps {
@@ -10,6 +12,7 @@ interface DetailDialogProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   onClose: () => void;
+  onOpenProfile?: (listing: Listing) => void;
   onSwipe?: (listing: Listing, decision: SwipeDecision) => void;
 }
 
@@ -20,14 +23,10 @@ export function DetailDialog({
   soundEnabled,
   onToggleSound,
   onClose,
+  onOpenProfile,
   onSwipe,
 }: DetailDialogProps) {
-  const safeHref =
-    listing?.sampleLink && /^https?:\/\//i.test(listing.sampleLink)
-      ? listing.sampleLink
-      : listing?.sampleLink
-        ? `https://${listing.sampleLink}`
-        : undefined;
+  const safeHref = safeHttpsUrl(listing?.sampleLink);
 
   return (
     <NativeDialog
@@ -54,35 +53,13 @@ export function DetailDialog({
             />
           </div>
 
+          <InstrumentBadgeRow instruments={listing.instruments} max={6} />
+
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)]">
-                {listing.roleCategory}
-              </span>
-              <span className="text-sm font-medium text-[var(--muted)]">{listing.subtitle}</span>
-            </div>
-            <p className="mt-2 text-base font-semibold leading-snug text-[var(--ink)]">
+            <p className="text-sm font-medium text-[var(--muted)]">{listing.subtitle}</p>
+            <p className="mt-1.5 text-base font-semibold leading-snug text-[var(--ink)]">
               {listing.seekingOrOffer}
             </p>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5">
-            {listing.genres.map((genre) => (
-              <span
-                key={genre}
-                className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-[var(--ink)]"
-              >
-                {genre}
-              </span>
-            ))}
-            {listing.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--muted)]"
-              >
-                {tag}
-              </span>
-            ))}
           </div>
 
           <p className="text-sm leading-relaxed text-[var(--ink)]/90">{listing.bio}</p>
@@ -90,11 +67,22 @@ export function DetailDialog({
           <dl className="space-y-3 rounded-2xl border border-[var(--border)] bg-white/5 p-4 text-sm">
             <div className="flex items-start gap-3">
               <Speaker className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
-              <div>
+              <div className="min-w-0 flex-1">
                 <dt className="text-xs font-semibold text-[var(--muted)]">
-                  {listing.side === 'jam' ? 'Rig and gear' : 'Backline and sound'}
+                  {listing.side === 'jam' ? 'Gear locker' : 'Backline and sound'}
                 </dt>
-                <dd className="mt-0.5 text-[var(--ink)]">{listing.gearOrBackline}</dd>
+                {listing.gearLocker.length > 0 ? (
+                  <dd className="mt-1 space-y-1">
+                    {listing.gearLocker.slice(0, 4).map((item) => (
+                      <div key={item.id} className="text-xs text-[var(--ink)]">
+                        <span className="font-semibold">{item.name}</span>
+                        {item.notes ? <span className="text-[var(--muted)]"> — {item.notes}</span> : null}
+                      </div>
+                    ))}
+                  </dd>
+                ) : (
+                  <dd className="mt-0.5 text-[var(--ink)]">{listing.gearOrBackline}</dd>
+                )}
               </div>
             </div>
 
@@ -122,7 +110,7 @@ export function DetailDialog({
             <a
               href={safeHref}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--ink)] underline decoration-white/25 underline-offset-4 hover:opacity-80"
             >
               <span>Listen or view press kit ({listing.sampleLink})</span>
@@ -130,8 +118,22 @@ export function DetailDialog({
             </a>
           )}
 
+          {onOpenProfile && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenProfile(listing);
+              }}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border-strong)] bg-white/10 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/15"
+            >
+              <Maximize2 className="h-4 w-4" aria-hidden="true" />
+              <span>Open full profile page</span>
+            </button>
+          )}
+
           {onSwipe && !alreadyMatched && (
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => {

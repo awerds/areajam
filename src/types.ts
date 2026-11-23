@@ -8,6 +8,56 @@ export type SwipeDecision = 'like' | 'pass';
 
 export type LocationConsent = 'unknown' | 'granted' | 'declined';
 
+export type InstrumentId =
+  | 'guitar'
+  | 'bass'
+  | 'drums'
+  | 'vocals'
+  | 'keys'
+  | 'synth'
+  | 'horns'
+  | 'strings'
+  | 'producer'
+  | 'band';
+
+export type GearCategory =
+  | 'Instruments'
+  | 'Amps & Cabs'
+  | 'Pedals & Synth'
+  | 'Drums & Percussion'
+  | 'Mics & Studio'
+  | 'PA & Backline';
+
+export interface GearItem {
+  id: string;
+  category: GearCategory;
+  name: string;
+  notes?: string;
+}
+
+export type ProfileThemeId =
+  | 'stage-coral'
+  | 'midnight-vinyl'
+  | 'tube-amber'
+  | 'emerald-club'
+  | 'synth-violet'
+  | 'zine-mono';
+
+export interface ProfileStyle {
+  themeId: ProfileThemeId;
+  moodStatus?: string;
+  soundsLike?: string[];
+  bannerPattern?: 'vinyl' | 'waves' | 'bars' | 'grid';
+}
+
+export interface WallComment {
+  id: string;
+  authorName: string;
+  authorUid?: string;
+  text: string;
+  createdAt: number;
+}
+
 export interface MediaClip {
   id: string;
   title: string;
@@ -42,6 +92,7 @@ export interface Listing {
   side: AppMode;
   gigSubtype?: GigSubtype;
   roleCategory: string;
+  instruments: InstrumentId[];
   regionId: string;
   neighborhood: string;
   title: string;
@@ -51,11 +102,14 @@ export interface Listing {
   tags: string[];
   bio: string;
   gearOrBackline: string;
+  gearLocker: GearItem[];
   availability: string;
   payOrSplit?: string;
   sampleLink?: string;
   visualSeed: number;
   clips: MediaClip[];
+  featuredClipId?: string;
+  profileStyle: ProfileStyle;
   autoMatch: boolean;
   autoReply: string;
   isUserCreated?: boolean;
@@ -98,4 +152,5 @@ export interface AppState {
   swiped: Record<string, SwipeDecision>;
   history: SwipeHistoryItem[];
   matches: MatchRecord[];
+  wallComments: Record<string, WallComment[]>;
 }

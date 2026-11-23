@@ -4,6 +4,19 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= AUSTIN (512) =================
   {
     id: 'atx-jam-1',
+    instruments: ['drums', 'producer'],
+    featuredClipId: 'atx-jam-1-c1',
+    gearLocker: [
+      { id: 'atx-jam-1-g1', category: 'Drums & Percussion', name: '1976 Ludwig Vistalite 4-pc', notes: 'Clear acrylic shells, tuned punchy' },
+      { id: 'atx-jam-1-g2', category: 'Drums & Percussion', name: 'Zildjian K Sweet Cymbals', notes: '15 hats, 21 ride, 19 crash' },
+      { id: 'atx-jam-1-g3', category: 'Mics & Studio', name: 'Shure Beta 52A + SM57s', notes: 'Ready to track rehearsals' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: 'Locking in motorik beats & looking for psych guitar',
+      soundsLike: ['Can', 'Kikagaku Moyo', 'Thee Oh Sees'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Drummers',
     side: 'jam',
     regionId: 'austin',
@@ -28,6 +41,20 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atx-jam-2',
+    instruments: ['bass', 'synth'],
+    featuredClipId: 'atx-jam-2-c1',
+    gearLocker: [
+      { id: 'atx-jam-2-g1', category: 'Instruments', name: 'Fender Precision Bass', notes: 'Flatwounds through tube DI' },
+      { id: 'atx-jam-2-g2', category: 'Pedals & Synth', name: 'Sequential Prophet Rev2', notes: '8-voice analog pads & bass' },
+      { id: 'atx-jam-2-g3', category: 'Pedals & Synth', name: 'Roland RE-201 Space Echo', notes: 'Warm tape saturation' },
+      { id: 'atx-jam-2-g4', category: 'PA & Backline', name: '16-ch Mackie PA', notes: 'Permanent South Congress room' },
+    ],
+    profileStyle: {
+      themeId: 'synth-violet',
+      moodStatus: 'Wednesdays in South Lamar with Prophet & Space Echo',
+      soundsLike: ['LCD Soundsystem', 'Talking Heads', 'ESG'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Bassists',
     side: 'jam',
     regionId: 'austin',
@@ -52,6 +79,19 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atx-gigs-1',
+    instruments: ['band', 'drums', 'vocals'],
+    featuredClipId: 'atx-gigs-1-c1',
+    gearLocker: [
+      { id: 'atx-gigs-1-g1', category: 'PA & Backline', name: 'Full House PA + FOH Engineer', notes: 'Digital board, 4 monitor mixes' },
+      { id: 'atx-gigs-1-g2', category: 'Amps & Cabs', name: 'Ampeg SVT 8x10 Bass Cab', notes: 'Shared backline on stage' },
+      { id: 'atx-gigs-1-g3', category: 'Drums & Percussion', name: 'Shared 4-pc Drum Shells', notes: 'Bring breakables & snare' },
+    ],
+    profileStyle: {
+      themeId: 'emerald-club',
+      moodStatus: 'Booking Thursday Red River opener — 35 min tight set',
+      soundsLike: ['White Denim', 'Parquet Courts', 'Spoon'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -77,6 +117,19 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atx-gigs-2',
+    instruments: ['band', 'vocals', 'guitar', 'bass', 'drums'],
+    featuredClipId: 'atx-gigs-2-c1',
+    gearLocker: [
+      { id: 'atx-gigs-2-g1', category: 'PA & Backline', name: 'QSC K12.2 Mains + Digital Mixer', notes: 'Self-contained up to 250 cap' },
+      { id: 'atx-gigs-2-g2', category: 'Instruments', name: 'Fender Telecaster + Jazz Bass', notes: 'Warm soul-funk rhythm section' },
+      { id: 'atx-gigs-2-g3', category: 'Amps & Cabs', name: 'Fender Deluxe Reverb', notes: 'Clean headroom for outdoor sets' },
+    ],
+    profileStyle: {
+      themeId: 'tube-amber',
+      moodStatus: 'Ready for Central TX patios, breweries & club openers',
+      soundsLike: ['Khruangbin', 'Durand Jones', 'Alabama Shakes'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -105,6 +158,19 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= NASHVILLE (615) =================
   {
     id: 'bna-jam-1',
+    instruments: ['guitar', 'strings', 'vocals'],
+    featuredClipId: 'bna-jam-1-c1',
+    gearLocker: [
+      { id: 'bna-jam-1-g1', category: 'Instruments', name: 'Sho-Bud Pro I Pedal Steel', notes: 'E9 tuning, sweet volume swells' },
+      { id: 'bna-jam-1-g2', category: 'Instruments', name: '1968 Fender Telecaster', notes: 'B-bender ready' },
+      { id: 'bna-jam-1-g3', category: 'Amps & Cabs', name: '1966 Princeton Reverb', notes: 'Hand-wired studio sweet spot' },
+    ],
+    profileStyle: {
+      themeId: 'tube-amber',
+      moodStatus: 'Five Points porch hangs & cosmic country charts',
+      soundsLike: ['Sturgill Simpson', 'MJ Lenderman', 'Gram Parsons'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'nashville',
@@ -128,6 +194,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'bna-jam-2',
+    instruments: ['vocals', 'keys', 'producer'],
+    featuredClipId: 'bna-jam-2-c1',
+    gearLocker: [
+      { id: 'bna-jam-2-g1', category: 'Instruments', name: 'Nord Electro 6D', notes: 'Rhodes, Clav & B3 presets' },
+      { id: 'bna-jam-2-g2', category: 'Mics & Studio', name: 'Neumann KMS 105', notes: 'Stage condenser vocal mic' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: 'Building live R&B rhythm section for 10 new demos',
+      soundsLike: ['Cleo Sol', 'Hiatus Kaiyote', 'Yebba'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Vocalists',
     side: 'jam',
     regionId: 'nashville',
@@ -151,6 +229,19 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'bna-gigs-1',
+    instruments: ['band', 'vocals', 'guitar'],
+    featuredClipId: 'bna-gigs-1-c1',
+    gearLocker: [
+      { id: 'bna-gigs-1-g1', category: 'PA & Backline', name: 'Midas Console + Bose Room Array', notes: 'Dedicated sound engineer' },
+      { id: 'bna-gigs-1-g2', category: 'Instruments', name: 'Kawai Stage Piano', notes: 'Tuned and mic’d on stage' },
+      { id: 'bna-gigs-1-g3', category: 'Mics & Studio', name: '4 Vocal Condenser Channels', notes: 'Clean acoustic clarity' },
+    ],
+    profileStyle: {
+      themeId: 'midnight-vinyl',
+      moodStatus: '90-cap seated listening room — zero pay-to-play',
+      soundsLike: ['Jason Isbell', 'Phoebe Bridgers', 'Watchhouse'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -176,6 +267,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'bna-gigs-2',
+    instruments: ['band', 'guitar', 'vocals', 'drums'],
+    featuredClipId: 'bna-gigs-2-c1',
+    gearLocker: [
+      { id: 'bna-gigs-2-g1', category: 'PA & Backline', name: 'Behringer X32 IEM Split Rig', notes: '5-minute venue changeover' },
+      { id: 'bna-gigs-2-g2', category: 'Amps & Cabs', name: 'Twin Reverb + Mesa Lone Star', notes: 'Clean country twang & grit' },
+    ],
+    profileStyle: {
+      themeId: 'tube-amber',
+      moodStatus: '3-hour country rock book + tight pro IEM rig',
+      soundsLike: ['Turnpike Troubadours', 'Brothers Osborne', 'Waylon'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -203,6 +306,19 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= NYC / BROOKLYN (718) =================
   {
     id: 'nyc-jam-1',
+    instruments: ['bass', 'synth'],
+    featuredClipId: 'nyc-jam-1-c1',
+    gearLocker: [
+      { id: 'nyc-jam-1-g1', category: 'Instruments', name: 'Rickenbacker 4003 Bass', notes: 'Bright dual-output clank' },
+      { id: 'nyc-jam-1-g2', category: 'Pedals & Synth', name: 'Tech 21 SansAmp BDDI', notes: 'Driven mid-bite' },
+      { id: 'nyc-jam-1-g3', category: 'Amps & Cabs', name: 'Ampeg PF-500 Head', notes: 'Compact Brooklyn load-in' },
+    ],
+    profileStyle: {
+      themeId: 'zine-mono',
+      moodStatus: 'Morgan Ave L stop — chasing loud post-punk bass tone',
+      soundsLike: ['Interpol', 'Dry Cleaning', 'Wire'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Bassists',
     side: 'jam',
     regionId: 'nyc',
@@ -226,6 +342,19 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'nyc-jam-2',
+    instruments: ['guitar', 'drums'],
+    featuredClipId: 'nyc-jam-2-c1',
+    gearLocker: [
+      { id: 'nyc-jam-2-g1', category: 'Instruments', name: 'Fender Jazzmaster', notes: 'Shimmer chorus & spring reverb' },
+      { id: 'nyc-jam-2-g2', category: 'Amps & Cabs', name: 'Roland JC-120 Jazz Chorus', notes: 'Stereo chorus benchmark' },
+      { id: 'nyc-jam-2-g3', category: 'Drums & Percussion', name: 'Pearl Masters Birch Kit', notes: 'Warm resonant studio tone' },
+    ],
+    profileStyle: {
+      themeId: 'synth-violet',
+      moodStatus: 'Sundays at Astoria Soundworks — 5 dream-pop cuts ready',
+      soundsLike: ['Alvvays', 'Beach House', 'Slowdive'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'nyc',
@@ -249,6 +378,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'nyc-gigs-1',
+    instruments: ['band', 'guitar', 'drums'],
+    featuredClipId: 'nyc-gigs-1-c1',
+    gearLocker: [
+      { id: 'nyc-gigs-1-g1', category: 'Amps & Cabs', name: '2x12 Tube Combo + Ampeg 410', notes: 'Shared stage backline' },
+      { id: 'nyc-gigs-1-g2', category: 'Drums & Percussion', name: 'Gretsch House Drum Shells', notes: 'Bring breakables & cymbals' },
+    ],
+    profileStyle: {
+      themeId: 'zine-mono',
+      moodStatus: 'LES basement showcase — fast 15-min backline changeovers',
+      soundsLike: ['Idles', 'The Strokes', 'Turnstile'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -274,6 +415,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'nyc-gigs-2',
+    instruments: ['band', 'horns', 'bass', 'drums', 'keys'],
+    featuredClipId: 'nyc-gigs-2-c1',
+    gearLocker: [
+      { id: 'nyc-gigs-2-g1', category: 'Instruments', name: 'Tenor Sax, Trumpet & Upright Bass', notes: 'Full acoustic or mic’d' },
+      { id: 'nyc-gigs-2-g2', category: 'Amps & Cabs', name: 'Battery-Ready Street Amps', notes: 'Zero-power rooftop setups' },
+    ],
+    profileStyle: {
+      themeId: 'midnight-vinyl',
+      moodStatus: '5-piece Brooklyn horn section for rooftops & late clubs',
+      soundsLike: ['Antibalas', 'Snarky Puppy', 'Soulive'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -301,6 +454,19 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= LOS ANGELES (213) =================
   {
     id: 'la-jam-1',
+    instruments: ['guitar', 'producer', 'synth'],
+    featuredClipId: 'la-jam-1-c1',
+    gearLocker: [
+      { id: 'la-jam-1-g1', category: 'Instruments', name: 'Fender Mustang + Roland Juno-106', notes: 'Analog chorus & bright single-coils' },
+      { id: 'la-jam-1-g2', category: 'Mics & Studio', name: 'Universal Audio Apollo x8', notes: 'Full drum mic package rigged' },
+      { id: 'la-jam-1-g3', category: 'Pedals & Synth', name: 'Ableton Live Push Rig', notes: 'Clocked live stems' },
+    ],
+    profileStyle: {
+      themeId: 'synth-violet',
+      moodStatus: 'Treated Sunset Blvd garage studio — turning stems live',
+      soundsLike: ['Caribou', 'Jungle', 'Toro y Moi'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'la',
@@ -324,6 +490,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'la-jam-2',
+    instruments: ['guitar', 'bass', 'drums', 'vocals'],
+    featuredClipId: 'la-jam-2-c1',
+    gearLocker: [
+      { id: 'la-jam-2-g1', category: 'PA & Backline', name: 'Cypress Park 24/7 Lockout', notes: 'Ready for late rehearsal' },
+      { id: 'la-jam-2-g2', category: 'Amps & Cabs', name: 'Orange Crush + Marshall JCM800', notes: 'Loud fuzz headroom' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: 'Gigs booked in Echo Park — need fearless frontperson',
+      soundsLike: ['Ty Segall', 'Amyl and the Sniffers', 'The Cramps'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Vocalists',
     side: 'jam',
     regionId: 'la',
@@ -347,6 +525,17 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'la-gigs-1',
+    instruments: ['band', 'vocals', 'horns'],
+    featuredClipId: 'la-gigs-1-c1',
+    gearLocker: [
+      { id: 'la-gigs-1-g1', category: 'PA & Backline', name: 'Outdoor Dual-Sub PA + Risers', notes: 'Shaded stage & lighting' },
+    ],
+    profileStyle: {
+      themeId: 'emerald-club',
+      moodStatus: 'Figueroa First Friday — $400 flat guarantee for 2 bands',
+      soundsLike: ['Chicano Batman', 'Khruangbin', 'Cumbia All Stars'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -372,6 +561,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'la-gigs-2',
+    instruments: ['band', 'guitar', 'vocals', 'drums'],
+    featuredClipId: 'la-gigs-2-c1',
+    gearLocker: [
+      { id: 'la-gigs-2-g1', category: 'Amps & Cabs', name: 'Fender Twin Reverb + Vox AC30', notes: 'Drenched in spring reverb' },
+      { id: 'la-gigs-2-g2', category: 'PA & Backline', name: 'Optional Portable PA', notes: 'Beach clubs & wrap parties' },
+    ],
+    profileStyle: {
+      themeId: 'midnight-vinyl',
+      moodStatus: 'Westside surf-indie 4-piece with 90-min crowd-tested book',
+      soundsLike: ['Allah-Las', 'Surf Curse', 'Best Coast'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -399,6 +600,18 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= CHICAGO (312) =================
   {
     id: 'chi-jam-1',
+    instruments: ['guitar', 'bass'],
+    featuredClipId: 'chi-jam-1-c1',
+    gearLocker: [
+      { id: 'chi-jam-1-g1', category: 'Instruments', name: 'Fender Telecaster Deluxe', notes: 'Open FACGCE tunings' },
+      { id: 'chi-jam-1-g2', category: 'Amps & Cabs', name: 'Fender Twin Reverb', notes: 'Sparkly clean tapping headroom' },
+    ],
+    profileStyle: {
+      themeId: 'midnight-vinyl',
+      moodStatus: 'Music Garage room in 5/4 and 7/8 — seeking drummer',
+      soundsLike: ['American Football', 'Delta Sleep', 'Toe'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Drummers',
     side: 'jam',
     regionId: 'chicago',
@@ -422,6 +635,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'chi-jam-2',
+    instruments: ['keys', 'vocals'],
+    featuredClipId: 'chi-jam-2-c1',
+    gearLocker: [
+      { id: 'chi-jam-2-g1', category: 'Instruments', name: 'Hammond XK-1c + Leslie Sim', notes: 'Classic drawbar growl' },
+      { id: 'chi-jam-2-g2', category: 'Instruments', name: 'Roland RD-88 Stage Piano', notes: 'Weighted action' },
+    ],
+    profileStyle: {
+      themeId: 'tube-amber',
+      moodStatus: 'Hammond XK-1c ready for Saturday afternoon soul jams',
+      soundsLike: ['Booker T. & the M.G.s', 'Cory Henry', 'Curtis Mayfield'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Keys & Synth',
     side: 'jam',
     regionId: 'chicago',
@@ -445,6 +670,17 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'chi-gigs-1',
+    instruments: ['band', 'horns', 'keys'],
+    featuredClipId: 'chi-gigs-1-c1',
+    gearLocker: [
+      { id: 'chi-gigs-1-g1', category: 'PA & Backline', name: 'House Mixer + 2 Powered Mains', notes: '3 vocal/horn mics + stage rug' },
+    ],
+    profileStyle: {
+      themeId: 'emerald-club',
+      moodStatus: 'Warm wood cocktail acoustics — Wednesday jazz-funk bills',
+      soundsLike: ['BadBadNotGood', 'Kamasi Washington', 'Herbie Hancock'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -470,6 +706,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'chi-gigs-2',
+    instruments: ['band', 'horns', 'drums'],
+    featuredClipId: 'chi-gigs-2-c1',
+    gearLocker: [
+      { id: 'chi-gigs-2-g1', category: 'Instruments', name: 'Sousaphone, 2 Saxes, Trumpet, Snare/Kick', notes: 'Full roaming acoustic punch' },
+      { id: 'chi-gigs-2-g2', category: 'Mics & Studio', name: 'Clip-on Wireless Horn Pack', notes: 'Instant club PA integration' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: '6-piece wireless brass — clubs or block parties',
+      soundsLike: ['Youngblood Brass Band', 'Hypnotic Brass Ensemble', 'Rebirth'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -497,6 +745,19 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= PORTLAND (503) =================
   {
     id: 'pdx-jam-1',
+    instruments: ['strings', 'bass'],
+    featuredClipId: 'pdx-jam-1-c1',
+    gearLocker: [
+      { id: 'pdx-jam-1-g1', category: 'Instruments', name: 'NS Design NXT5 Electric Cello', notes: '5-string low F to A' },
+      { id: 'pdx-jam-1-g2', category: 'Instruments', name: 'Fender Mustang Short-Scale Bass', notes: 'Warm flatwound thump' },
+      { id: 'pdx-jam-1-g3', category: 'Pedals & Synth', name: 'Strymon El Capistan + EarthQuaker Hoof', notes: 'Ambient swells & grit' },
+    ],
+    profileStyle: {
+      themeId: 'synth-violet',
+      moodStatus: 'Electric cello through analog delay & fuzz in Alberta Arts',
+      soundsLike: ['Dirty Three', 'Agnes Obel', 'Mogwai'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Horns & Strings',
     side: 'jam',
     regionId: 'portland',
@@ -520,6 +781,19 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'pdx-jam-2',
+    instruments: ['guitar', 'drums'],
+    featuredClipId: 'pdx-jam-2-c1',
+    gearLocker: [
+      { id: 'pdx-jam-2-g1', category: 'Amps & Cabs', name: 'Orange Rockerverb 100', notes: 'Drop-C fuzz wall' },
+      { id: 'pdx-jam-2-g2', category: 'Amps & Cabs', name: 'Spare Ampeg 8x10 Cab', notes: 'Plug your bass head right in' },
+      { id: 'pdx-jam-2-g3', category: 'Drums & Percussion', name: 'Tama Starclassic Maple', notes: '24-inch thunder kick' },
+    ],
+    profileStyle: {
+      themeId: 'zine-mono',
+      moodStatus: 'Soundproof SE basement + spare Ampeg 8x10 fridge waiting',
+      soundsLike: ['Sleep', 'Melvins', 'Black Sabbath'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Bassists',
     side: 'jam',
     regionId: 'portland',
@@ -543,6 +817,17 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'pdx-gigs-1',
+    instruments: ['band', 'guitar', 'vocals'],
+    featuredClipId: 'pdx-gigs-1-c1',
+    gearLocker: [
+      { id: 'pdx-gigs-1-g1', category: 'PA & Backline', name: 'Fishman Acoustic PA + 2 Mics', notes: 'Plug-and-play patio sound' },
+    ],
+    profileStyle: {
+      themeId: 'emerald-club',
+      moodStatus: 'Heated SE patio sets — guaranteed pay + food & drinks',
+      soundsLike: ['Fleet Foxes', 'Big Thief', 'Iron & Wine'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -568,6 +853,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'pdx-gigs-2',
+    instruments: ['band', 'vocals', 'strings', 'guitar'],
+    featuredClipId: 'pdx-gigs-2-c1',
+    gearLocker: [
+      { id: 'pdx-gigs-2-g1', category: 'Instruments', name: 'Acoustic Guitars, Violin, Upright Bass, Suitcase Kick', notes: 'Tight small-corner footprint' },
+      { id: 'pdx-gigs-2-g2', category: 'Mics & Studio', name: 'Self-Contained Acoustic DI Rig', notes: 'Zero feedback' },
+    ],
+    profileStyle: {
+      themeId: 'tube-amber',
+      moodStatus: '3-part harmonies & suitcase kick ready for PNW tours',
+      soundsLike: ['The Head and the Heart', 'First Aid Kit', 'Lumineers'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -595,6 +892,18 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= SEATTLE (206) =================
   {
     id: 'sea-jam-1',
+    instruments: ['synth', 'vocals', 'producer'],
+    featuredClipId: 'sea-jam-1-c1',
+    gearLocker: [
+      { id: 'sea-jam-1-g1', category: 'Pedals & Synth', name: 'Elektron Digitakt + Moog Grandmother', notes: 'Live hardware synth rig' },
+      { id: 'sea-jam-1-g2', category: 'Amps & Cabs', name: 'Roland Jazz Chorus', notes: 'Lush stereo synth spread' },
+    ],
+    profileStyle: {
+      themeId: 'synth-violet',
+      moodStatus: 'MIDI-clocked Digitakt + Moog Grandmother sets in Cap Hill',
+      soundsLike: ['Boy Harsher', 'Chvrches', 'Nation of Language'],
+      bannerPattern: 'waves',
+    },
     roleCategory: 'Keys & Synth',
     side: 'jam',
     regionId: 'seattle',
@@ -618,6 +927,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'sea-jam-2',
+    instruments: ['bass', 'drums'],
+    featuredClipId: 'sea-jam-2-c1',
+    gearLocker: [
+      { id: 'sea-jam-2-g1', category: 'Drums & Percussion', name: 'Ludwig Classic Maple Kit', notes: 'Big 90s snare crack' },
+      { id: 'sea-jam-2-g2', category: 'Instruments', name: 'Fender Jazz Bass', notes: 'Growling midrange' },
+    ],
+    profileStyle: {
+      themeId: 'zine-mono',
+      moodStatus: 'Ballard Cry Baby room — loud-quiet-loud alt rock',
+      soundsLike: ['Smashing Pumpkins', 'Dinosaur Jr.', 'Hum'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'seattle',
@@ -641,6 +962,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'sea-gigs-1',
+    instruments: ['band', 'guitar', 'drums'],
+    featuredClipId: 'sea-gigs-1-c1',
+    gearLocker: [
+      { id: 'sea-gigs-1-g1', category: 'Amps & Cabs', name: 'Shared 4x12 Cab + Bass Rig', notes: '15-minute changeovers' },
+      { id: 'sea-gigs-1-g2', category: 'Drums & Percussion', name: 'House Shell Pack', notes: 'Bring cymbals, pedal & snare' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: 'Fremont Friday punk/garage bill — 150-cap dive stage',
+      soundsLike: ['Fugazi', 'Hot Snakes', 'Pissed Jeans'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -666,6 +999,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'sea-gigs-2',
+    instruments: ['band', 'bass', 'drums', 'horns'],
+    featuredClipId: 'sea-gigs-2-c1',
+    gearLocker: [
+      { id: 'sea-gigs-2-g1', category: 'Pedals & Synth', name: 'Live Spring Reverb + Siren FX Rack', notes: 'Hands-on dub mixes' },
+      { id: 'sea-gigs-2-g2', category: 'PA & Backline', name: 'Full Dub Backline', notes: 'Ready for outdoor festivals' },
+    ],
+    profileStyle: {
+      themeId: 'emerald-club',
+      moodStatus: 'Live hardware spring reverb & heavy low-end dub sets',
+      soundsLike: ['Scientist', 'Khruangbin', 'Fat Freddy’s Drop'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',
@@ -693,6 +1038,18 @@ export const SEED_LISTINGS: Listing[] = [
   // ================= ATLANTA (404) =================
   {
     id: 'atl-jam-1',
+    instruments: ['drums', 'producer'],
+    featuredClipId: 'atl-jam-1-c1',
+    gearLocker: [
+      { id: 'atl-jam-1-g1', category: 'Drums & Percussion', name: 'Gretsch Catalina Club', notes: 'Dry vintage jazz-hip-hop snap' },
+      { id: 'atl-jam-1-g2', category: 'Pedals & Synth', name: 'Roland SPD-SX Sample Pad', notes: 'Triggered chops & clicks' },
+    ],
+    profileStyle: {
+      themeId: 'tube-amber',
+      moodStatus: 'EAV Dilla-swing & Glasper chord sheds — need bass + keys',
+      soundsLike: ['J Dilla', 'Robert Glasper', 'Yussef Dayes'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Drummers',
     side: 'jam',
     regionId: 'atlanta',
@@ -716,6 +1073,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atl-jam-2',
+    instruments: ['guitar', 'vocals'],
+    featuredClipId: 'atl-jam-2-c1',
+    gearLocker: [
+      { id: 'atl-jam-2-g1', category: 'Amps & Cabs', name: 'Fender Hot Rod Deluxe + Vox AC15', notes: 'Dual chime & crunch' },
+      { id: 'atl-jam-2-g2', category: 'PA & Backline', name: 'Edgewood Studio Access', notes: 'Walkable from BeltLine' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: '12 songs written in Little Five Points — need bass & drums',
+      soundsLike: ['The Strokes', 'Bully', 'Twin Peaks'],
+      bannerPattern: 'vinyl',
+    },
     roleCategory: 'Guitarists',
     side: 'jam',
     regionId: 'atlanta',
@@ -739,6 +1108,17 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atl-gigs-1',
+    instruments: ['band', 'vocals', 'keys'],
+    featuredClipId: 'atl-gigs-1-c1',
+    gearLocker: [
+      { id: 'atl-gigs-1-g1', category: 'PA & Backline', name: 'JBL Line Array + 16-ch Mixer', notes: 'Covered courtyard stage' },
+    ],
+    profileStyle: {
+      themeId: 'emerald-club',
+      moodStatus: 'West Midtown Saturday courtyard — $450 guarantee',
+      soundsLike: ['Lake Street Dive', 'Leon Bridges', 'Tedeschi Trucks'],
+      bannerPattern: 'grid',
+    },
     roleCategory: 'Open venue slots',
     side: 'gigs',
     gigSubtype: 'open-gig',
@@ -764,6 +1144,18 @@ export const SEED_LISTINGS: Listing[] = [
   },
   {
     id: 'atl-gigs-2',
+    instruments: ['band', 'vocals', 'horns', 'bass', 'drums'],
+    featuredClipId: 'atl-gigs-2-c1',
+    gearLocker: [
+      { id: 'atl-gigs-2-g1', category: 'PA & Backline', name: 'Self-Contained PA + DMX Stage Lights', notes: 'Ready for any club or BeltLine stage' },
+      { id: 'atl-gigs-2-g2', category: 'Instruments', name: '3-Piece Horn Option + 5-String Funk Bass', notes: 'Tight choreographed groove' },
+    ],
+    profileStyle: {
+      themeId: 'stage-coral',
+      moodStatus: 'ATL Southern funk dance band with powerhouse vocals',
+      soundsLike: ['Sharon Jones', 'St. Paul & The Broken Bones', 'Earth, Wind & Fire'],
+      bannerPattern: 'bars',
+    },
     roleCategory: 'Bands for hire',
     side: 'gigs',
     gigSubtype: 'band-for-hire',

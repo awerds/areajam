@@ -1,8 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, CheckCircle2, Eye, Film, LogOut, PlusCircle, ShieldCheck, Trash2, Video } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  Film,
+  LogOut,
+  Palette,
+  Plus,
+  PlusCircle,
+  ShieldCheck,
+  Speaker,
+  Trash2,
+  Video,
+} from 'lucide-react';
 import { GIGS_PREFERENCES, JAM_PREFERENCES } from '../data/regions';
+import { GEAR_CATEGORIES, PROFILE_THEME_LIST } from '../data/themes';
 import { attachFormValidation } from '../lib/formValidation';
-import type { AppMode, AuthUser, GigSubtype, Listing, MediaClip, Region } from '../types';
+import type {
+  AppMode,
+  AuthUser,
+  GearCategory,
+  GearItem,
+  GigSubtype,
+  InstrumentId,
+  Listing,
+  MediaClip,
+  ProfileThemeId,
+  Region,
+} from '../types';
+import { ALL_INSTRUMENTS, INSTRUMENT_META, InstrumentIcon } from './InstrumentIcons';
 import { VideoClipRecorder } from './VideoClipRecorder';
 
 interface PostViewProps {
@@ -33,17 +59,36 @@ export function PostView({
   const [roleCategory, setRoleCategory] = useState<string>(
     defaultSide === 'jam' ? JAM_PREFERENCES[0] : GIGS_PREFERENCES[0]
   );
+  const [instruments, setInstruments] = useState<InstrumentId[]>(
+    defaultSide === 'jam' ? ['guitar'] : ['band']
+  );
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
   const [seekingOrOffer, setSeekingOrOffer] = useState('');
   const [genresInput, setGenresInput] = useState('');
   const [payOrSplit, setPayOrSplit] = useState('');
-  const [gearOrBackline, setGearOrBackline] = useState('');
   const [availability, setAvailability] = useState('');
   const [sampleLink, setSampleLink] = useState('');
   const [bio, setBio] = useState('');
+
+  // Clips & Main Clip
   const [clips, setClips] = useState<MediaClip[]>([]);
+  const [featuredClipId, setFeaturedClipId] = useState<string | undefined>(undefined);
+
+  // MySpace-inspired Page Customizer
+  const [themeId, setThemeId] = useState<ProfileThemeId>(
+    defaultSide === 'jam' ? 'stage-coral' : 'emerald-club'
+  );
+  const [moodStatus, setMoodStatus] = useState('');
+  const [soundsLikeInput, setSoundsLikeInput] = useState('');
+
+  // Music Nerd Gear Locker
+  const [gearLocker, setGearLocker] = useState<GearItem[]>([]);
+  const [gearCat, setGearCat] = useState<GearCategory>('Instruments');
+  const [gearName, setGearName] = useState('');
+  const [gearNotes, setGearNotes] = useState('');
+
   const [justPostedListing, setJustPostedListing] = useState<Listing | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -55,6 +100,9 @@ export function PostView({
 
   useEffect(() => {
     setRoleCategory(side === 'jam' ? JAM_PREFERENCES[0] : GIGS_PREFERENCES[0]);
+    setInstruments((prev) =>
+      prev.length > 0 ? prev : side === 'jam' ? ['guitar'] : ['band']
+    );
   }, [side]);
 
   useEffect(() => {
@@ -73,10 +121,10 @@ export function PostView({
               Account required only when creating a profile
             </span>
             <h2 className="font-display text-3xl font-bold tracking-tight">
-              Record an intro video and join {region.city}
+              Build your {region.city} artist page &amp; gear locker
             </h2>
             <p className="text-sm leading-relaxed text-[var(--muted)]">
-              Anyone can browse local players and watch clips without an account. Sign in with Apple or Google to build your card, record a 30-second webcam intro or upload cuts, and message matches.
+              Anyone can browse local players and watch clips without an account. Sign in with Google or Apple to customize your full-page profile, list your exact rig, and record video intro clips.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-2">
@@ -84,13 +132,13 @@ export function PostView({
                 type="button"
                 onClick={() =>
                   onRequireAuth(
-                    'Sign in with Apple or Google to create your profile, record video intros, and post to your local board.'
+                    'Sign in with Google or Apple to create your custom profile page, gear locker, and video intro clips.'
                   )
                 }
                 className="inline-flex items-center gap-2 rounded-2xl bg-[var(--ink)] px-5 py-3 text-sm font-bold text-[var(--bg)] transition hover:opacity-90"
               >
                 <Video className="h-4 w-4" aria-hidden="true" />
-                <span>Sign in with Apple or Google</span>
+                <span>Sign in with Google or Apple</span>
               </button>
             </div>
           </div>
@@ -98,16 +146,16 @@ export function PostView({
           <div className="grid grid-cols-1 gap-3 md:col-span-5">
             <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
               <Film className="h-5 w-5 text-[var(--jam)]" aria-hidden="true" />
-              <h3 className="font-display mt-2 text-base font-bold">In-browser clip studio</h3>
+              <h3 className="font-display mt-2 text-base font-bold">Main clip &amp; webcam reels</h3>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Record 30s vertical intro clips from your webcam or upload live rehearsal cuts straight from your phone or laptop.
+                Record 30s vertical intros or upload cuts, and star which clip auto-plays first on your card.
               </p>
             </div>
             <div className="rounded-2xl border border-[var(--border)] bg-white/5 p-4">
-              <PlusCircle className="h-5 w-5 text-[var(--gigs)]" aria-hidden="true" />
-              <h3 className="font-display mt-2 text-base font-bold">Auto-playing reel cards</h3>
+              <Palette className="h-5 w-5 text-[var(--gigs)]" aria-hidden="true" />
+              <h3 className="font-display mt-2 text-base font-bold">Custom MySpace-style page</h3>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Your first clip loops automatically when musicians browse or swipe through {region.city}.
+                Pick a color theme, list every pedal, amp, and mic in your Gear Locker, and open a wall for local players.
               </p>
             </div>
           </div>
@@ -115,6 +163,31 @@ export function PostView({
       </section>
     );
   }
+
+  const toggleInstrument = (id: InstrumentId) => {
+    setInstruments((prev) =>
+      prev.includes(id)
+        ? prev.length > 1
+          ? prev.filter((item) => item !== id)
+          : prev
+        : [...prev, id].slice(0, 6)
+    );
+  };
+
+  const addGearItem = () => {
+    if (!gearName.trim()) return;
+    setGearLocker((prev) => [
+      ...prev,
+      {
+        id: `gear-${Date.now()}-${prev.length}`,
+        category: gearCat,
+        name: gearName.trim(),
+        notes: gearNotes.trim() || undefined,
+      },
+    ]);
+    setGearName('');
+    setGearNotes('');
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -128,6 +201,12 @@ export function PostView({
       .map((s) => s.trim())
       .filter(Boolean)
       .slice(0, 4);
+
+    const parsedSounds = soundsLikeInput
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 6);
 
     const id = `user-${Date.now()}`;
     const finalClips: MediaClip[] =
@@ -143,11 +222,17 @@ export function PostView({
             },
           ];
 
+    const summaryGear =
+      gearLocker.length > 0
+        ? gearLocker.map((g) => g.name).join(', ')
+        : 'Details available on match';
+
     const newListing: Listing = {
       id,
       side,
       gigSubtype: side === 'gigs' ? gigSubtype : undefined,
       roleCategory,
+      instruments,
       regionId: region.id,
       neighborhood: neighborhood.trim(),
       title: title.trim(),
@@ -159,12 +244,20 @@ export function PostView({
           ? ['Local', 'Your post']
           : [gigSubtype === 'open-gig' ? 'Open slot' : 'Band for hire'],
       bio: bio.trim(),
-      gearOrBackline: gearOrBackline.trim() || 'Details available on match',
+      gearOrBackline: summaryGear,
+      gearLocker,
       availability: availability.trim() || 'Flexible evenings',
       payOrSplit: side === 'gigs' && payOrSplit.trim() ? payOrSplit.trim() : undefined,
       sampleLink: sampleLink.trim() || undefined,
       visualSeed: Math.floor(Math.random() * 90) + 10,
       clips: finalClips,
+      featuredClipId: featuredClipId || finalClips[0]?.id,
+      profileStyle: {
+        themeId,
+        moodStatus: moodStatus.trim() || undefined,
+        soundsLike: parsedSounds,
+        bannerPattern: 'waves',
+      },
       autoMatch: false,
       autoReply: 'Thanks for connecting on AreaJam!',
       isUserCreated: true,
@@ -181,11 +274,14 @@ export function PostView({
     setSeekingOrOffer('');
     setGenresInput('');
     setPayOrSplit('');
-    setGearOrBackline('');
     setAvailability('');
     setSampleLink('');
     setBio('');
     setClips([]);
+    setFeaturedClipId(undefined);
+    setGearLocker([]);
+    setMoodStatus('');
+    setSoundsLikeInput('');
     e.currentTarget.reset();
   };
 
@@ -196,7 +292,12 @@ export function PostView({
       <div className="glass-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-3.5">
         <div className="flex items-center gap-3">
           {user.photoURL ? (
-            <img src={user.photoURL} alt="" className="h-9 w-9 rounded-full object-cover" />
+            <img
+              src={user.photoURL}
+              alt=""
+              referrerPolicy="no-referrer"
+              className="h-9 w-9 rounded-full object-cover"
+            />
           ) : (
             <span className="font-display inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-white">
               {user.displayName.slice(0, 1).toUpperCase()}
@@ -225,7 +326,7 @@ export function PostView({
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-2xl font-bold tracking-tight">
-              Create your profile card and clips
+              Create your profile page, gear locker &amp; clips
             </h2>
             <p className="text-sm text-[var(--muted)]">
               Publishing to <span className="font-semibold text-[var(--ink)]">{region.label}</span>
@@ -271,9 +372,9 @@ export function PostView({
             <button
               type="button"
               onClick={() => onPreviewListing(justPostedListing)}
-              className="rounded-full bg-[var(--ok)] px-3.5 py-1 text-xs font-bold text-[#041d12]"
+              className="rounded-full bg-[var(--ok)] px-4 py-1.5 text-xs font-bold text-[#041d12]"
             >
-              Watch my card
+              Open my page
             </button>
           </div>
         )}
@@ -281,12 +382,14 @@ export function PostView({
         <div className="mb-6">
           <VideoClipRecorder
             clips={clips}
+            featuredClipId={featuredClipId}
             onAddClip={(clip) => setClips((prev) => [...prev, clip])}
             onRemoveClip={(clipId) => setClips((prev) => prev.filter((c) => c.id !== clipId))}
+            onSetFeaturedClip={setFeaturedClipId}
           />
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
           {side === 'gigs' && (
             <div className="grid grid-cols-2 gap-2.5">
               {(
@@ -312,10 +415,48 @@ export function PostView({
             </div>
           )}
 
+          {/* Instruments picker with bespoke vector icons */}
+          <div className="space-y-2">
+            <span className="block text-xs font-semibold">
+              What do you play or offer? (Shown as icons on your card)
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {ALL_INSTRUMENTS.map((id) => {
+                const selected = instruments.includes(id);
+                const meta = INSTRUMENT_META[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleInstrument(id)}
+                    className="inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition"
+                    style={
+                      selected
+                        ? {
+                            backgroundColor: 'var(--accent)',
+                            color: side === 'jam' ? '#ffffff' : '#041d12',
+                            borderColor: 'var(--accent)',
+                          }
+                        : {
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            color: 'var(--ink)',
+                            borderColor: 'var(--border)',
+                          }
+                    }
+                  >
+                    <InstrumentIcon id={id} size={15} />
+                    <span>{meta.shortLabel}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="post-role" className="mb-1 block text-xs font-semibold">
-                {side === 'jam' ? 'Main instrument or role' : 'Gig category'}
+                {side === 'jam' ? 'Primary category' : 'Gig category'}
               </label>
               <span id="post-role-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
                 Matches player filters
@@ -351,6 +492,7 @@ export function PostView({
                 type="text"
                 required
                 minLength={2}
+                maxLength={64}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 aria-describedby="post-title-hint"
@@ -378,6 +520,7 @@ export function PostView({
                 type="text"
                 required
                 minLength={2}
+                maxLength={64}
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
                 aria-describedby="post-subtitle-hint"
@@ -407,6 +550,7 @@ export function PostView({
                 type="text"
                 required
                 minLength={2}
+                maxLength={48}
                 value={neighborhood}
                 onChange={(e) => setNeighborhood(e.target.value)}
                 aria-describedby="post-neighborhood-hint"
@@ -434,6 +578,7 @@ export function PostView({
                 type="text"
                 required
                 minLength={2}
+                maxLength={80}
                 value={genresInput}
                 onChange={(e) => setGenresInput(e.target.value)}
                 aria-describedby="post-genres-hint"
@@ -462,6 +607,7 @@ export function PostView({
               type="text"
               required
               minLength={6}
+              maxLength={140}
               value={seekingOrOffer}
               onChange={(e) => setSeekingOrOffer(e.target.value)}
               aria-describedby="post-seeking-hint"
@@ -481,6 +627,170 @@ export function PostView({
             </div>
           </div>
 
+          {/* Music Nerd Gear Locker Builder */}
+          <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-4">
+            <div className="flex items-center gap-2">
+              <Speaker className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
+              <div>
+                <h3 className="font-display text-sm font-bold">Gear locker (for the music nerds)</h3>
+                <p className="text-xs text-[var(--muted)]">
+                  List your exact guitars, amps, pedals, synths, drum kit, or house backline
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-12">
+              <div className="sm:col-span-4">
+                <label htmlFor="gear-cat-select" className="visually-hidden">
+                  Gear category
+                </label>
+                <select
+                  id="gear-cat-select"
+                  value={gearCat}
+                  onChange={(e) => setGearCat(e.target.value as GearCategory)}
+                  className="field-control text-xs"
+                >
+                  {GEAR_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat} className="bg-[#10131d] text-white">
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="sm:col-span-4">
+                <label htmlFor="gear-name-input" className="visually-hidden">
+                  Gear name
+                </label>
+                <input
+                  id="gear-name-input"
+                  type="text"
+                  maxLength={60}
+                  value={gearName}
+                  onChange={(e) => setGearName(e.target.value)}
+                  placeholder="e.g. Fender Jazzmaster"
+                  className="field-control text-xs"
+                />
+              </div>
+              <div className="flex gap-2 sm:col-span-4">
+                <label htmlFor="gear-notes-input" className="visually-hidden">
+                  Gear notes
+                </label>
+                <input
+                  id="gear-notes-input"
+                  type="text"
+                  maxLength={60}
+                  value={gearNotes}
+                  onChange={(e) => setGearNotes(e.target.value)}
+                  placeholder="Optional specs"
+                  className="field-control text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={addGearItem}
+                  aria-label="Add gear item"
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--border-strong)] bg-white/10 hover:bg-white/20"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            {gearLocker.length > 0 && (
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {gearLocker.map((g) => (
+                  <li
+                    key={g.id}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-black/30 px-3 py-2 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <span className="font-semibold text-[var(--accent)]">{g.category}: </span>
+                      <span className="font-semibold text-[var(--ink)]">{g.name}</span>
+                      {g.notes && <span className="text-[var(--muted)]"> — {g.notes}</span>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setGearLocker((prev) => prev.filter((item) => item.id !== g.id))}
+                      aria-label={`Remove ${g.name}`}
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--err)] hover:bg-white/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* MySpace-Inspired Page Customizer */}
+          <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-white/[0.03] p-4">
+            <div className="flex items-center gap-2">
+              <Palette className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
+              <div>
+                <h3 className="font-display text-sm font-bold">Customize your profile page vibe</h3>
+                <p className="text-xs text-[var(--muted)]">
+                  Choose a theme, status mood, and bands you sound like for your full page
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              {PROFILE_THEME_LIST.map((t) => {
+                const selected = t.id === themeId;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setThemeId(t.id)}
+                    className="rounded-xl border p-2.5 text-left transition"
+                    style={{
+                      background: `linear-gradient(135deg, ${t.bgFrom}, ${t.bgTo})`,
+                      borderColor: selected ? t.accent : 'rgba(255,255,255,0.12)',
+                      boxShadow: selected ? `0 0 0 1px ${t.accent}` : undefined,
+                    }}
+                  >
+                    <span
+                      className="mb-1.5 block h-2.5 w-7 rounded-full"
+                      style={{ backgroundColor: t.accent }}
+                    />
+                    <span className="block text-[11px] font-bold text-white">{t.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="post-mood" className="mb-1 block text-xs font-semibold">
+                  Mood or current session status
+                </label>
+                <input
+                  id="post-mood"
+                  type="text"
+                  maxLength={90}
+                  value={moodStatus}
+                  onChange={(e) => setMoodStatus(e.target.value)}
+                  placeholder="e.g. Shedding odd-time grooves in East Austin"
+                  className="field-control text-xs"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="post-sounds-like" className="mb-1 block text-xs font-semibold">
+                  Sounds like / FFO (comma-separated)
+                </label>
+                <input
+                  id="post-sounds-like"
+                  type="text"
+                  maxLength={100}
+                  value={soundsLikeInput}
+                  onChange={(e) => setSoundsLikeInput(e.target.value)}
+                  placeholder="e.g. Khruangbin, Radiohead, Turnstile"
+                  className="field-control text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
           {side === 'gigs' && (
             <div>
               <label htmlFor="post-pay" className="mb-1 block text-xs font-semibold">
@@ -492,6 +802,7 @@ export function PostView({
               <input
                 id="post-pay"
                 type="text"
+                maxLength={60}
                 value={payOrSplit}
                 onChange={(e) => setPayOrSplit(e.target.value)}
                 aria-describedby="post-pay-hint"
@@ -503,24 +814,6 @@ export function PostView({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="post-gear" className="mb-1 block text-xs font-semibold">
-                {side === 'jam' ? 'Gear or practice space' : 'Backline and PA info'}
-              </label>
-              <span id="post-gear-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                Amps, kit, mics, or lock-out room details
-              </span>
-              <input
-                id="post-gear"
-                type="text"
-                value={gearOrBackline}
-                onChange={(e) => setGearOrBackline(e.target.value)}
-                aria-describedby="post-gear-hint"
-                placeholder="Fender Twin, own mics, shared studio"
-                className="field-control"
-              />
-            </div>
-
-            <div>
               <label htmlFor="post-availability" className="mb-1 block text-xs font-semibold">
                 Availability
               </label>
@@ -530,6 +823,7 @@ export function PostView({
               <input
                 id="post-availability"
                 type="text"
+                maxLength={70}
                 value={availability}
                 onChange={(e) => setAvailability(e.target.value)}
                 aria-describedby="post-availability-hint"
@@ -537,29 +831,30 @@ export function PostView({
                 className="field-control"
               />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="post-link" className="mb-1 block text-xs font-semibold">
-              Demo or live link (optional)
-            </label>
-            <span id="post-link-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-              Bandcamp, SoundCloud, Spotify, or Instagram URL
-            </span>
-            <input
-              id="post-link"
-              type="text"
-              value={sampleLink}
-              onChange={(e) => setSampleLink(e.target.value)}
-              aria-describedby="post-link-hint"
-              placeholder="bandcamp.com/yourband"
-              className="field-control"
-            />
+            <div>
+              <label htmlFor="post-link" className="mb-1 block text-xs font-semibold">
+                Demo or live link (optional)
+              </label>
+              <span id="post-link-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
+                Bandcamp, SoundCloud, Spotify, or Instagram HTTPS URL
+              </span>
+              <input
+                id="post-link"
+                type="text"
+                maxLength={120}
+                value={sampleLink}
+                onChange={(e) => setSampleLink(e.target.value)}
+                aria-describedby="post-link-hint"
+                placeholder="bandcamp.com/yourband"
+                className="field-control"
+              />
+            </div>
           </div>
 
           <div>
             <label htmlFor="post-bio" className="mb-1 block text-xs font-semibold">
-              Vibe and influences
+              Bio and musical goals
             </label>
             <span id="post-bio-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
               Short note on sound, goals, or set details (min 12 chars)
@@ -569,11 +864,12 @@ export function PostView({
               rows={3}
               required
               minLength={12}
+              maxLength={600}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               aria-describedby="post-bio-hint"
               data-error="post-bio-error"
-              placeholder="Influenced by Khruangbin, Pavement, and Alabama Shakes..."
+              placeholder="Tell local musicians about your setup, rehearsal style, and gig goals..."
               className="field-control"
             />
             <div id="post-bio-error" className="error-msg">
@@ -594,7 +890,7 @@ export function PostView({
           >
             <PlusCircle className="h-4 w-4" aria-hidden="true" />
             <span>
-              Publish profile to {region.city} ({clips.length} {clips.length === 1 ? 'clip' : 'clips'})
+              Publish profile page to {region.city} ({clips.length} {clips.length === 1 ? 'clip' : 'clips'})
             </span>
           </button>
         </form>
@@ -603,7 +899,7 @@ export function PostView({
       {userListings.length > 0 && (
         <div className="space-y-3">
           <h3 className="font-display text-lg font-bold">
-            Your published cards ({userListings.length})
+            Your published pages ({userListings.length})
           </h3>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {userListings.map((item) => (
@@ -636,10 +932,11 @@ export function PostView({
                   <button
                     type="button"
                     onClick={() => onPreviewListing(item)}
-                    aria-label={`Preview ${item.title}`}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white/5 transition hover:bg-white/10"
+                    aria-label={`Open full page for ${item.title}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white/5 px-3 py-2 text-xs font-semibold transition hover:bg-white/10"
                   >
-                    <Eye className="h-4 w-4" aria-hidden="true" />
+                    <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Open page</span>
                   </button>
                   <button
                     type="button"
