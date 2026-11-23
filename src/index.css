@@ -1,97 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
   --target-size: 24px;
 
-  /* Print Flyer (Light) */
-  --bg-light: #f5f0e6;
-  --surface-light: #fcfaf5;
-  --surface-2-light: #ece4d5;
-  --ink-light: #141210;
-  --muted-light: #5e574e;
-  --border-light: rgba(20, 18, 16, 0.14);
-  --jam-light: #d94318;
-  --jam-ink-light: #ffffff;
-  --gigs-light: #1d4ed8;
-  --gigs-ink-light: #ffffff;
-  --ok-light: #18794e;
-  --err-light: #c92a2a;
-  --err-bg-light: #fff0ee;
-  --scrollbar-track-light: #ebe3d3;
-  --scrollbar-thumb-light: #8f8578;
+  /* OLED Soundstage & Spatial Glass Tokens */
+  --bg: #07080d;
+  --surface: rgba(19, 22, 33, 0.62);
+  --surface-solid: #10131d;
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --ink: #f8fafc;
+  --muted: #a3afc4;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
 
-  /* Late-Night Venue (Dark) */
-  --bg-dark: #0e0d0b;
-  --surface-dark: #181613;
-  --surface-2-dark: #23201b;
-  --ink-dark: #f2ece1;
-  --muted-dark: #9e9588;
-  --border-dark: rgba(242, 236, 225, 0.14);
-  --jam-dark: #ff5c2b;
-  --jam-ink-dark: #140b07;
-  --gigs-dark: #5b94ff;
-  --gigs-ink-dark: #081226;
-  --ok-dark: #3dd68c;
-  --err-dark: #ff6b6b;
-  --err-bg-dark: #2d1616;
-  --scrollbar-track-dark: #171512;
-  --scrollbar-thumb-dark: #686055;
+  /* Two-Sided Luminous Accents */
+  --jam: #ff3b6b;
+  --jam-ink: #ffffff;
+  --gigs: #10e88a;
+  --gigs-ink: #041d12;
 
-  /* Active Tokens — light default fallback */
-  --bg: var(--bg-light);
-  --surface: var(--surface-light);
-  --surface-2: var(--surface-2-light);
-  --ink: var(--ink-light);
-  --muted: var(--muted-light);
-  --border: var(--border-light);
-  --jam: var(--jam-light);
-  --jam-ink: var(--jam-ink-light);
-  --gigs: var(--gigs-light);
-  --gigs-ink: var(--gigs-ink-light);
-  --ok: var(--ok-light);
-  --err: var(--err-light);
-  --err-bg: var(--err-bg-light);
-  --scrollbar-track: var(--scrollbar-track-light);
-  --scrollbar-thumb: var(--scrollbar-thumb-light);
+  /* Semantic Status */
+  --ok: #22c55e;
+  --err: #ff5c6c;
+  --err-bg: rgba(255, 92, 108, 0.14);
+  --scrollbar-track: #0b0d14;
+  --scrollbar-thumb: #363f57;
   --accent: var(--jam);
-
-  @media (prefers-color-scheme: dark) {
-    --bg: var(--bg-dark);
-    --surface: var(--surface-dark);
-    --surface-2: var(--surface-2-dark);
-    --ink: var(--ink-dark);
-    --muted: var(--muted-dark);
-    --border: var(--border-dark);
-    --jam: var(--jam-dark);
-    --jam-ink: var(--jam-ink-dark);
-    --gigs: var(--gigs-dark);
-    --gigs-ink: var(--gigs-ink-dark);
-    --ok: var(--ok-dark);
-    --err: var(--err-dark);
-    --err-bg: var(--err-bg-dark);
-    --scrollbar-track: var(--scrollbar-track-dark);
-    --scrollbar-thumb: var(--scrollbar-thumb-dark);
-  }
-
-  @supports (color: light-dark(white, black)) {
-    --bg: light-dark(var(--bg-light), var(--bg-dark));
-    --surface: light-dark(var(--surface-light), var(--surface-dark));
-    --surface-2: light-dark(var(--surface-2-light), var(--surface-2-dark));
-    --ink: light-dark(var(--ink-light), var(--ink-dark));
-    --muted: light-dark(var(--muted-light), var(--muted-dark));
-    --border: light-dark(var(--border-light), var(--border-dark));
-    --jam: light-dark(var(--jam-light), var(--jam-dark));
-    --jam-ink: light-dark(var(--jam-ink-light), var(--jam-ink-dark));
-    --gigs: light-dark(var(--gigs-light), var(--gigs-dark));
-    --gigs-ink: light-dark(var(--gigs-ink-light), var(--gigs-ink-dark));
-    --ok: light-dark(var(--ok-light), var(--ok-dark));
-    --err: light-dark(var(--err-light), var(--err-dark));
-    --err-bg: light-dark(var(--err-bg-light), var(--err-bg-dark));
-    --scrollbar-track: light-dark(var(--scrollbar-track-light), var(--scrollbar-track-dark));
-    --scrollbar-thumb: light-dark(var(--scrollbar-thumb-light), var(--scrollbar-thumb-dark));
-  }
 
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
@@ -104,7 +40,7 @@
 
 html {
   accent-color: var(--accent);
-  scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 @layer base {
@@ -112,7 +48,7 @@ html {
     margin: 0;
     background-color: var(--bg);
     color: var(--ink);
-    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     overflow-wrap: break-word;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
@@ -121,7 +57,7 @@ html {
   h1,
   h2,
   h3 {
-    font-family: 'Syne', system-ui, sans-serif;
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
     text-wrap: balance;
   }
 
@@ -168,11 +104,7 @@ html {
 }
 
 .font-display {
-  font-family: 'Syne', system-ui, sans-serif;
-}
-
-.font-mono-code {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
 }
 
 .stage-shell {
@@ -180,13 +112,79 @@ html {
 }
 
 .safe-top {
-  padding-top: max(0.625rem, env(safe-area-inset-top, 0px));
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
 }
 
 .safe-bottom {
-  padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
-  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
-  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.glass-surface {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+}
+
+.glass-dock {
+  background-color: rgba(16, 19, 29, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 48px rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(26px) saturate(175%);
+  -webkit-backdrop-filter: blur(26px) saturate(175%);
+}
+
+.ambient-orb {
+  position: fixed;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(95px);
+  opacity: 0.46;
+  transition: background-color 600ms ease, transform 800ms ease;
+}
+
+.deck-perspective {
+  perspective: 1200px;
+}
+
+.card-glare {
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 28%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0) 58%
+  );
+  transition: opacity 220ms ease;
+}
+
+@keyframes eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.eq-bar {
+  transform-origin: bottom;
+  animation: eq-bar 640ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eq-bar {
+    animation: none;
+    transform: scaleY(0.7);
+  }
+  .ambient-orb {
+    transition: none;
+  }
 }
 
 .icon-btn {
@@ -225,13 +223,17 @@ html {
 dialog.areajam-dialog {
   margin: auto;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 1.5rem;
-  background-color: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 1.75rem;
+  background-color: rgba(16, 19, 29, 0.88);
   color: var(--ink);
-  width: min(calc(100vw - 1.5rem), 32rem);
-  max-height: min(88dvh, 46rem);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  width: min(calc(100vw - 1.5rem), 33rem);
+  max-height: min(88dvh, 48rem);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 32px 90px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
 }
 
 dialog.areajam-dialog:modal {
@@ -241,20 +243,25 @@ dialog.areajam-dialog:modal {
 dialog.areajam-dialog::backdrop {
   overflow: hidden;
   overscroll-behavior: contain;
-  background-color: rgba(10, 9, 8, 0.72);
-  backdrop-filter: blur(6px);
+  background-color: rgba(4, 5, 10, 0.76);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Form validation after interaction */
 .field-control {
   width: 100%;
-  border-radius: 0.875rem;
+  border-radius: 0.95rem;
   border: 1px solid var(--border);
-  background-color: var(--surface-2);
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--ink);
-  padding: 0.65rem 0.875rem;
+  padding: 0.7rem 0.95rem;
   font-size: 0.95rem;
   transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.field-control::placeholder {
+  color: rgba(163, 175, 196, 0.65);
 }
 
 .field-control:focus-visible {
@@ -276,7 +283,9 @@ dialog.areajam-dialog::backdrop {
 }
 
 :is(input, select, textarea).field-control:is(:user-invalid, .user-invalid-fallback) + .error-msg {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 :is(input, select, textarea).field-control:is(:user-valid, .user-valid-fallback) {
@@ -297,6 +306,6 @@ dialog.areajam-dialog::backdrop {
 
 @container stage (inline-size > 38rem) {
   .deck-frame {
-    max-width: 26rem;
+    max-width: 25rem;
   }
 }

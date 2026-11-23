@@ -6,99 +6,115 @@ interface CardArtworkProps {
   compact?: boolean;
 }
 
-const PALETTES = [
-  { bg: '#161311', a: '#ff5c2b', b: '#f2ece1', c: '#5b94ff' },
-  { bg: '#121622', a: '#5b94ff', b: '#f2ece1', c: '#ff7b54' },
-  { bg: '#1b1418', a: '#f97316', b: '#fde68a', c: '#38bdf8' },
-  { bg: '#111a17', a: '#3dd68c', b: '#f2ece1', c: '#ff5c2b' },
-  { bg: '#1d1812', a: '#eab308', b: '#faf3e3', c: '#f97316' },
+const STAGE_PALETTES = [
+  { base: '#120912', primary: '#ff3b6b', secondary: '#ff8a5b', rim: '#60a5fa' },
+  { base: '#071412', primary: '#10e88a', secondary: '#2dd4bf', rim: '#818cf8' },
+  { base: '#0b0d1f', primary: '#6366f1', secondary: '#ec4899', rim: '#38bdf8' },
+  { base: '#160e08', primary: '#f59e0b', secondary: '#ff3b6b', rim: '#fde68a' },
+  { base: '#091124', primary: '#3b82f6', secondary: '#10e88a', rim: '#c084fc' },
+  { base: '#17090e', primary: '#fb7185', secondary: '#a855f7', rim: '#fda4af' },
 ];
 
 export function CardArtwork({ listing, areaCode, compact = false }: CardArtworkProps) {
-  const palette = PALETTES[Math.abs(listing.visualSeed) % PALETTES.length];
+  const palette = STAGE_PALETTES[Math.abs(listing.visualSeed) % STAGE_PALETTES.length];
   const motif = Math.abs(listing.visualSeed) % 4;
-  const sideBadge =
+  const sideLabel =
     listing.side === 'jam'
-      ? 'JAM / PLAYER'
+      ? 'Jam session'
       : listing.gigSubtype === 'open-gig'
-        ? 'OPEN GIG SLOT'
-        : 'BAND FOR HIRE';
+        ? 'Open gig slot'
+        : 'Band for hire';
+
+  const glowColor = listing.side === 'jam' ? palette.primary : palette.secondary;
 
   return (
     <div
-      className={`relative w-full overflow-hidden ${compact ? 'h-40 rounded-2xl' : 'h-56 rounded-t-[1.35rem]'}`}
-      style={{ backgroundColor: palette.bg }}
+      className={
+        compact
+          ? 'relative h-44 w-full overflow-hidden rounded-2xl'
+          : 'pointer-events-none absolute inset-0 overflow-hidden'
+      }
+      style={{ backgroundColor: palette.base }}
     >
       <svg
-        viewBox="0 0 400 240"
+        viewBox="0 0 400 560"
         preserveAspectRatio="xMidYMid slice"
         className="h-full w-full"
         aria-hidden="true"
       >
         <defs>
-          <radialGradient id={`glow-${listing.id}`} cx="78%" cy="24%" r="65%">
-            <stop offset="0%" stopColor={listing.side === 'jam' ? palette.a : palette.c} stopOpacity="0.34" />
-            <stop offset="100%" stopColor={palette.bg} stopOpacity="0" />
+          <radialGradient id={`mesh-a-${listing.id}`} cx="78%" cy="18%" r="65%">
+            <stop offset="0%" stopColor={glowColor} stopOpacity="0.52" />
+            <stop offset="100%" stopColor={palette.base} stopOpacity="0" />
           </radialGradient>
+          <radialGradient id={`mesh-b-${listing.id}`} cx="18%" cy="56%" r="60%">
+            <stop offset="0%" stopColor={palette.rim} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={palette.base} stopOpacity="0" />
+          </radialGradient>
+          <filter id={`grain-${listing.id}`}>
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+          </filter>
         </defs>
-        <rect width="400" height="240" fill={palette.bg} />
-        <rect width="400" height="240" fill={`url(#glow-${listing.id})`} />
+
+        <rect width="400" height="560" fill={palette.base} />
+        <rect width="400" height="560" fill={`url(#mesh-a-${listing.id})`} />
+        <rect width="400" height="560" fill={`url(#mesh-b-${listing.id})`} />
 
         {motif === 0 && (
-          <g fill="none" opacity="0.72">
-            {[42, 68, 94, 120, 146, 172].map((r, i) => (
+          <g fill="none">
+            {[74, 108, 142, 176, 210, 244].map((r, i) => (
               <circle
                 key={r}
-                cx="305"
-                cy="120"
+                cx="265"
+                cy="185"
                 r={r}
-                stroke={i % 2 === 0 ? palette.b : palette.a}
-                strokeOpacity={0.18 + (i % 3) * 0.08}
-                strokeWidth={i === 1 ? 3 : 1.5}
+                stroke={i % 2 === 0 ? '#ffffff' : glowColor}
+                strokeOpacity={0.09 + (i % 3) * 0.05}
+                strokeWidth={i === 2 ? 2.5 : 1.2}
               />
             ))}
-            <circle cx="305" cy="120" r="24" fill={palette.a} fillOpacity="0.88" />
-            <circle cx="305" cy="120" r="6" fill={palette.bg} />
+            <circle cx="265" cy="185" r="34" fill={glowColor} fillOpacity="0.88" />
+            <circle cx="265" cy="185" r="9" fill={palette.base} />
           </g>
         )}
 
         {motif === 1 && (
           <g fill="none" strokeLinecap="round">
             <path
-              d="M-10 140 Q 45 75, 100 135 T 210 120 T 320 138 T 420 105"
-              stroke={palette.a}
+              d="M-20 190 Q 60 110, 140 195 T 300 175 T 430 140"
+              stroke={glowColor}
               strokeWidth="4"
-              strokeOpacity="0.8"
+              strokeOpacity="0.72"
             />
             <path
-              d="M-10 165 Q 55 110, 115 155 T 230 145 T 340 165 T 420 130"
-              stroke={palette.c}
+              d="M-20 225 Q 75 155, 165 230 T 320 215 T 430 180"
+              stroke={palette.rim}
               strokeWidth="2.5"
-              strokeOpacity="0.65"
+              strokeOpacity="0.52"
             />
             <path
-              d="M-10 190 Q 70 150, 130 185 T 250 175 T 360 192 T 420 160"
-              stroke={palette.b}
-              strokeWidth="1.5"
-              strokeOpacity="0.3"
+              d="M-20 265 Q 90 215, 185 270 T 340 255 T 430 230"
+              stroke="#ffffff"
+              strokeWidth="1.4"
+              strokeOpacity="0.22"
             />
           </g>
         )}
 
         {motif === 2 && (
-          <g opacity="0.75">
-            {Array.from({ length: 14 }).map((_, idx) => {
-              const h = 28 + ((listing.visualSeed * (idx + 3) * 19) % 110);
+          <g opacity="0.78">
+            {Array.from({ length: 12 }).map((_, idx) => {
+              const h = 42 + ((listing.visualSeed * (idx + 3) * 23) % 165);
               return (
                 <rect
                   key={idx}
-                  x={26 + idx * 25}
-                  y={200 - h}
-                  width="12"
+                  x={28 + idx * 30}
+                  y={290 - h}
+                  width="14"
                   height={h}
-                  rx="6"
-                  fill={idx % 3 === 0 ? palette.a : idx % 3 === 1 ? palette.c : palette.b}
-                  fillOpacity={idx % 3 === 2 ? 0.25 : 0.72}
+                  rx="7"
+                  fill={idx % 3 === 0 ? glowColor : idx % 3 === 1 ? palette.rim : '#ffffff'}
+                  fillOpacity={idx % 3 === 2 ? 0.16 : 0.62}
                 />
               );
             })}
@@ -107,68 +123,63 @@ export function CardArtwork({ listing, areaCode, compact = false }: CardArtworkP
 
         {motif === 3 && (
           <g>
-            {Array.from({ length: 5 }).map((_, row) =>
-              Array.from({ length: 9 }).map((__, col) => (
+            <polygon points="210,-10 70,380 350,380" fill={glowColor} fillOpacity="0.14" />
+            <polygon points="310,-10 175,380 420,380" fill={palette.rim} fillOpacity="0.1" />
+            {Array.from({ length: 6 }).map((_, row) =>
+              Array.from({ length: 8 }).map((__, col) => (
                 <circle
                   key={`${row}-${col}`}
-                  cx={36 + col * 42}
-                  cy={38 + row * 42}
-                  r={(row + col + listing.visualSeed) % 4 === 0 ? 7 : 3}
-                  fill={(row + col) % 3 === 0 ? palette.a : palette.b}
-                  fillOpacity={(row + col + listing.visualSeed) % 4 === 0 ? 0.85 : 0.18}
+                  cx={46 + col * 44}
+                  cy={68 + row * 44}
+                  r={(row + col + listing.visualSeed) % 5 === 0 ? 5.5 : 2.2}
+                  fill={(row + col) % 3 === 0 ? glowColor : '#ffffff'}
+                  fillOpacity={(row + col + listing.visualSeed) % 5 === 0 ? 0.72 : 0.16}
                 />
               ))
             )}
           </g>
         )}
 
-        <rect
-          x="0"
-          y="135"
-          width="400"
-          height="105"
-          fill="url(#fade-bottom)"
-          opacity="0"
-        />
+        {/* Fine studio grain */}
+        <rect width="400" height="560" filter={`url(#grain-${listing.id})`} opacity="0.045" />
       </svg>
 
-      {/* Top corner flyer stamps */}
-      <div className="pointer-events-none absolute inset-x-3 top-3 flex items-center justify-between gap-2">
-        <span
-          className="font-mono-code rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wider"
-          style={{
-            backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-            color: listing.side === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-          }}
-        >
-          {sideBadge}
+      {/* Smooth velvet scrim for effortless typography contrast */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: compact
+            ? 'linear-gradient(180deg, rgba(7,8,13,0.18) 0%, rgba(7,8,13,0.72) 100%)'
+            : 'linear-gradient(180deg, rgba(7,8,13,0.28) 0%, rgba(7,8,13,0.12) 32%, rgba(7,8,13,0.82) 64%, rgba(7,8,13,0.96) 100%)',
+        }}
+      />
+
+      {/* Top floating glass metadata badges */}
+      <div className="pointer-events-none absolute inset-x-4 top-4 flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{
+              backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+              boxShadow:
+                listing.side === 'jam'
+                  ? '0 0 10px var(--jam)'
+                  : '0 0 10px var(--gigs)',
+            }}
+          />
+          {sideLabel}
         </span>
 
         {listing.payOrSplit ? (
-          <span className="font-mono-code rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-xs">
+          <span className="max-w-[52%] truncate rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
             {listing.payOrSplit}
           </span>
         ) : (
-          areaCode && (
-            <span className="font-mono-code rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-xs">
-              AREA {areaCode}
-            </span>
-          )
-        )}
-      </div>
-
-      {/* Bottom location strip */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-4 pb-3 pt-8">
-        <div className="flex items-center justify-between gap-2 text-xs text-white/90">
-          <span className="font-mono-code truncate uppercase tracking-wider">
+          <span className="max-w-[52%] truncate rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
             {listing.neighborhood}
+            {areaCode ? `, ${areaCode}` : ''}
           </span>
-          {listing.isUserCreated && (
-            <span className="font-mono-code rounded bg-white/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wider">
-              Your Post
-            </span>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

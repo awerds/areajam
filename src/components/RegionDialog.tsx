@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { Check, MapPin, Plus } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { AlertCircle, Check, MapPin, Plus } from 'lucide-react';
 import { attachFormValidation } from '../lib/formValidation';
 import type { Listing, Region } from '../types';
 import { NativeDialog } from './NativeDialog';
@@ -31,11 +32,28 @@ export function RegionDialog({
   const [stateCode, setStateCode] = useState('');
   const [areaCode, setAreaCode] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!formRef.current) return;
     return attachFormValidation(formRef.current);
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open || !gridRef.current) return;
+    const items = gridRef.current.querySelectorAll('.region-tile');
+    if (items.length === 0) return;
+
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.28, stagger: 0.03, ease: 'power2.out' }
+      );
+    });
+    return () => mm.revert();
+  }, [open, regions.length]);
 
   const countFor = (regionId: string, side: 'jam' | 'gigs') =>
     listings.filter((l) => l.regionId === regionId && l.side === side).length;
@@ -59,11 +77,11 @@ export function RegionDialog({
       open={open}
       onClose={onClose}
       titleId="region-dialog-title"
-      title="Pick Your Local Scene"
-      eyebrow="REGIONAL BOARDS"
+      title="Pick your local scene"
+      subtitle="Switch regional boards or open a board for your own city"
     >
       <div className="space-y-5">
-        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm">
+        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white/5 px-4 py-3 text-sm">
           <div>
             <span className="block font-semibold text-[var(--ink)]">
               Show other cities after local cards
@@ -80,7 +98,7 @@ export function RegionDialog({
           />
         </label>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div ref={gridRef} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {regions.map((region) => {
             const active = region.id === currentRegionId;
             const jams = countFor(region.id, 'jam');
@@ -93,10 +111,10 @@ export function RegionDialog({
                   onSelectRegion(region.id);
                   onClose();
                 }}
-                className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-3 text-left transition"
+                className="region-tile flex items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-left transition hover:bg-white/10"
                 style={{
                   borderColor: active ? 'var(--accent)' : 'var(--border)',
-                  backgroundColor: active ? 'var(--surface-2)' : 'transparent',
+                  backgroundColor: active ? 'rgba(255, 255, 255, 0.09)' : 'rgba(255, 255, 255, 0.03)',
                 }}
               >
                 <div className="min-w-0">
@@ -107,8 +125,8 @@ export function RegionDialog({
                       <span className="text-xs text-[var(--muted)]">{region.state}</span>
                     )}
                   </div>
-                  <p className="font-mono-code mt-1 text-[11px] text-[var(--muted)]">
-                    ({region.areaCode || 'LOC'}) · {jams} Jam · {gigs} Gigs
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    Area {region.areaCode || 'local'}, {jams} jam, {gigs} gigs
                   </p>
                 </div>
                 {active && <Check className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />}
@@ -120,9 +138,9 @@ export function RegionDialog({
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="space-y-3 rounded-2xl border border-dashed border-[var(--border)] p-4"
+          className="space-y-3 rounded-2xl border border-dashed border-[var(--border)] bg-white/[0.02] p-4"
         >
-          <h3 className="font-display text-sm font-bold">Don&apos;t see your city? Start a board</h3>
+          <h3 className="font-display text-base font-bold">Start a board in your city</h3>
 
           <div>
             <label htmlFor="custom-city" className="mb-1 block text-xs font-semibold">
@@ -144,17 +162,17 @@ export function RegionDialog({
               className="field-control"
             />
             <div id="custom-city-error" className="error-msg">
-              <span role="img" aria-label="Error">
-                ⚠
-              </span>{' '}
-              Enter a city name with at least 2 characters.
+              <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+              <span>Enter a city name with at least 2 characters.</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>
               <label htmlFor="custom-state" className="mb-1 block text-xs font-semibold">
-                State / Region
+                State or region
               </label>
               <span id="custom-state-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
                 2-letter code (e.g. CO)
@@ -188,23 +206,23 @@ export function RegionDialog({
                 aria-describedby="custom-area-hint"
                 data-error="custom-area-error"
                 placeholder="303"
-                className="field-control font-mono-code"
+                className="field-control"
               />
               <div id="custom-area-error" className="error-msg">
-                <span role="img" aria-label="Error">
-                  ⚠
-                </span>{' '}
-                Enter a 3-digit area code or leave blank.
+                <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                  <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span>Enter a 3-digit area code or leave blank.</span>
               </div>
             </div>
           </div>
 
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5 text-sm font-semibold transition hover:opacity-85"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white/10 px-4 py-2.5 text-sm font-semibold transition hover:bg-white/15"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            <span>Create &amp; Switch to City</span>
+            <span>Create and switch to city</span>
           </button>
         </form>
       </div>

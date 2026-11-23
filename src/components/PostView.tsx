@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Eye, PlusCircle, Trash2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, PlusCircle, Trash2 } from 'lucide-react';
 import { attachFormValidation } from '../lib/formValidation';
 import type { AppMode, GigSubtype, Listing, Region } from '../types';
 
@@ -64,7 +64,10 @@ export function PostView({
       subtitle: subtitle.trim(),
       seekingOrOffer: seekingOrOffer.trim(),
       genres: parsedGenres.length > 0 ? parsedGenres : ['Indie'],
-      tags: side === 'jam' ? ['Local', 'Your Post'] : [gigSubtype === 'open-gig' ? 'Open Slot' : 'Band for Hire'],
+      tags:
+        side === 'jam'
+          ? ['Local', 'Your post']
+          : [gigSubtype === 'open-gig' ? 'Open slot' : 'Band for hire'],
       bio: bio.trim(),
       gearOrBackline: gearOrBackline.trim() || 'Details available on match',
       availability: availability.trim() || 'Flexible evenings',
@@ -94,48 +97,48 @@ export function PostView({
 
   return (
     <section className="mx-auto w-full max-w-2xl space-y-6">
-      <div className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-md">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div className="glass-surface rounded-[2rem] p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="font-display text-2xl font-extrabold tracking-tight">Pin a Local Card</h2>
+            <h2 className="font-display text-2xl font-bold tracking-tight">Pin a local card</h2>
             <p className="text-sm text-[var(--muted)]">
               Posting to <span className="font-semibold text-[var(--ink)]">{region.label}</span>
             </p>
           </div>
 
-          <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface-2)] p-1">
+          <div className="inline-flex rounded-full border border-[var(--border)] bg-white/5 p-1">
             <button
               type="button"
               onClick={() => setSide('jam')}
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
               style={
                 side === 'jam'
                   ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
                   : { color: 'var(--muted)' }
               }
             >
-              Jam / Bandmate
+              Jam or bandmate
             </button>
             <button
               type="button"
               onClick={() => setSide('gigs')}
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
               style={
                 side === 'gigs'
                   ? { backgroundColor: 'var(--gigs)', color: 'var(--gigs-ink)' }
                   : { color: 'var(--muted)' }
               }
             >
-              Band / Gig
+              Band or gig
             </button>
           </div>
         </div>
 
         {justPostedTitle && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl border border-[var(--ok)] bg-[var(--surface-2)] px-3.5 py-2.5 text-sm text-[var(--ok)]">
+          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-[var(--ok)] bg-white/5 px-4 py-3 text-sm text-[var(--ok)]">
             <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>
-              Pinned <strong>{justPostedTitle}</strong> to your {region.city} board!
+              Pinned <strong>{justPostedTitle}</strong> to your {region.city} board.
             </span>
           </div>
         )}
@@ -145,8 +148,8 @@ export function PostView({
             <div className="grid grid-cols-2 gap-2.5">
               {(
                 [
-                  { id: 'open-gig', label: 'Open Venue / Bill Slot' },
-                  { id: 'band-for-hire', label: 'Band Ready to Book' },
+                  { id: 'open-gig', label: 'Open venue or bill slot' },
+                  { id: 'band-for-hire', label: 'Band ready to book' },
                 ] as const
               ).map((opt) => (
                 <button
@@ -156,7 +159,8 @@ export function PostView({
                   className="rounded-xl border px-3 py-2.5 text-xs font-semibold transition"
                   style={{
                     borderColor: gigSubtype === opt.id ? 'var(--gigs)' : 'var(--border)',
-                    backgroundColor: gigSubtype === opt.id ? 'var(--surface-2)' : 'transparent',
+                    backgroundColor:
+                      gigSubtype === opt.id ? 'rgba(16, 232, 138, 0.12)' : 'rgba(255, 255, 255, 0.03)',
                   }}
                 >
                   {opt.label}
@@ -168,10 +172,14 @@ export function PostView({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="post-title" className="mb-1 block text-xs font-semibold">
-                {side === 'jam' ? 'Name or Project' : gigSubtype === 'open-gig' ? 'Venue / Showcase Name' : 'Band Name'}
+                {side === 'jam'
+                  ? 'Name or project'
+                  : gigSubtype === 'open-gig'
+                    ? 'Venue or showcase name'
+                    : 'Band name'}
               </label>
               <span id="post-title-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                Shown as the bold headline on your card
+                Shown as the main headline on your card
               </span>
               <input
                 id="post-title"
@@ -186,19 +194,19 @@ export function PostView({
                 className="field-control"
               />
               <div id="post-title-error" className="error-msg">
-                <span role="img" aria-label="Error">
-                  ⚠
-                </span>{' '}
-                Enter a name (at least 2 characters).
+                <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                  <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span>Enter a name (at least 2 characters).</span>
               </div>
             </div>
 
             <div>
               <label htmlFor="post-subtitle" className="mb-1 block text-xs font-semibold">
-                {side === 'jam' ? 'Primary Instrument / Role' : 'Format / Slot Label'}
+                {side === 'jam' ? 'Primary instrument or role' : 'Format or slot label'}
               </label>
               <span id="post-subtitle-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
-                {side === 'jam' ? 'e.g. Drummer · 6 yrs' : 'e.g. 4-Piece Band or Thu 9 PM Slot'}
+                {side === 'jam' ? 'e.g. Drummer, 6 yrs' : 'e.g. 4-Piece Band or Thu 9 PM Slot'}
               </span>
               <input
                 id="post-subtitle"
@@ -209,14 +217,14 @@ export function PostView({
                 onChange={(e) => setSubtitle(e.target.value)}
                 aria-describedby="post-subtitle-hint"
                 data-error="post-subtitle-error"
-                placeholder={side === 'jam' ? 'Drummer · 6 yrs' : 'Open Slot · Fri Night'}
+                placeholder={side === 'jam' ? 'Drummer, 6 yrs' : 'Open Slot, Fri Night'}
                 className="field-control"
               />
               <div id="post-subtitle-error" className="error-msg">
-                <span role="img" aria-label="Error">
-                  ⚠
-                </span>{' '}
-                Enter your instrument, role, or slot label.
+                <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                  <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span>Enter your instrument, role, or slot label.</span>
               </div>
             </div>
           </div>
@@ -224,7 +232,7 @@ export function PostView({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="post-neighborhood" className="mb-1 block text-xs font-semibold">
-                Neighborhood / Part of Town
+                Neighborhood or part of town
               </label>
               <span id="post-neighborhood-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
                 Keeps meetups local to your side of {region.city}
@@ -242,10 +250,10 @@ export function PostView({
                 className="field-control"
               />
               <div id="post-neighborhood-error" className="error-msg">
-                <span role="img" aria-label="Error">
-                  ⚠
-                </span>{' '}
-                Enter a neighborhood or area.
+                <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                  <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span>Enter a neighborhood or area.</span>
               </div>
             </div>
 
@@ -269,17 +277,17 @@ export function PostView({
                 className="field-control"
               />
               <div id="post-genres-error" className="error-msg">
-                <span role="img" aria-label="Error">
-                  ⚠
-                </span>{' '}
-                Add at least one genre.
+                <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                  <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span>Add at least one genre.</span>
               </div>
             </div>
           </div>
 
           <div>
             <label htmlFor="post-seeking" className="mb-1 block text-xs font-semibold">
-              {side === 'jam' ? 'What are you looking for?' : 'Gig / Booking Headline'}
+              {side === 'jam' ? 'What are you looking for?' : 'Gig or booking headline'}
             </label>
             <span id="post-seeking-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
               One punchy sentence shown right below your title
@@ -295,23 +303,23 @@ export function PostView({
               data-error="post-seeking-error"
               placeholder={
                 side === 'jam'
-                  ? 'Looking for tight drummer + bass to write 6 songs'
+                  ? 'Looking for tight drummer and bass to write 6 songs'
                   : 'Need 1 energetic local band for 9 PM Friday slot'
               }
               className="field-control"
             />
             <div id="post-seeking-error" className="error-msg">
-              <span role="img" aria-label="Error">
-                ⚠
-              </span>{' '}
-              Describe who or what you are looking for (at least 6 characters).
+              <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+              <span>Describe who or what you are looking for (at least 6 characters).</span>
             </div>
           </div>
 
           {side === 'gigs' && (
             <div>
               <label htmlFor="post-pay" className="mb-1 block text-xs font-semibold">
-                Pay Guarantee or Door Split
+                Pay guarantee or door split
               </label>
               <span id="post-pay-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
                 Optional — e.g. $250 guarantee or 80/20 door
@@ -331,7 +339,7 @@ export function PostView({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="post-gear" className="mb-1 block text-xs font-semibold">
-                {side === 'jam' ? 'Gear / Practice Space' : 'Backline / PA Info'}
+                {side === 'jam' ? 'Gear or practice space' : 'Backline and PA info'}
               </label>
               <span id="post-gear-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
                 Amps, kit, mics, or lock-out room details
@@ -368,7 +376,7 @@ export function PostView({
 
           <div>
             <label htmlFor="post-link" className="mb-1 block text-xs font-semibold">
-              Demo / Live Link (optional)
+              Demo or live link (optional)
             </label>
             <span id="post-link-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
               Bandcamp, SoundCloud, Spotify, or Instagram URL
@@ -386,7 +394,7 @@ export function PostView({
 
           <div>
             <label htmlFor="post-bio" className="mb-1 block text-xs font-semibold">
-              Vibe &amp; Influences
+              Vibe and influences
             </label>
             <span id="post-bio-hint" className="mb-1.5 block text-xs text-[var(--muted)]">
               Short note on sound, goals, or set details (min 12 chars)
@@ -404,50 +412,53 @@ export function PostView({
               className="field-control"
             />
             <div id="post-bio-error" className="error-msg">
-              <span role="img" aria-label="Error">
-                ⚠
-              </span>{' '}
-              Write at least 12 characters about your sound or event.
+              <span role="img" aria-label="Error" className="inline-flex shrink-0">
+                <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+              <span>Write at least 12 characters about your sound or event.</span>
             </div>
           </div>
 
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition hover:opacity-90"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-bold transition hover:opacity-90"
             style={{
               backgroundColor: side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
               color: side === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
             }}
           >
             <PlusCircle className="h-4 w-4" aria-hidden="true" />
-            <span>Pin Flyer to {region.city}</span>
+            <span>Pin flyer to {region.city}</span>
           </button>
         </form>
       </div>
 
       {userListings.length > 0 && (
-        <div className="space-y-2.5">
-          <h3 className="font-display text-lg font-bold">Your Posted Cards ({userListings.length})</h3>
-          <ul className="space-y-2">
+        <div className="space-y-3">
+          <h3 className="font-display text-lg font-bold">
+            Your posted cards ({userListings.length})
+          </h3>
+          <ul className="space-y-2.5">
             {userListings.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3"
+                className="glass-surface flex items-center justify-between gap-3 rounded-2xl px-4 py-3"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span
-                      className="font-mono-code rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
+                      className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
                       style={{
-                        backgroundColor: item.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                        color: item.side === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                        backgroundColor:
+                          item.side === 'jam'
+                            ? 'rgba(255, 59, 107, 0.16)'
+                            : 'rgba(16, 232, 138, 0.16)',
+                        color: item.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
                       }}
                     >
-                      {item.side}
+                      {item.side === 'jam' ? 'Jam' : 'Gigs'}
                     </span>
-                    <span className="font-mono-code text-xs text-[var(--muted)]">
-                      {item.neighborhood}
-                    </span>
+                    <span className="text-xs text-[var(--muted)]">{item.neighborhood}</span>
                   </div>
                   <p className="font-display mt-1 truncate font-bold">{item.title}</p>
                 </div>
@@ -457,7 +468,7 @@ export function PostView({
                     type="button"
                     onClick={() => onPreviewListing(item)}
                     aria-label={`Preview ${item.title}`}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-2)]"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white/5 transition hover:bg-white/10"
                   >
                     <Eye className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -465,7 +476,7 @@ export function PostView({
                     type="button"
                     onClick={() => onDeleteListing(item.id)}
                     aria-label={`Delete ${item.title}`}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--err)]"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white/5 text-[var(--err)] transition hover:bg-white/10"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>

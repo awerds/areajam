@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, MessageCircle, Send } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ArrowLeft, ChevronRight, MessageCircle, Send } from 'lucide-react';
 import type { AppMode, Listing, MatchRecord, Region } from '../types';
 
 interface MatchesViewProps {
@@ -21,7 +22,7 @@ const ICEBREAKERS: Record<AppMode, string[]> = {
   ],
   gigs: [
     'Here is our live clip — what dates are open?',
-    'What is the backline & load-in time?',
+    'What is the backline and load-in time?',
     'Still looking to fill that slot on the bill?',
   ],
 };
@@ -40,6 +41,7 @@ export function MatchesView({
   const [draft, setDraft] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   const selectedMatch = matches.find((m) => m.id === selectedMatchId) ?? null;
   const selectedListing = selectedMatch
@@ -49,6 +51,24 @@ export function MatchesView({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectedMatch?.messages.length]);
+
+  const visibleMatches = matches.filter((m) => filter === 'all' || m.side === filter);
+
+  useLayoutEffect(() => {
+    if (selectedMatch || !listRef.current) return;
+    const items = listRef.current.querySelectorAll('.match-item');
+    if (items.length === 0) return;
+
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.26, stagger: 0.035, ease: 'power2.out' }
+      );
+    });
+    return () => mm.revert();
+  }, [selectedMatch, filter, visibleMatches.length]);
 
   const submitMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,21 +94,21 @@ export function MatchesView({
     const isJam = selectedListing.side === 'jam';
 
     return (
-      <section className="mx-auto flex h-[min(74dvh,38rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-md">
-        <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+      <section className="glass-surface mx-auto flex h-[min(72dvh,38rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem]">
+        <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-5 py-3.5">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => onSelectMatch(null)}
               aria-label="Back to matches"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-[var(--ink)]"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/5 text-[var(--ink)] transition hover:bg-white/10"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </button>
             <div className="min-w-0">
-              <h2 className="font-display truncate text-base font-extrabold">{selectedListing.title}</h2>
-              <p className="font-mono-code truncate text-[11px] text-[var(--muted)]">
-                {isJam ? 'JAM' : 'GIGS'} · {region?.city ?? selectedListing.regionId} ·{' '}
+              <h2 className="font-display truncate text-lg font-bold">{selectedListing.title}</h2>
+              <p className="truncate text-xs text-[var(--muted)]">
+                {isJam ? 'Jam' : 'Gigs'} in {region?.city ?? selectedListing.regionId},{' '}
                 {selectedListing.neighborhood}
               </p>
             </div>
@@ -97,28 +117,28 @@ export function MatchesView({
           <button
             type="button"
             onClick={() => onInspectListing(selectedListing)}
-            className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs font-semibold hover:opacity-85"
+            className="shrink-0 rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-white/10"
           >
-            View Card
+            View card
           </button>
         </header>
 
-        <div className="app-scroll flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        <div className="app-scroll flex-1 space-y-3 overflow-y-auto px-5 py-4">
           {selectedMatch.messages.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-2)] p-4 text-center">
+            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/[0.03] p-5 text-center">
               <p className="text-sm font-medium text-[var(--ink)]">
                 You matched with {selectedListing.title} in {selectedListing.neighborhood}.
               </p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Tap a quick opener below or write your own message:
+                Tap an opener below or type your own message
               </p>
-              <div className="mt-3 flex flex-wrap justify-center gap-2">
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {ICEBREAKERS[selectedListing.side].map((prompt) => (
                   <button
                     key={prompt}
                     type="button"
                     onClick={() => onSendMessage(selectedMatch.id, prompt)}
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--ink)] transition hover:border-[var(--accent)]"
+                    className="rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[var(--ink)] transition hover:border-[var(--accent)] hover:bg-white/10"
                   >
                     {prompt}
                   </button>
@@ -131,7 +151,7 @@ export function MatchesView({
               return (
                 <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className="max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed"
+                    className="max-w-[82%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed"
                     style={
                       isMe
                         ? {
@@ -139,7 +159,7 @@ export function MatchesView({
                             color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
                           }
                         : {
-                            backgroundColor: 'var(--surface-2)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
                             color: 'var(--ink)',
                             border: '1px solid var(--border)',
                           }
@@ -157,7 +177,7 @@ export function MatchesView({
         <form
           ref={formRef}
           onSubmit={submitMessage}
-          className="flex items-end gap-2 border-t border-[var(--border)] bg-[var(--surface)] p-3"
+          className="flex items-end gap-2 border-t border-[var(--border)] bg-black/20 p-3.5"
         >
           <label htmlFor="chat-input" className="visually-hidden">
             Message {selectedListing.title}
@@ -188,34 +208,33 @@ export function MatchesView({
     );
   }
 
-  const visibleMatches = matches.filter((m) => filter === 'all' || m.side === filter);
-
   return (
-    <section className="mx-auto w-full max-w-2xl space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <section className="mx-auto w-full max-w-2xl space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-2xl font-extrabold tracking-tight">Matches &amp; Threads</h2>
+          <h2 className="font-display text-2xl font-bold tracking-tight">Matches and threads</h2>
           <p className="text-sm text-[var(--muted)]">
-            Two-sided inbox for jam sessions and gig bookings.
+            Two-sided inbox for jam sessions and gig bookings
           </p>
         </div>
 
-        <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] p-1">
+        <div className="glass-surface inline-flex rounded-full p-1">
           {(['all', 'jam', 'gigs'] as const).map((tab) => {
             const active = filter === tab;
+            const label = tab === 'all' ? 'All' : tab === 'jam' ? 'Jam' : 'Gigs';
             return (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setFilter(tab)}
-                className="rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition"
+                className="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
                 style={
                   active
                     ? { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
                     : { color: 'var(--muted)' }
                 }
               >
-                {tab}
+                {label}
               </button>
             );
           })}
@@ -223,49 +242,65 @@ export function MatchesView({
       </div>
 
       {visibleMatches.length === 0 ? (
-        <div className="rounded-[1.5rem] border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-12 text-center">
+        <div className="glass-surface rounded-[2rem] px-6 py-12 text-center">
           <MessageCircle className="mx-auto h-8 w-8 text-[var(--muted)]" aria-hidden="true" />
           <h3 className="font-display mt-3 text-lg font-bold">No matches yet</h3>
-          <p className="mx-auto mt-1 max-w-xs text-sm text-[var(--muted)]">
+          <p className="mx-auto mt-1.5 max-w-xs text-sm text-[var(--muted)]">
             Swipe right on a musician to jam or pitch on a local gig slot to start a thread.
           </p>
           <button
             type="button"
             onClick={onBackToDiscover}
-            className="mt-5 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-sm font-semibold text-[var(--bg)] transition hover:opacity-90"
+            className="mt-5 rounded-2xl bg-[var(--ink)] px-5 py-2.5 text-sm font-semibold text-[var(--bg)] transition hover:opacity-90"
           >
-            Back to Swipe Deck
+            Back to swipe deck
           </button>
         </div>
       ) : (
-        <ul className="space-y-2.5">
+        <ul ref={listRef} className="space-y-2.5">
           {visibleMatches.map((match) => {
             const listing = listings.find((l) => l.id === match.listingId);
             if (!listing) return null;
             const region = regions.find((r) => r.id === listing.regionId);
             const lastMsg = match.messages[match.messages.length - 1];
             const isJam = listing.side === 'jam';
+            const initial = listing.title.slice(0, 1).toUpperCase();
 
             return (
-              <li key={match.id}>
+              <li key={match.id} className="match-item">
                 <button
                   type="button"
                   onClick={() => onSelectMatch(match.id)}
-                  className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition hover:border-[var(--accent)]"
+                  className="glass-surface flex w-full items-center gap-3.5 rounded-2xl p-4 text-left transition hover:border-[var(--border-strong)]"
                 >
+                  <span
+                    aria-hidden="true"
+                    className="font-display flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold"
+                    style={{
+                      background: isJam
+                        ? 'linear-gradient(135deg, #ff3b6b, #ff8a5b)'
+                        : 'linear-gradient(135deg, #10e88a, #3b82f6)',
+                      color: isJam ? '#ffffff' : '#041d12',
+                    }}
+                  >
+                    {initial}
+                  </span>
+
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span
-                        className="font-mono-code rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                        className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
                         style={{
-                          backgroundColor: isJam ? 'var(--jam)' : 'var(--gigs)',
-                          color: isJam ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                          backgroundColor: isJam
+                            ? 'rgba(255, 59, 107, 0.16)'
+                            : 'rgba(16, 232, 138, 0.16)',
+                          color: isJam ? 'var(--jam)' : 'var(--gigs)',
                         }}
                       >
-                        {isJam ? 'JAM' : 'GIGS'}
+                        {isJam ? 'Jam' : 'Gigs'}
                       </span>
-                      <span className="font-mono-code text-xs text-[var(--muted)]">
-                        {region?.city ?? listing.regionId} · {listing.neighborhood}
+                      <span className="truncate text-xs text-[var(--muted)]">
+                        {region?.city ?? listing.regionId}, {listing.neighborhood}
                       </span>
                     </div>
                     <p className="font-display mt-1 truncate text-lg font-bold">{listing.title}</p>
@@ -273,9 +308,8 @@ export function MatchesView({
                       {lastMsg ? lastMsg.text : listing.seekingOrOffer}
                     </p>
                   </div>
-                  <span className="font-mono-code shrink-0 text-xs font-semibold text-[var(--muted)]">
-                    Open →
-                  </span>
+
+                  <ChevronRight className="h-5 w-5 shrink-0 text-[var(--muted)]" aria-hidden="true" />
                 </button>
               </li>
             );

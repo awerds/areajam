@@ -8,6 +8,7 @@ import { RegionDialog } from './components/RegionDialog';
 import { SwipeDeck } from './components/SwipeDeck';
 import { STARTER_REGIONS } from './data/regions';
 import { SEED_LISTINGS } from './data/seedListings';
+import { stopCardPreview } from './lib/audioPreview';
 import { loadState, resetPassedSwipes, saveState, syncUrlRegionAndMode } from './lib/storage';
 import type { AppMode, AppState, Listing, NavTab, Region, SwipeDecision } from './types';
 
@@ -35,6 +36,7 @@ export function App() {
 
   useEffect(() => {
     return () => {
+      stopCardPreview();
       replyTimersRef.current.forEach((id) => window.clearTimeout(id));
       window.clearTimeout(toastTimerRef.current);
     };
@@ -63,12 +65,15 @@ export function App() {
 
   const availableFilters = useMemo(() => {
     const modeListings = allListings.filter(
-      (l) => l.side === state.mode && !l.isUserCreated && (state.includeNearbyRegions || l.regionId === state.regionId)
+      (l) =>
+        l.side === state.mode &&
+        !l.isUserCreated &&
+        (state.includeNearbyRegions || l.regionId === state.regionId)
     );
     const counts = new Map<string, number>();
     for (const item of modeListings) {
       if (state.mode === 'gigs' && item.gigSubtype) {
-        const label = item.gigSubtype === 'open-gig' ? 'Open Slots' : 'Bands for Hire';
+        const label = item.gigSubtype === 'open-gig' ? 'Open slots' : 'Bands for hire';
         counts.set(label, (counts.get(label) ?? 0) + 1);
       }
       for (const genre of item.genres) {
@@ -100,18 +105,30 @@ export function App() {
 
     const combined = [...local, ...nearby];
     if (chipFilter === 'All') return combined;
-    if (chipFilter === 'Open Slots') return combined.filter((l) => l.gigSubtype === 'open-gig');
-    if (chipFilter === 'Bands for Hire') return combined.filter((l) => l.gigSubtype === 'band-for-hire');
+    if (chipFilter === 'Open slots') return combined.filter((l) => l.gigSubtype === 'open-gig');
+    if (chipFilter === 'Bands for hire') {
+      return combined.filter((l) => l.gigSubtype === 'band-for-hire');
+    }
     return combined.filter((l) => l.genres.includes(chipFilter) || l.tags.includes(chipFilter));
   }, [allListings, chipFilter, state.includeNearbyRegions, state.mode, state.regionId, state.swiped]);
 
   const handleModeChange = (nextMode: AppMode) => {
+    stopCardPreview();
     setState((prev) => ({ ...prev, mode: nextMode }));
     setActiveTab('discover');
     setChipFilter('All');
   };
 
+  const handleTabChange = (nextTab: NavTab) => {
+    stopCardPreview();
+    setActiveTab(nextTab);
+    if (nextTab !== 'matches') {
+      setSelectedMatchId(null);
+    }
+  };
+
   const handleSwipe = (listing: Listing, decision: SwipeDecision) => {
+    stopCardPreview();
     let createdMatch = false;
 
     setState((prev) => {
@@ -150,6 +167,7 @@ export function App() {
   };
 
   const handleUndo = () => {
+    stopCardPreview();
     setState((prev) => {
       const idx = [...prev.history]
         .reverse()
@@ -291,47 +309,58 @@ export function App() {
     }
   };
 
+  const activeSeed = deckCards[0]?.visualSeed ?? 1;
+  const secondaryOrbColor =
+    activeSeed % 2 === 0 ? 'rgba(99, 102, 241, 0.36)' : 'rgba(56, 189, 248, 0.28)';
+
   return (
-    <div className="min-h-dvh pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] lg:pb-10">
-      {/* Top sticky bar */}
-      <header className="safe-top sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]/90 backdrop-blur-md">
-        <div className="toolbar mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pb-3">
-          <div className="flex items-center gap-2.5">
-            <img src="./icon.svg" alt="" className="h-9 w-9 rounded-xl shadow-sm" />
-            <div>
-              <h1 className="font-display text-lg font-extrabold leading-none tracking-tight">
-                AreaJam
-              </h1>
-              <p className="font-mono-code mt-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                areajam.com
-              </p>
-            </div>
+    <div className="relative min-h-dvh pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))]">
+      {/* Fixed spatial ambient soundstage lighting */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+        <div
+          className="ambient-orb -top-28 right-[-8rem] h-[24rem] w-[24rem]"
+          style={{
+            backgroundColor:
+              state.mode === 'jam' ? 'rgba(255, 59, 107, 0.36)' : 'rgba(16, 232, 138, 0.3)',
+          }}
+        />
+        <div
+          className="ambient-orb bottom-[-6rem] left-[-8rem] h-[22rem] w-[22rem]"
+          style={{ backgroundColor: secondaryOrbColor }}
+        />
+      </div>
+
+      {/* Floating glass header bar */}
+      <header className="safe-top sticky top-0 z-20 px-4 pb-2">
+        <div className="toolbar glass-dock mx-auto flex max-w-2xl items-center justify-between gap-2 rounded-full px-3 py-2">
+          <div className="flex items-center gap-2.5 pl-1">
+            <img src="./icon.svg" alt="" className="h-8 w-8 rounded-full shadow-sm" />
+            <h1 className="font-display text-base font-bold tracking-tight sm:text-lg">AreaJam</h1>
           </div>
 
-          {/* Regional board picker */}
           <button
             type="button"
             onClick={() => setRegionModalOpen(true)}
             aria-label={`Change local region, currently ${currentRegion.label}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold transition hover:border-[var(--accent)]"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold transition hover:bg-white/10"
           >
             <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
-            <span>{currentRegion.city}</span>
-            <span className="font-mono-code text-[var(--muted)]">({currentRegion.areaCode})</span>
+            <span>
+              {currentRegion.city}, {currentRegion.areaCode}
+            </span>
             <ChevronDown className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
           </button>
 
-          {/* Two-sided segmented toggle */}
           <div
             role="group"
             aria-label="Switch mode between Jam and Gigs"
-            className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] p-1"
+            className="inline-flex rounded-full border border-white/10 bg-black/35 p-0.5"
           >
             <button
               type="button"
               aria-pressed={state.mode === 'jam'}
               onClick={() => handleModeChange('jam')}
-              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition"
               style={
                 state.mode === 'jam'
                   ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
@@ -345,7 +374,7 @@ export function App() {
               type="button"
               aria-pressed={state.mode === 'gigs'}
               onClick={() => handleModeChange('gigs')}
-              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition"
               style={
                 state.mode === 'gigs'
                   ? { backgroundColor: 'var(--gigs)', color: 'var(--gigs-ink)' }
@@ -359,215 +388,149 @@ export function App() {
         </div>
       </header>
 
-      {/* Main layout */}
-      <div className="mx-auto max-w-5xl px-4 pt-4 lg:grid lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:pt-7">
-        {/* Desktop left rail */}
-        <aside className="hidden space-y-5 lg:block">
-          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4">
-            <p className="font-mono-code text-[11px] uppercase tracking-widest text-[var(--muted)]">
-              Current Board
-            </p>
-            <h2 className="font-display mt-1 text-xl font-extrabold">{currentRegion.label}</h2>
-            <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-              {state.mode === 'jam'
-                ? 'Swipe right on local players to jam, write songs, or start a band.'
-                : 'Swipe right to pitch open gig slots or book gig-ready local bands.'}
-            </p>
-            <button
-              type="button"
-              onClick={() => setRegionModalOpen(true)}
-              className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs font-semibold transition hover:opacity-85"
-            >
-              Switch Region / Add City
-            </button>
-          </div>
-
-          <nav aria-label="Workspace sections" className="flex flex-col gap-1.5">
-            {(
-              [
-                { id: 'discover', label: 'Swipe Deck', icon: Compass },
-                { id: 'matches', label: `Matches (${state.matches.length})`, icon: MessageCircle },
-                { id: 'post', label: 'Post Flyer', icon: PlusSquare },
-              ] as const
-            ).map((item) => {
-              const Icon = item.icon;
-              const active = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    if (item.id !== 'matches') setSelectedMatchId(null);
-                  }}
-                  className="flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold transition"
-                  style={{
-                    borderColor: active ? 'var(--accent)' : 'var(--border)',
-                    backgroundColor: active ? 'var(--surface)' : 'transparent',
-                    color: active ? 'var(--ink)' : 'var(--muted)',
-                  }}
-                >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {activeTab === 'discover' && (
-            <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 text-xs text-[var(--muted)]">
-              <p className="font-mono-code mb-2 text-[11px] uppercase tracking-widest">Shortcuts</p>
-              <ul className="space-y-1.5">
-                <li>
-                  <code className="font-mono-code font-semibold text-[var(--ink)]">← / →</code> Pass or{' '}
-                  {state.mode === 'jam' ? 'Jam' : 'Book'}
-                </li>
-                <li>
-                  <code className="font-mono-code font-semibold text-[var(--ink)]">↑</code> Gear &amp; Details
-                </li>
-                <li>
-                  <code className="font-mono-code font-semibold text-[var(--ink)]">Z</code> Undo last swipe
-                </li>
-              </ul>
+      {/* Unified spatial stage */}
+      <main className="stage-shell relative z-10 mx-auto max-w-2xl px-4 pt-3">
+        {activeTab === 'discover' && (
+          <div className="space-y-4">
+            <div className="no-scrollbar flex items-center justify-start gap-2 overflow-x-auto pb-1 sm:justify-center">
+              {availableFilters.map((filter) => {
+                const active = chipFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setChipFilter(filter)}
+                    className="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
+                    style={
+                      active
+                        ? {
+                            backgroundColor: 'var(--ink)',
+                            color: 'var(--bg)',
+                            borderColor: 'var(--ink)',
+                          }
+                        : {
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            color: 'var(--muted)',
+                            borderColor: 'var(--border)',
+                          }
+                    }
+                  >
+                    {filter}
+                  </button>
+                );
+              })}
             </div>
-          )}
-        </aside>
 
-        {/* Primary stage */}
-        <main className="stage-shell min-w-0">
-          {activeTab === 'discover' && (
-            <div className="space-y-4">
-              {/* Quick genre / slot chips */}
-              <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
-                {availableFilters.map((filter) => {
-                  const active = chipFilter === filter;
-                  return (
-                    <button
-                      key={filter}
-                      type="button"
-                      onClick={() => setChipFilter(filter)}
-                      className="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
-                      style={
-                        active
-                          ? {
-                              backgroundColor: 'var(--ink)',
-                              color: 'var(--bg)',
-                              borderColor: 'var(--ink)',
-                            }
-                          : {
-                              backgroundColor: 'var(--surface)',
-                              color: 'var(--muted)',
-                              borderColor: 'var(--border)',
-                            }
-                      }
-                    >
-                      {filter}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <SwipeDeck
-                cards={deckCards}
-                mode={state.mode}
-                region={currentRegion}
-                allRegions={allRegions}
-                canUndo={canUndo}
-                includeNearbyRegions={state.includeNearbyRegions}
-                onSwipe={handleSwipe}
-                onUndo={handleUndo}
-                onOpenDetails={setDetailListing}
-                onEnableNearby={() =>
-                  setState((prev) => ({ ...prev, includeNearbyRegions: true }))
-                }
-                onResetPassed={handleResetPassed}
-                onGoToPost={() => setActiveTab('post')}
-              />
-            </div>
-          )}
-
-          {activeTab === 'matches' && (
-            <MatchesView
-              matches={state.matches}
-              listings={allListings}
-              regions={allRegions}
-              selectedMatchId={selectedMatchId}
-              onSelectMatch={setSelectedMatchId}
-              onSendMessage={handleSendMessage}
-              onInspectListing={setDetailListing}
-              onBackToDiscover={() => setActiveTab('discover')}
-            />
-          )}
-
-          {activeTab === 'post' && (
-            <PostView
-              defaultSide={state.mode}
+            <SwipeDeck
+              cards={deckCards}
+              mode={state.mode}
               region={currentRegion}
-              userListings={state.userListings}
-              onCreateListing={(listing) => {
-                setState((prev) => ({
-                  ...prev,
-                  userListings: [listing, ...prev.userListings],
-                }));
-              }}
-              onDeleteListing={(listingId) => {
-                setState((prev) => ({
-                  ...prev,
-                  userListings: prev.userListings.filter((l) => l.id !== listingId),
-                }));
-              }}
-              onPreviewListing={setDetailListing}
+              allRegions={allRegions}
+              canUndo={canUndo}
+              includeNearbyRegions={state.includeNearbyRegions}
+              onSwipe={handleSwipe}
+              onUndo={handleUndo}
+              onOpenDetails={setDetailListing}
+              onEnableNearby={() =>
+                setState((prev) => ({ ...prev, includeNearbyRegions: true }))
+              }
+              onResetPassed={handleResetPassed}
+              onGoToPost={() => handleTabChange('post')}
             />
-          )}
-        </main>
-      </div>
+          </div>
+        )}
 
-      {/* Mobile safe-bottom navigation */}
+        {activeTab === 'matches' && (
+          <MatchesView
+            matches={state.matches}
+            listings={allListings}
+            regions={allRegions}
+            selectedMatchId={selectedMatchId}
+            onSelectMatch={setSelectedMatchId}
+            onSendMessage={handleSendMessage}
+            onInspectListing={setDetailListing}
+            onBackToDiscover={() => handleTabChange('discover')}
+          />
+        )}
+
+        {activeTab === 'post' && (
+          <PostView
+            defaultSide={state.mode}
+            region={currentRegion}
+            userListings={state.userListings}
+            onCreateListing={(listing) => {
+              setState((prev) => ({
+                ...prev,
+                userListings: [listing, ...prev.userListings],
+              }));
+            }}
+            onDeleteListing={(listingId) => {
+              setState((prev) => ({
+                ...prev,
+                userListings: prev.userListings.filter((l) => l.id !== listingId),
+              }));
+            }}
+            onPreviewListing={setDetailListing}
+          />
+        )}
+      </main>
+
+      {/* Floating visionOS/iOS glass bottom navigation dock */}
       <nav
-        aria-label="Mobile navigation"
-        className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur-md lg:hidden"
+        aria-label="Primary navigation"
+        className="safe-bottom pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center px-4"
       >
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-1 pt-1.5">
+        <div className="glass-dock pointer-events-auto grid w-full max-w-sm grid-cols-3 gap-1 rounded-full p-1.5">
           <button
             type="button"
-            onClick={() => setActiveTab('discover')}
-            className="flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold"
-            style={{ color: activeTab === 'discover' ? 'var(--accent)' : 'var(--muted)' }}
+            onClick={() => handleTabChange('discover')}
+            className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition"
+            style={
+              activeTab === 'discover'
+                ? { backgroundColor: 'rgba(255, 255, 255, 0.14)', color: 'var(--ink)' }
+                : { color: 'var(--muted)' }
+            }
           >
-            <Compass className="h-5 w-5" aria-hidden="true" />
+            <Compass className="h-4 w-4" aria-hidden="true" />
             <span>Discover</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('matches')}
-            className="relative flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold"
-            style={{ color: activeTab === 'matches' ? 'var(--accent)' : 'var(--muted)' }}
+            onClick={() => handleTabChange('matches')}
+            className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition"
+            style={
+              activeTab === 'matches'
+                ? { backgroundColor: 'rgba(255, 255, 255, 0.14)', color: 'var(--ink)' }
+                : { color: 'var(--muted)' }
+            }
           >
-            <span className="relative">
-              <MessageCircle className="h-5 w-5" aria-hidden="true" />
-              {state.matches.length > 0 && (
-                <span
-                  className="font-mono-code absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
-                  style={{
-                    backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                    color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                  }}
-                >
-                  {state.matches.length}
-                </span>
-              )}
-            </span>
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
             <span>Matches</span>
+            {state.matches.length > 0 && (
+              <span
+                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold"
+                style={{
+                  backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                  color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                }}
+              >
+                {state.matches.length}
+              </span>
+            )}
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('post')}
-            className="flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[11px] font-semibold"
-            style={{ color: activeTab === 'post' ? 'var(--accent)' : 'var(--muted)' }}
+            onClick={() => handleTabChange('post')}
+            className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition"
+            style={
+              activeTab === 'post'
+                ? { backgroundColor: 'rgba(255, 255, 255, 0.14)', color: 'var(--ink)' }
+                : { color: 'var(--muted)' }
+            }
           >
-            <PlusSquare className="h-5 w-5" aria-hidden="true" />
+            <PlusSquare className="h-4 w-4" aria-hidden="true" />
             <span>Post</span>
           </button>
         </div>
@@ -578,7 +541,7 @@ export function App() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-[var(--border)] bg-[var(--ink)] px-4 py-2 text-xs font-semibold text-[var(--bg)] shadow-lg lg:bottom-6"
+          className="glass-dock fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full px-4 py-2 text-xs font-semibold text-[var(--ink)]"
         >
           {toast}
         </div>
@@ -601,7 +564,10 @@ export function App() {
         listing={detailListing}
         region={detailListing ? allRegions.find((r) => r.id === detailListing.regionId) : undefined}
         alreadyMatched={
-          detailListing ? state.matches.some((m) => m.listingId === detailListing.id) || Boolean(detailListing.isUserCreated) : false
+          detailListing
+            ? state.matches.some((m) => m.listingId === detailListing.id) ||
+              Boolean(detailListing.isUserCreated)
+            : false
         }
         onClose={() => setDetailListing(null)}
         onSwipe={handleSwipe}
