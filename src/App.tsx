@@ -891,20 +891,12 @@ export function App() {
               <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1.5 shadow-sm sm:hidden">
                 <AreaJamMark className="h-full w-full" />
               </span>
-              <span className="sm:hidden">
-                <span className="font-display block text-base font-bold leading-none tracking-tight text-[var(--ink)]">
-                  AreaJam
-                </span>
-                <span className="mt-0.5 block text-[10px] font-semibold leading-none text-[var(--muted)]">
-                  Nashville pilot
-                </span>
+              <span className="font-display text-base font-bold leading-none tracking-tight text-[var(--ink)] sm:hidden">
+                AreaJam
               </span>
 
-              <span className="hidden items-center gap-2.5 sm:inline-flex">
+              <span className="hidden items-center sm:inline-flex">
                 <AreaJamLogo className="h-10 w-[164px] shrink-0 text-[var(--ink)]" />
-                <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--muted)]">
-                  Nashville pilot + all US cities
-                </span>
               </span>
             </button>
 
