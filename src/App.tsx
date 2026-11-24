@@ -941,39 +941,43 @@ export function App() {
 
       {/* Full-width edge-to-edge sticky header */}
       <header className="safe-top sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-xl">
-        <div className="toolbar mx-auto flex w-full max-w-[1440px] items-center justify-between gap-2 px-3 pb-2 md:px-6 md:pb-2.5 xl:px-10">
-          <div className="flex items-center gap-3 md:gap-4">
+        <div className="toolbar mx-auto flex w-full max-w-[1440px] flex-nowrap items-center justify-between gap-2 px-3 pb-2 md:px-4 md:pb-2.5 lg:px-6 xl:px-10">
+          <div className="flex shrink-0 items-center gap-2 md:gap-2.5 lg:gap-4">
             <button
               type="button"
               onClick={() => handleTabChange('discover')}
               aria-label="AreaJam home"
-              className="flex items-center gap-2 text-left sm:gap-2.5"
+              className="flex shrink-0 items-center gap-2 text-left sm:gap-2.5"
             >
-              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1 shadow-sm sm:hidden">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1 shadow-sm lg:hidden">
                 <AreaJamMark className="h-full w-full" />
               </span>
-              <span className="font-display text-[15px] font-bold leading-none tracking-tight text-[var(--ink)] sm:hidden">
+              <span className="font-display text-[15px] font-bold leading-none tracking-tight text-[var(--ink)] md:hidden">
                 AreaJam
               </span>
 
-              <span className="hidden items-center sm:inline-flex">
+              <span className="hidden items-center lg:inline-flex">
                 <AreaJamLogo className="h-9 w-[150px] shrink-0 text-[var(--ink)]" />
               </span>
             </button>
 
-            <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+            <nav aria-label="Primary" className="hidden shrink-0 items-center gap-0.5 md:flex lg:gap-1">
               {(
                 [
-                  { id: 'discover', label: 'Discover' },
-                  { id: 'browse', label: 'Browse players' },
+                  { id: 'discover', compactLabel: 'Discover', label: 'Discover' },
+                  { id: 'browse', compactLabel: 'Browse', label: 'Browse players' },
                   {
                     id: 'matches',
+                    compactLabel:
+                      incomingPendingCount + visibleThreads.length > 0
+                        ? `Invites (${incomingPendingCount + visibleThreads.length})`
+                        : 'Invites',
                     label:
                       incomingPendingCount + visibleThreads.length > 0
                         ? `Invites (${incomingPendingCount + visibleThreads.length})`
                         : 'Invites',
                   },
-                  { id: 'post', label: 'Profile & studio' },
+                  { id: 'post', compactLabel: 'Studio', label: 'Profile & studio' },
                 ] as const
               ).map((item) => (
                 <button
@@ -981,25 +985,28 @@ export function App() {
                   type="button"
                   aria-current={!activeProfileId && activeTab === item.id ? 'page' : undefined}
                   onClick={() => handleTabChange(item.id)}
-                  className="nav-pill-btn rounded-full px-3.5 py-2 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+                  className="nav-pill-btn shrink-0 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)] lg:px-3.5 lg:py-2"
                 >
-                  {item.label}
+                  <span className="xl:hidden">{item.compactLabel}</span>
+                  <span className="hidden xl:inline">{item.label}</span>
                 </button>
               ))}
             </nav>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 lg:gap-2">
             <button
               type="button"
               onClick={() => setRegionModalOpen(true)}
               aria-label={`Change local region, currently ${currentRegion.label}`}
-              className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] sm:gap-1.5 sm:px-3"
+              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] lg:gap-1.5 lg:px-3"
             >
               <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
-              <span className="max-w-[7.25rem] truncate sm:max-w-none">
+              <span className="max-w-[6.75rem] truncate lg:max-w-none">
                 {currentRegion.city}
-                {currentRegion.areaCode !== 'LOC' ? `, ${currentRegion.areaCode}` : ''}
+                <span className="hidden xl:inline">
+                  {currentRegion.areaCode !== 'LOC' ? `, ${currentRegion.areaCode}` : ''}
+                </span>
               </span>
               <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--muted)]" aria-hidden="true" />
             </button>
@@ -1011,7 +1018,7 @@ export function App() {
               aria-label="Show sample profiles"
               title="Turn sample preview profiles on or off"
               onClick={handleToggleSamples}
-              className="hidden shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:inline-flex"
+              className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:inline-flex lg:gap-2 lg:px-2.5"
             >
               <span>Samples</span>
               <span
@@ -1035,7 +1042,7 @@ export function App() {
               type="button"
               onClick={handleToggleColorScheme}
               title="Switch light or dark theme"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:h-10 sm:w-10"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)] lg:h-10 lg:w-10"
             >
               <span className="if-dark inline-flex items-center justify-center">
                 <Sun className="h-4 w-4 text-amber-400" aria-hidden="true" />
@@ -1051,7 +1058,7 @@ export function App() {
               type="button"
               onClick={() => setHowItWorksOpen(true)}
               aria-label="How AreaJam works"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)] sm:h-10 sm:w-10"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)] lg:h-10 lg:w-10"
             >
               <HelpCircle className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -1061,16 +1068,16 @@ export function App() {
                 type="button"
                 onClick={() => handleTabChange('post')}
                 aria-label="Open your profile and studio"
-                className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] sm:inline-flex"
+                className="hidden shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] sm:inline-flex lg:px-3"
               >
                 <UserCheck className="h-3.5 w-3.5 text-[var(--ok)]" aria-hidden="true" />
-                <span className="max-w-[7rem] truncate">{user.displayName}</span>
+                <span className="max-w-[5.5rem] truncate lg:max-w-[7rem]">{user.displayName}</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => openAuthPrompt()}
-                className="hidden rounded-full bg-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 sm:inline-flex"
+                className="hidden shrink-0 whitespace-nowrap rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 sm:inline-flex lg:px-3.5"
               >
                 Sign in
               </button>
@@ -1169,11 +1176,11 @@ export function App() {
           <>
             {activeTab === 'discover' && (
               <div className="space-y-8 md:space-y-10">
-                <div className="grid grid-cols-1 items-start gap-2 md:grid-cols-12 md:items-center md:gap-6 lg:gap-10">
-                  {/* Mobile single-row search toggle + compact instrument filter strip */}
+                <div className="grid grid-cols-1 items-start gap-2 md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
+                  {/* Mobile 3-slot grid bar: search toggle, scrollable instrument rail, pinned Samples switch */}
                   {mobileSearchOpen ? (
-                    <div className="flex items-center gap-1.5 md:hidden">
-                      <div className="relative min-w-0 flex-1">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 md:hidden">
+                      <div className="relative min-w-0">
                         <label htmlFor="mobile-discover-search" className="visually-hidden">
                           Search players, gear, genres, or neighborhoods
                         </label>
@@ -1201,7 +1208,7 @@ export function App() {
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 md:hidden">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[auto_minmax(0,1fr)] md:hidden">
                       <button
                         type="button"
                         onClick={() => setMobileSearchOpen(true)}
@@ -1224,7 +1231,7 @@ export function App() {
                         <Search className="h-4 w-4" aria-hidden="true" />
                       </button>
 
-                      <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-0.5">
+                      <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto pb-0.5">
                         {searchQuery.trim().length > 0 && (
                           <button
                             type="button"
@@ -1272,39 +1279,39 @@ export function App() {
                             </button>
                           );
                         })}
-
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={samplesEnabled}
-                          aria-label="Show sample profiles"
-                          onClick={handleToggleSamples}
-                          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:hidden"
-                        >
-                          <span>Samples</span>
-                          <span
-                            aria-hidden="true"
-                            className="relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors"
-                            style={{
-                              backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
-                            }}
-                          >
-                            <span
-                              className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
-                                }`}
-                              style={{
-                                backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
-                              }}
-                            />
-                          </span>
-                        </button>
                       </div>
+
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={samplesEnabled}
+                        aria-label="Show sample profiles"
+                        onClick={handleToggleSamples}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:hidden"
+                      >
+                        <span>Samples</span>
+                        <span
+                          aria-hidden="true"
+                          className="relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors"
+                          style={{
+                            backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
+                          }}
+                        >
+                          <span
+                            className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
+                              }`}
+                            style={{
+                              backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
+                            }}
+                          />
+                        </span>
+                      </button>
                     </div>
                   )}
 
-                  {/* Desktop & Tablet Left Column: Hero + Inline Search + Instrument Filters + CTAs */}
-                  <div className="hidden space-y-3.5 md:col-span-6 md:block lg:col-span-7">
-                    <div className="space-y-2">
+                  {/* Desktop & Tablet Left Column: Hero + Unified Filter Grid + CTAs */}
+                  <div className="hidden space-y-5 md:col-span-6 md:block lg:col-span-7">
+                    <div className="space-y-2.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
                           {currentRegion.label}
@@ -1321,7 +1328,7 @@ export function App() {
                       </p>
                     </div>
 
-                    <div className="glass-surface space-y-2.5 rounded-3xl p-4">
+                    <div className="glass-surface space-y-3 rounded-3xl p-4 lg:p-5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h2 className="font-display text-sm font-bold">
                           Filter by instrument or search local players
@@ -1337,25 +1344,49 @@ export function App() {
                         )}
                       </div>
 
-                      <div className="relative">
-                        <label htmlFor="discover-search" className="visually-hidden">
-                          Search players, gear, genres, or neighborhoods
-                        </label>
-                        <Search
-                          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
-                          aria-hidden="true"
-                        />
-                        <input
-                          id="discover-search"
-                          type="search"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search name, gear, genre, or neighborhood..."
-                          className="field-control py-2 pl-10 text-xs"
-                        />
+                      <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_11.5rem]">
+                        <div className="relative min-w-0">
+                          <label htmlFor="discover-search" className="visually-hidden">
+                            Search players, gear, genres, or neighborhoods
+                          </label>
+                          <Search
+                            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
+                            aria-hidden="true"
+                          />
+                          <input
+                            id="discover-search"
+                            type="search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search name, gear, genre..."
+                            className="field-control w-full py-2 pl-10 text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="discover-genre" className="visually-hidden">
+                            Filter by genre
+                          </label>
+                          <select
+                            id="discover-genre"
+                            aria-label="Filter by genre"
+                            value={chipFilter}
+                            onChange={(e) => handleSelectChipFilter(e.target.value)}
+                            className="field-control w-full py-2 text-xs font-semibold"
+                          >
+                            <option value="All">All genres</option>
+                            {availableFilters
+                              .filter((f) => f !== 'All')
+                              .map((genre) => (
+                                <option key={genre} value={genre}>
+                                  {genre}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
                         {prefChoices.map((pref) => {
                           const selected = activePrefs.includes(pref);
                           return (
@@ -1364,7 +1395,7 @@ export function App() {
                               type="button"
                               aria-pressed={selected}
                               onClick={() => togglePreference(pref)}
-                              className="filter-chip-btn rounded-full border px-3 py-1.5 text-xs font-semibold"
+                              className="filter-chip-btn inline-flex w-full items-center justify-center whitespace-nowrap rounded-xl border px-2 py-2 text-center text-xs font-semibold"
                               style={
                                 selected
                                   ? {
@@ -1386,28 +1417,7 @@ export function App() {
                       </div>
                     </div>
 
-                    <div className="hidden gap-2.5 lg:grid lg:grid-cols-3">
-                      <div className="glass-surface brand-card-accent rounded-2xl p-3.5">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
-                        <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
-                          Matches your city first and sorts nearby musicians by rough distance.
-                        </p>
-                      </div>
-                      <div className="glass-surface brand-card-accent rounded-2xl p-3.5">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
-                        <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
-                          Embed public Reels, YouTube, or SoundCloud clips plus your IG handle.
-                        </p>
-                      </div>
-                      <div className="glass-surface brand-card-accent rounded-2xl p-3.5">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
-                        <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
-                          Accept or decline invites to unlock a private 1-on-1 Firestore thread.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-3">
                       <button
                         type="button"
                         onClick={() =>
@@ -1435,36 +1445,7 @@ export function App() {
                   </div>
 
                   {/* Right Column: Live 9:16 TikTok / Tinder card stage */}
-                  <div className="space-y-2.5 md:col-span-6 lg:col-span-5">
-                    <div className="hidden flex-wrap items-center justify-center gap-1.5 md:flex">
-                      {availableFilters.map((filter) => {
-                        const active = chipFilter === filter;
-                        return (
-                          <button
-                            key={filter}
-                            type="button"
-                            onClick={() => handleSelectChipFilter(filter)}
-                            className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
-                            style={
-                              active
-                                ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                  borderColor: 'var(--accent)',
-                                }
-                                : {
-                                  backgroundColor: 'var(--pill-bg)',
-                                  color: 'var(--muted)',
-                                  borderColor: 'var(--border)',
-                                }
-                            }
-                          >
-                            {filter}
-                          </button>
-                        );
-                      })}
-                    </div>
-
+                  <div className="md:col-span-6 lg:col-span-5">
                     <SwipeDeck
                       cards={deckCards}
                       mode={state.mode}
@@ -1495,9 +1476,36 @@ export function App() {
                   </div>
                 </div>
 
+                {/* Balanced 3-column feature highlights band above directory */}
+                <section
+                  aria-label="How AreaJam works"
+                  className="hidden border-t border-[var(--border)] pt-8 md:block"
+                >
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                      <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
+                      <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                        Matches your city first and sorts nearby musicians by rough distance.
+                      </p>
+                    </div>
+                    <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                      <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
+                      <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                        Embed public Reels, YouTube, or SoundCloud clips plus your IG handle.
+                      </p>
+                    </div>
+                    <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                      <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
+                      <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                        Accept or decline invites to unlock a private 1-on-1 Firestore thread.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
                 <div
                   ref={browseSectionRef}
-                  className="hidden border-t border-[var(--border)] pt-10 md:block"
+                  className="hidden border-t border-[var(--border)] pt-8 md:block"
                 >
                   <BrowseGrid
                     listings={regionalPool}
@@ -1525,23 +1533,46 @@ export function App() {
             {activeTab === 'browse' && (
               <div className="space-y-6">
                 <div className="glass-surface space-y-3 rounded-3xl p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
                     <p className="text-xs font-semibold text-[var(--muted)]">
                       {state.mode === 'jam'
                         ? 'Filter by players you want to match with'
                         : 'Filter by gig or band type'}
                     </p>
-                    {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
-                      <button
-                        type="button"
-                        onClick={clearAllFilters}
-                        className="text-xs font-semibold text-[var(--accent-text)]"
-                      >
-                        Clear filters
-                      </button>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <div>
+                        <label htmlFor="browse-genre" className="visually-hidden">
+                          Filter by genre
+                        </label>
+                        <select
+                          id="browse-genre"
+                          aria-label="Filter by genre"
+                          value={chipFilter}
+                          onChange={(e) => handleSelectChipFilter(e.target.value)}
+                          className="field-control w-40 py-1.5 text-xs font-semibold"
+                        >
+                          <option value="All">All genres</option>
+                          {availableFilters
+                            .filter((f) => f !== 'All')
+                            .map((genre) => (
+                              <option key={genre} value={genre}>
+                                {genre}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                      {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
+                        <button
+                          type="button"
+                          onClick={clearAllFilters}
+                          className="text-xs font-semibold text-[var(--accent-text)] hover:underline"
+                        >
+                          Clear filters
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {prefChoices.map((pref) => {
                       const selected = activePrefs.includes(pref);
                       return (
@@ -1550,7 +1581,7 @@ export function App() {
                           type="button"
                           aria-pressed={selected}
                           onClick={() => togglePreference(pref)}
-                          className="filter-chip-btn rounded-full border px-3 py-1.5 text-xs font-semibold"
+                          className="filter-chip-btn inline-flex w-full items-center justify-center whitespace-nowrap rounded-xl border px-2 py-2 text-center text-xs font-semibold"
                           style={
                             selected
                               ? {

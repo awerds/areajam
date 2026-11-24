@@ -458,7 +458,7 @@ export function SwipeDeck({
           </button>
         </div>
       )}
-      <div className="deck-perspective relative mx-auto h-[clamp(24rem,calc(100dvh-var(--mobile-deck-offset,13rem)),41rem)] w-full select-none md:aspect-[9/16] md:h-auto md:w-[min(100%,21rem,calc(65dvh*0.5625))] lg:w-[min(100%,23.5rem,calc(65dvh*0.5625))]">
+      <div className="deck-perspective reel-aspect relative mx-auto w-[min(100%,calc((100dvh-var(--mobile-deck-offset,13.25rem))*0.5625))] select-none md:w-[min(100%,21rem,calc(68dvh*0.5625))] lg:w-[min(100%,23.5rem,calc(71dvh*0.5625))]">
         {nextCard && (
           <article
             ref={nextCardRef}
@@ -498,7 +498,7 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className={`absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:rounded-[2rem] ${
+          className={`isolate absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:rounded-[2rem] ${
             topIsEmbed ? 'bg-[var(--surface-solid)]' : 'bg-[#10131d]'
           }`}
           style={{ transformStyle: 'preserve-3d' }}
