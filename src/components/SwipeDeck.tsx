@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Flame, Info, Instagram, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
+import { Flame, Info, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
 import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
@@ -32,11 +32,6 @@ interface SwipeDeckProps {
   onToggleSampleCards?: () => void;
   onResetPassed: () => void;
   onGoToPost: () => void;
-}
-
-function sideBadgeLabel(listing: Listing): string {
-  if (listing.side === 'jam') return 'Jam session';
-  return listing.gigSubtype === 'open-gig' ? 'Open gig slot' : 'Band for hire';
 }
 
 export function SwipeDeck({
@@ -427,8 +422,25 @@ export function SwipeDeck({
   const passOpacity = flyDir === 'pass' ? 1 : Math.min(1, Math.max(0, (-dragState.x - 24) / 80));
   const positiveLabel = mode === 'jam' ? 'Jam' : 'Book';
 
+  const topFeaturedClip =
+    (topCard.featuredClipId
+      ? topCard.clips.find((c) => c.id === topCard.featuredClipId)
+      : undefined) ?? topCard.clips[0];
+  const topIsEmbed = topFeaturedClip?.kind === 'embed' && Boolean(topFeaturedClip.embedUrl);
+  const topLocationLabel =
+    topCard.regionId !== region.id && topCardRegion
+      ? `${topCardRegion.city}${topCardRegion.state ? `, ${topCardRegion.state}` : ''}`
+      : `${topCard.neighborhood}, ${getRegionAreaCode(topCard.regionId)}`;
+
+  const nextCardRegion = nextCard ? allRegions.find((r) => r.id === nextCard.regionId) : undefined;
+  const nextLocationLabel = nextCard
+    ? nextCard.regionId !== region.id && nextCardRegion
+      ? `${nextCardRegion.city}${nextCardRegion.state ? `, ${nextCardRegion.state}` : ''}`
+      : `${nextCard.neighborhood}, ${getRegionAreaCode(nextCard.regionId)}`
+    : '';
+
   return (
-    <div className="mx-auto flex w-full max-w-[25rem] flex-col items-center">
+    <div className="mx-auto flex w-full max-w-[22.5rem] flex-col items-center">
       {showingNearestFallback && (
         <div className="mb-3 flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2.5 text-xs backdrop-blur-md">
           <span className="flex min-w-0 items-start gap-2 font-medium leading-snug text-[var(--ink)]">
@@ -446,29 +458,35 @@ export function SwipeDeck({
           </button>
         </div>
       )}
-      <div className="deck-perspective relative h-auto w-full select-none md:h-[min(68dvh,37rem)]">
+      <div className="deck-perspective relative aspect-[9/16] max-h-[min(74dvh,39rem)] w-full select-none">
         {nextCard && (
           <article
             ref={nextCardRef}
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 hidden flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] md:flex"
+            className="pointer-events-none absolute inset-0 hidden flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)] md:flex"
             style={{
               transform: 'translate3d(0, 14px, 0) scale(0.94)',
               opacity: 0.65,
             }}
           >
-            <div className="relative min-h-[12rem] flex-1 overflow-hidden">
-              <ClipPlayer
-                listing={nextCard}
-                areaCode={getRegionAreaCode(nextCard.regionId)}
-                isActive={false}
-                soundEnabled={false}
-                showMetadataOverlay={false}
-              />
-            </div>
-            <div className="shrink-0 border-t border-[var(--border)] bg-[var(--surface-solid)] p-5">
-              <h3 className="font-display text-2xl font-bold text-[var(--ink)]">{nextCard.title}</h3>
-              <p className="mt-1 text-sm text-[var(--muted)]">{nextCard.subtitle}</p>
+            <ClipPlayer
+              listing={nextCard}
+              areaCode={getRegionAreaCode(nextCard.regionId)}
+              isActive={false}
+              soundEnabled={false}
+              showMetadataOverlay={false}
+              hideClipTitle
+            />
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2"
+              style={{
+                background:
+                  'linear-gradient(180deg, transparent 0%, rgba(10,12,20,0.45) 42%, rgba(10,12,20,0.92) 86%)',
+              }}
+            />
+            <div className="dark-stage pointer-events-none absolute inset-x-0 bottom-0 p-5">
+              <p className="truncate text-xs font-medium text-white/75">{nextLocationLabel}</p>
+              <h3 className="font-display truncate text-2xl font-bold text-white">{nextCard.title}</h3>
             </div>
           </article>
         )}
@@ -480,17 +498,20 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className="relative flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:absolute md:inset-0"
+          className={`absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing ${
+            topIsEmbed ? 'bg-[var(--surface-solid)]' : 'bg-[#10131d]'
+          }`}
           style={{ transformStyle: 'preserve-3d' }}
         >
-          {/* Zone 1: Adaptive video / artwork media stage */}
-          <div className="relative h-[11rem] shrink-0 overflow-hidden sm:h-[12.5rem] md:h-auto md:min-h-[13rem] md:flex-1">
+          {/* Media stage (full-bleed vertical for video/portrait, 2-zone split for iframe embeds) */}
+          <div className={`relative overflow-hidden ${topIsEmbed ? 'min-h-0 flex-1' : 'h-full w-full'}`}>
             <ClipPlayer
               listing={topCard}
               areaCode={getRegionAreaCode(topCard.regionId)}
               isActive={!flyDir}
               soundEnabled={soundEnabled}
               onToggleSound={onToggleSound}
+              hideClipTitle={!topIsEmbed}
             />
 
             <div ref={glareRef} className="card-glare absolute inset-0 opacity-0" aria-hidden="true" />
@@ -498,7 +519,7 @@ export function SwipeDeck({
             {/* Floating swipe decision stamps */}
             <div
               aria-hidden="true"
-              className="font-display pointer-events-none absolute left-5 top-16 -rotate-12 rounded-2xl border bg-[var(--surface-solid)]/90 px-4 py-1.5 text-2xl font-bold backdrop-blur-md"
+              className="font-display pointer-events-none absolute left-5 top-16 z-20 -rotate-12 rounded-2xl border bg-[var(--surface-solid)]/90 px-4 py-1.5 text-2xl font-bold backdrop-blur-md"
               style={{
                 opacity: likeOpacity,
                 borderColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
@@ -509,7 +530,7 @@ export function SwipeDeck({
             </div>
             <div
               aria-hidden="true"
-              className="font-display pointer-events-none absolute right-5 top-16 rotate-12 rounded-2xl border border-[var(--err)] bg-[var(--surface-solid)]/90 px-4 py-1.5 text-2xl font-bold text-[var(--err)] backdrop-blur-md"
+              className="font-display pointer-events-none absolute right-5 top-16 z-20 rotate-12 rounded-2xl border border-[var(--err)] bg-[var(--surface-solid)]/90 px-4 py-1.5 text-2xl font-bold text-[var(--err)] backdrop-blur-md"
               style={{ opacity: passOpacity }}
             >
               Pass
@@ -518,7 +539,7 @@ export function SwipeDeck({
             {/* Mobile right-edge action rail inside media stage */}
             <div
               onPointerDown={(e) => e.stopPropagation()}
-              className="absolute bottom-3 right-3 z-20 flex flex-col items-center gap-2 md:hidden"
+              className="absolute bottom-4 right-3 z-20 flex flex-col items-center gap-2 md:hidden"
             >
               <button
                 type="button"
@@ -541,7 +562,7 @@ export function SwipeDeck({
                 type="button"
                 onClick={() => triggerSwipe('pass')}
                 aria-label={`Pass on ${topCard.title}`}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--err)] backdrop-blur-md active:scale-90"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-[var(--err)] backdrop-blur-md active:scale-90"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -550,7 +571,7 @@ export function SwipeDeck({
                 type="button"
                 onClick={() => onOpenProfile(topCard)}
                 aria-label={`Open full profile page for ${topCard.title}`}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] backdrop-blur-md active:scale-90"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-white backdrop-blur-md active:scale-90"
               >
                 <Maximize2 className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -560,7 +581,7 @@ export function SwipeDeck({
                 onClick={onToggleSound}
                 aria-pressed={soundEnabled}
                 aria-label={soundEnabled ? 'Mute sound' : 'Turn sound on'}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] backdrop-blur-md active:scale-90"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-white backdrop-blur-md active:scale-90"
               >
                 {soundEnabled ? (
                   <Volume2 className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
@@ -574,143 +595,195 @@ export function SwipeDeck({
                 onClick={onUndo}
                 disabled={!canUndo}
                 aria-label="Undo last swipe"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] backdrop-blur-md disabled:opacity-35"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-white backdrop-blur-md disabled:opacity-35"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
-          </div>
 
-          {/* Zone 2: Solid high-contrast card info panel */}
-          <div className="relative z-10 flex shrink-0 flex-col gap-2 border-t border-[var(--border)] bg-[var(--surface-solid)] p-3.5 sm:gap-2.5 sm:p-5">
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ink)]">
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: topCard.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                    }}
-                  />
-                  <span>{sideBadgeLabel(topCard)}</span>
-                </span>
-                <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-                  {topCard.isSample ? 'Fictional sample' : 'Live'}
-                </span>
-                {topCard.instagramHandle && (
-                  <a
-                    href={`https://www.instagram.com/${topCard.instagramHandle}/`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 truncate rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--jam-text)] hover:bg-[var(--surface-hover)]"
-                  >
-                    <Instagram className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                    <span className="truncate">@{topCard.instagramHandle}</span>
-                  </a>
-                )}
-              </div>
-              <span className="flex min-w-0 items-center justify-end gap-1.5 truncate font-medium text-[var(--muted)]">
-                <span className="truncate">
-                  {topCard.regionId !== region.id && topCardRegion
-                    ? `${topCardRegion.city}${topCardRegion.state ? `, ${topCardRegion.state}` : ''}`
-                    : `${topCard.neighborhood}, ${getRegionAreaCode(topCard.regionId)}`}
-                </span>
-                {topRoughDistanceCompact && (
-                  <span
-                    title={topRoughDistanceVerbose ?? undefined}
-                    aria-label={topRoughDistanceVerbose ?? topRoughDistanceCompact}
-                    className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2 py-0.5 text-[10px] font-bold text-[var(--accent-text)]"
-                  >
-                    {topRoughDistanceCompact}
-                  </span>
-                )}
-              </span>
-            </div>
+            {!topIsEmbed && (
+              <>
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%]"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, transparent 0%, rgba(10,12,20,0.42) 38%, rgba(10,12,20,0.92) 82%, rgba(10,12,20,0.98) 100%)',
+                  }}
+                />
 
-            <InstrumentBadgeRow instruments={topCard.instruments} compact max={4} />
+                <div className="dark-stage absolute inset-x-0 bottom-0 z-10 p-4 pr-16 md:p-5 md:pr-5">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/85">
+                    <span className="truncate">{topLocationLabel}</span>
+                    {topRoughDistanceCompact && (
+                      <span
+                        title={topRoughDistanceVerbose ?? undefined}
+                        aria-label={topRoughDistanceVerbose ?? topRoughDistanceCompact}
+                        className="shrink-0 rounded-full border border-white/25 bg-black/50 px-2 py-0.5 text-[10px] font-bold text-[#ff85a6]"
+                      >
+                        {topRoughDistanceCompact}
+                      </span>
+                    )}
+                    {topCard.isSample && (
+                      <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/90">
+                        Fictional sample
+                      </span>
+                    )}
+                  </div>
 
-            <div>
-              <button
-                type="button"
-                onClick={() => onOpenProfile(topCard)}
-                className="text-left transition hover:opacity-80"
-              >
-                <h2 className="font-display text-xl font-bold leading-tight tracking-tight text-[var(--ink)] sm:text-[1.7rem]">
-                  {topCard.title}
-                </h2>
-              </button>
-              <p className="mt-0.5 text-xs font-medium text-[var(--muted)] sm:text-sm">
-                {topCard.subtitle}, {topCard.neighborhood}
-              </p>
-            </div>
-
-            <p className="line-clamp-2 text-xs font-medium leading-snug text-[var(--ink)]/90 sm:text-sm">
-              {topCard.seekingOrOffer}
-            </p>
-
-            <div
-              onPointerDown={(e) => e.stopPropagation()}
-              className="flex flex-wrap items-center justify-between gap-2 pt-0.5"
-            >
-              <div className="flex flex-wrap gap-1.5">
-                {topCard.genres.slice(0, 2).map((genre) => (
-                  <span
-                    key={genre}
-                    className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink)] sm:py-1 sm:text-xs"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                {!topCard.isSample && topAction.kind !== 'self' && (
                   <button
                     type="button"
-                    onClick={() => {
-                      if (topAction.kind === 'accepted') {
-                        onOpenInvites(topAction.invite.threadId);
-                      } else if (topAction.kind === 'incoming' || topAction.kind === 'sent') {
-                        onOpenInvites();
-                      } else {
-                        onInvite(topCard);
-                      }
-                    }}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition hover:opacity-90"
-                    style={
-                      topAction.kind === 'sent'
-                        ? {
-                            backgroundColor: 'var(--pill-bg)',
-                            color: 'var(--ink)',
-                            border: '1px solid var(--border-strong)',
-                          }
-                        : {
-                            backgroundColor: 'var(--jam)',
-                            color: 'var(--jam-ink)',
-                          }
-                    }
+                    onClick={() => onOpenProfile(topCard)}
+                    className="mt-1 block w-full text-left transition hover:opacity-85"
                   >
-                    {topAction.kind === 'accepted' ? (
-                      <MessageCircle className="h-3 w-3" aria-hidden="true" />
-                    ) : (
-                      <Flame className="h-3 w-3 fill-current" aria-hidden="true" />
-                    )}
-                    <span>{topAction.label}</span>
+                    <h2 className="font-display truncate text-2xl font-bold leading-tight tracking-tight text-white">
+                      {topCard.title}
+                    </h2>
                   </button>
-                )}
+                  <p className="mt-0.5 truncate text-xs font-medium text-white/80 sm:text-sm">
+                    {topCard.subtitle}
+                  </p>
 
+                  <div
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="mt-2.5 flex items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0">
+                      <InstrumentBadgeRow instruments={topCard.instruments} compact max={2} />
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {!topCard.isSample && topAction.kind !== 'self' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (topAction.kind === 'accepted') {
+                              onOpenInvites(topAction.invite.threadId);
+                            } else if (topAction.kind === 'incoming' || topAction.kind === 'sent') {
+                              onOpenInvites();
+                            } else {
+                              onInvite(topCard);
+                            }
+                          }}
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition hover:opacity-90"
+                          style={
+                            topAction.kind === 'sent'
+                              ? {
+                                  backgroundColor: 'rgba(255,255,255,0.14)',
+                                  color: '#ffffff',
+                                  border: '1px solid rgba(255,255,255,0.28)',
+                                }
+                              : {
+                                  backgroundColor: 'var(--jam)',
+                                  color: 'var(--jam-ink)',
+                                }
+                          }
+                        >
+                          {topAction.kind === 'accepted' ? (
+                            <MessageCircle className="h-3 w-3" aria-hidden="true" />
+                          ) : (
+                            <Flame className="h-3 w-3 fill-current" aria-hidden="true" />
+                          )}
+                          <span>{topAction.label}</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => onOpenProfile(topCard)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-black/45 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/65"
+                      >
+                        <Maximize2 className="h-3 w-3" aria-hidden="true" />
+                        <span>Profile</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {topIsEmbed && (
+            <div className="relative z-10 shrink-0 border-t border-[var(--border)] bg-[var(--surface-solid)] p-3.5 pr-16 sm:p-4 md:pr-4">
+              <div className="flex items-start justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => onOpenProfile(topCard)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:px-3.5"
+                  className="min-w-0 text-left transition hover:opacity-80"
                 >
-                  <Maximize2 className="h-3 w-3" aria-hidden="true" />
-                  <span>Full page</span>
+                  <h2 className="font-display truncate text-lg font-bold leading-tight text-[var(--ink)] sm:text-xl">
+                    {topCard.title}
+                  </h2>
                 </button>
+                <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-[var(--muted)]">
+                  <span className="truncate">{topLocationLabel}</span>
+                  {topRoughDistanceCompact && (
+                    <span
+                      title={topRoughDistanceVerbose ?? undefined}
+                      aria-label={topRoughDistanceVerbose ?? topRoughDistanceCompact}
+                      className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--accent-text)]"
+                    >
+                      {topRoughDistanceCompact}
+                    </span>
+                  )}
+                </span>
+              </div>
+
+              <div
+                onPointerDown={(e) => e.stopPropagation()}
+                className="mt-2 flex items-center justify-between gap-2"
+              >
+                <div className="min-w-0">
+                  <InstrumentBadgeRow instruments={topCard.instruments} compact max={2} />
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5">
+                  {!topCard.isSample && topAction.kind !== 'self' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (topAction.kind === 'accepted') {
+                          onOpenInvites(topAction.invite.threadId);
+                        } else if (topAction.kind === 'incoming' || topAction.kind === 'sent') {
+                          onOpenInvites();
+                        } else {
+                          onInvite(topCard);
+                        }
+                      }}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition hover:opacity-90"
+                      style={
+                        topAction.kind === 'sent'
+                          ? {
+                              backgroundColor: 'var(--pill-bg)',
+                              color: 'var(--ink)',
+                              border: '1px solid var(--border-strong)',
+                            }
+                          : {
+                              backgroundColor: 'var(--jam)',
+                              color: 'var(--jam-ink)',
+                            }
+                      }
+                    >
+                      {topAction.kind === 'accepted' ? (
+                        <MessageCircle className="h-3 w-3" aria-hidden="true" />
+                      ) : (
+                        <Flame className="h-3 w-3 fill-current" aria-hidden="true" />
+                      )}
+                      <span>{topAction.label}</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => onOpenProfile(topCard)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border-strong)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                  >
+                    <Maximize2 className="h-3 w-3" aria-hidden="true" />
+                    <span>Profile</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </article>
       </div>
 

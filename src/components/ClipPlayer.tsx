@@ -83,6 +83,7 @@ interface ClipPlayerProps {
   onToggleSound?: () => void;
   compact?: boolean;
   showMetadataOverlay?: boolean;
+  hideClipTitle?: boolean;
   activeClipId?: string;
   onActiveClipChange?: (clipId: string) => void;
 }
@@ -93,8 +94,9 @@ export function ClipPlayer({
   isActive = true,
   soundEnabled,
   onToggleSound,
-  compact = false,
+  compact: _compact = false,
   showMetadataOverlay = true,
+  hideClipTitle = false,
   activeClipId,
   onActiveClipChange,
 }: ClipPlayerProps) {
@@ -131,6 +133,7 @@ export function ClipPlayer({
   const resolvedDirectUrl = activeClip?.embedUrl || localMediaUrl;
   const hasRealVideo = activeClip?.kind === 'video' && Boolean(resolvedDirectUrl);
   const hasRealAudio = activeClip?.kind === 'audio' && Boolean(resolvedDirectUrl);
+  const hideSingleTitleHud = hideClipTitle && !isEmbed && clips.length <= 1;
   const paletteIdx = Math.abs(listing.visualSeed) % 6;
 
   useEffect(() => {
@@ -321,6 +324,7 @@ export function ClipPlayer({
               : idx === safeIndex
                 ? Math.round(progress * 100)
                 : 0;
+        const slimSingle = hideClipTitle && clips.length === 1;
         return (
           <button
             key={clip.id}
@@ -332,10 +336,10 @@ export function ClipPlayer({
               onActiveClipChange?.(clip.id);
             }}
             aria-label={`Play clip ${idx + 1}: ${clip.title}`}
-            className="group relative h-6 flex-1 cursor-pointer py-2.5"
+            className={`group relative flex-1 cursor-pointer ${slimSingle ? 'h-4 py-1.5' : 'h-6 py-2.5'}`}
           >
             <span
-              className={`block h-1 w-full overflow-hidden rounded-full ${
+              className={`block ${slimSingle ? 'h-0.5' : 'h-1'} w-full overflow-hidden rounded-full ${
                 hasRealVideo || isEmbed ? 'bg-white/30' : 'bg-[var(--card-track-bg)]'
               }`}
             >
@@ -377,7 +381,7 @@ export function ClipPlayer({
                   />
                 )}
                 <span className="truncate">{activeClip.title || 'Linked clip'}</span>
-                {activeClip.embedProvider && (
+                {activeClip.embedProvider && activeClip.embedProvider !== 'direct' && (
                   <span className="shrink-0 text-[10px] text-white/75">
                     ({embedProviderLabel(activeClip.embedProvider)})
                   </span>
@@ -423,7 +427,7 @@ export function ClipPlayer({
       <CardArtwork
         listing={listing}
         areaCode={areaCode}
-        compact={compact}
+        compact={false}
         showTopBadges={false}
       />
 
@@ -473,34 +477,36 @@ export function ClipPlayer({
       <div className="pointer-events-none absolute inset-x-3.5 top-3 z-10 flex flex-col gap-2">
         {clips.length > 0 && progressStrip}
 
-        {showMetadataOverlay && (
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md ${
-                hasRealVideo || hasPortraitOnly
-                  ? 'border-white/20 bg-black/65 text-white'
-                  : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)]'
-              }`}
-            >
-              {!hasPortraitOnly && isMainClip ? (
-                <Star className="h-3 w-3 fill-current text-[var(--accent)]" aria-hidden="true" />
-              ) : (
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{
-                    backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                  }}
-                />
-              )}
-              <span className="truncate">
-                {hasPortraitOnly ? 'Fictional sample portrait' : activeClip?.title || 'Intro reel'}
-              </span>
-              {!hasPortraitOnly && activeClip?.embedProvider && (
-                <span className="text-[10px] text-white/75">
-                  ({embedProviderLabel(activeClip.embedProvider)})
+        {showMetadataOverlay && !(hideSingleTitleHud && hasPortraitOnly) && (
+          <div className={`flex items-center gap-2 ${hideSingleTitleHud ? 'justify-end' : 'justify-between'}`}>
+            {!hideSingleTitleHud && (
+              <span
+                className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md ${
+                  hasRealVideo || hasPortraitOnly
+                    ? 'border-white/20 bg-black/65 text-white'
+                    : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)]'
+                }`}
+              >
+                {!hasPortraitOnly && isMainClip ? (
+                  <Star className="h-3 w-3 fill-current text-[var(--accent)]" aria-hidden="true" />
+                ) : (
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{
+                      backgroundColor: listing.side === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                    }}
+                  />
+                )}
+                <span className="truncate">
+                  {hasPortraitOnly ? 'Fictional sample portrait' : activeClip?.title || 'Intro reel'}
                 </span>
-              )}
-            </span>
+                {!hasPortraitOnly && activeClip?.embedProvider && activeClip.embedProvider !== 'direct' && (
+                  <span className="text-[10px] text-white/75">
+                    ({embedProviderLabel(activeClip.embedProvider)})
+                  </span>
+                )}
+              </span>
+            )}
 
             {!hasPortraitOnly && onToggleSound && (
               <button

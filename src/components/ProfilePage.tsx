@@ -520,20 +520,36 @@ export function ProfilePage({
         {/* Left column: Featured video stage, playlist, details, and Top 4 local scene */}
         <div className="space-y-6 lg:col-span-5">
           {/* Featured Video / Audio Reel Player */}
-          <div
-            className="relative h-[29rem] overflow-hidden rounded-[2rem] border bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] sm:h-[33rem]"
-            style={{ borderColor: 'var(--pt-border)' }}
-          >
-            <ClipPlayer
-              listing={listing}
-              areaCode={region?.areaCode}
-              isActive
-              soundEnabled={soundEnabled}
-              onToggleSound={onToggleSound}
-              activeClipId={activeClipId}
-              onActiveClipChange={setActiveClipId}
-            />
-          </div>
+          {(() => {
+            const activeStageClip =
+              orderedClips.find((c) => c.id === activeClipId) ?? orderedClips[0];
+            const stageIsEmbed =
+              activeStageClip?.kind === 'embed' && Boolean(activeStageClip.embedUrl);
+            const stageIsPortraitOnly =
+              orderedClips.length === 0 && Boolean(listing.portraitUrl);
+            return (
+              <div
+                className={`relative overflow-hidden rounded-[2rem] border bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] ${
+                  stageIsEmbed
+                    ? 'h-[28rem] sm:h-[32rem]'
+                    : stageIsPortraitOnly
+                      ? 'mx-auto aspect-[4/5] w-full max-w-[23rem]'
+                      : 'mx-auto aspect-[9/16] max-h-[38rem] w-full max-w-[21.5rem]'
+                }`}
+                style={{ borderColor: 'var(--pt-border)' }}
+              >
+                <ClipPlayer
+                  listing={listing}
+                  areaCode={region?.areaCode}
+                  isActive
+                  soundEnabled={soundEnabled}
+                  onToggleSound={onToggleSound}
+                  activeClipId={activeClipId}
+                  onActiveClipChange={setActiveClipId}
+                />
+              </div>
+            );
+          })()}
 
           {/* MySpace Music Playlist */}
           {orderedClips.length > 0 && (

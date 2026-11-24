@@ -50,6 +50,17 @@ export function DetailDialog({
         )
       : null;
 
+  const primaryDetailClip = listing
+    ? (listing.featuredClipId
+        ? listing.clips.find((c) => c.id === listing.featuredClipId)
+        : undefined) ?? listing.clips[0]
+    : undefined;
+  const detailIsEmbed =
+    primaryDetailClip?.kind === 'embed' && Boolean(primaryDetailClip.embedUrl);
+  const detailIsPortraitOnly = Boolean(
+    listing && listing.clips.length === 0 && listing.portraitUrl
+  );
+
   return (
     <NativeDialog
       open={Boolean(listing)}
@@ -64,7 +75,15 @@ export function DetailDialog({
     >
       {listing && (
         <div className="space-y-4">
-          <div className="h-64 w-full overflow-hidden rounded-2xl border border-[var(--border)]">
+          <div
+            className={`overflow-hidden rounded-2xl border border-[var(--border)] ${
+              detailIsEmbed
+                ? 'h-64 w-full'
+                : detailIsPortraitOnly
+                  ? 'mx-auto aspect-[4/5] max-h-[22rem] w-full max-w-[17.5rem]'
+                  : 'mx-auto aspect-[9/16] max-h-[24rem] w-full max-w-[14rem]'
+            }`}
+          >
             <ClipPlayer
               listing={listing}
               areaCode={region?.areaCode}

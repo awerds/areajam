@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Flame, Instagram, MapPin, Maximize2, MessageCircle, Pause, Play, Search } from 'lucide-react';
+import { Flame, MessageCircle, Pause, Play, Search } from 'lucide-react';
 import { getPlayingListingId, subscribeAudioState, toggleCardPreview } from '../lib/audioPreview';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
@@ -132,7 +132,7 @@ export function BrowseGrid({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filtered.map((item, idx) => {
             const itemRegion = allRegions.find((r) => r.id === item.regionId);
             const isPlaying = playingId === item.id;
@@ -150,11 +150,16 @@ export function BrowseGrid({
               item.regionId !== region.id
                 ? formatRoughDistance(distMiles, region, itemRegion, 'verbose')
                 : null;
+            const locationLabel =
+              item.regionId !== region.id && itemRegion
+                ? `${itemRegion.city}${itemRegion.state ? `, ${itemRegion.state}` : ''}`
+                : item.neighborhood || itemRegion?.city || item.regionId;
+            const profileHref = `?area=${encodeURIComponent(item.regionId)}&mode=${item.side}&profile=${encodeURIComponent(item.id)}`;
 
             return (
               <article
                 key={item.id}
-                className={`glass-surface ${idx < 24 ? 'filter-grid-card ' : ''}flex flex-col overflow-hidden rounded-[1.5rem] transition hover:border-[var(--border-strong)]`}
+                className={`browse-card glass-surface ${idx < 24 ? 'filter-grid-card ' : ''}flex flex-col overflow-hidden rounded-[1.5rem] transition`}
                 style={
                   idx < 24
                     ? ({ viewTransitionName: cardViewTransitionName(item.id) } as CSSProperties)
@@ -162,153 +167,95 @@ export function BrowseGrid({
                 }
               >
                 <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => onOpenProfile(item)}
-                    aria-label={`Open profile for ${item.title}`}
-                    className="block w-full cursor-pointer text-left focus:outline-none"
-                  >
-                    <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact />
-                  </button>
-                  {hasEmbed ? (
-                    <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md">
-                      <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                      <span>{item.clips.length} linked {item.clips.length === 1 ? 'clip' : 'clips'}</span>
+                  <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact showTopBadges={false} />
+
+                  {item.isSample && (
+                    <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-full border border-white/20 bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+                      Fictional sample
                     </span>
-                  ) : hasDirectVideo ? (
-                    <button
-                      type="button"
-                      onClick={() => onOpenProfile(item)}
-                      aria-label={`Watch clip for ${item.title}`}
-                      className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/85"
+                  )}
+
+                  {roughDistance && (
+                    <span
+                      title={roughDistanceTitle ?? undefined}
+                      aria-label={roughDistanceTitle ?? roughDistance}
+                      className="pointer-events-none absolute right-2.5 top-2.5 rounded-full border border-white/25 bg-black/65 px-2 py-0.5 text-[10px] font-bold text-[#ff85a6] backdrop-blur-md"
                     >
-                      <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                      <span>Watch clip</span>
-                    </button>
-                  ) : hasPortraitOnly ? (
-                    <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
-                      Portrait preview
+                      {roughDistance}
                     </span>
-                  ) : (
+                  )}
+
+                  {hasDirectVideo || hasEmbed ? (
+                    <span className="pointer-events-none absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
+                      <Play className="h-3 w-3 fill-current" aria-hidden="true" />
+                      <span>Clip</span>
+                    </span>
+                  ) : !hasPortraitOnly ? (
                     <button
                       type="button"
                       onClick={() => void toggleCardPreview(item, 0)}
                       aria-pressed={isPlaying}
                       aria-label={isPlaying ? `Pause clip for ${item.title}` : `Play clip for ${item.title}`}
-                      className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-solid)]"
+                      className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card-hud-bg)] px-2.5 py-1 text-[11px] font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-solid)]"
                     >
                       {isPlaying ? (
-                        <Pause className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                        <Pause className="h-3 w-3 fill-current" aria-hidden="true" />
                       ) : (
-                        <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                        <Play className="h-3 w-3 fill-current" aria-hidden="true" />
                       )}
                       <span>{isPlaying ? 'Playing' : `${item.clips.length} clips`}</span>
                     </button>
-                  )}
+                  ) : null}
                 </div>
 
-                <div className="flex flex-1 flex-col justify-between gap-3 p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
-                      <span className="flex min-w-0 items-center gap-1.5">
-                        <span className="truncate font-medium">{item.roleCategory}</span>
-                        <span
-                          className="shrink-0 rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold"
-                          style={
-                            item.isSample
-                              ? { backgroundColor: 'var(--pill-bg)', color: 'var(--muted)' }
-                              : { backgroundColor: 'var(--gigs-soft)', color: 'var(--gigs)' }
+                <div className="flex flex-1 flex-col justify-between gap-2.5 p-3 sm:p-3.5">
+                  <div className="space-y-1.5">
+                    <h3 className="font-display truncate text-base font-bold leading-snug text-[var(--ink)] sm:text-lg">
+                      <a
+                        href={profileHref}
+                        className="card-link"
+                        onClick={(e) => {
+                          if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                            e.preventDefault();
+                            onOpenProfile(item);
                           }
+                        }}
+                      >
+                        {item.title}
+                      </a>
+                    </h3>
+
+                    <p className="truncate text-xs font-medium text-[var(--muted)]">{locationLabel}</p>
+
+                    <InstrumentBadgeRow instruments={item.instruments} compact max={2} />
+                  </div>
+
+                  {action.kind !== 'sample' && action.kind !== 'self' && (
+                    <div className="flex items-center gap-2 border-t border-[var(--border)] pt-2.5">
+                      {action.kind === 'invite' ? (
+                        <button
+                          type="button"
+                          onClick={() => onInvite(item)}
+                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition hover:opacity-90"
+                          style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
                         >
-                          {item.isSample ? 'Fictional sample' : 'Live'}
-                        </span>
-                      </span>
-                      <span className="inline-flex shrink-0 items-center gap-1">
-                        <MapPin className="h-3 w-3" aria-hidden="true" />
-                        <span>
-                          {itemRegion
-                            ? item.regionId !== region.id && itemRegion.state
-                              ? `${itemRegion.city}, ${itemRegion.state}`
-                              : itemRegion.city
-                            : (item.regionLabel ?? item.regionId)}
-                        </span>
-                        {roughDistance && (
-                          <span
-                            title={roughDistanceTitle ?? undefined}
-                            aria-label={roughDistanceTitle ?? roughDistance}
-                            className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--accent-text)]"
-                          >
-                            {roughDistance}
-                          </span>
-                        )}
-                      </span>
+                          <Flame className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                          <span>Invite to jam</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onOpenInvites(action.kind === 'accepted' ? action.invite.threadId : undefined)
+                          }
+                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-bold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>{action.label}</span>
+                        </button>
+                      )}
                     </div>
-
-                    <div>
-                      <button
-                        type="button"
-                        onClick={() => onOpenProfile(item)}
-                        className="w-full text-left transition hover:opacity-80"
-                      >
-                        <h3 className="font-display truncate text-xl font-bold text-[var(--ink)]">
-                          {item.title}
-                        </h3>
-                      </button>
-                      <p className="flex items-center gap-1.5 text-xs font-medium text-[var(--muted)]">
-                        <span className="truncate">
-                          {item.subtitle}, {item.neighborhood}
-                        </span>
-                        {item.instagramHandle && (
-                          <span className="inline-flex shrink-0 items-center gap-0.5 text-[var(--accent-text)]">
-                            <Instagram className="h-3 w-3" aria-hidden="true" />
-                            <span>@{item.instagramHandle}</span>
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
-                    <InstrumentBadgeRow instruments={item.instruments} compact max={3} />
-
-                    <p className="line-clamp-2 text-sm text-[var(--ink)]/90">
-                      {item.seekingOrOffer}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 border-t border-[var(--border)] pt-3">
-                    <button
-                      type="button"
-                      onClick={() => onOpenProfile(item)}
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-2 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
-                    >
-                      <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>View page</span>
-                    </button>
-
-                    {action.kind === 'invite' && (
-                      <button
-                        type="button"
-                        onClick={() => onInvite(item)}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition hover:opacity-90"
-                        style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
-                      >
-                        <Flame className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                        <span>Invite to jam</span>
-                      </button>
-                    )}
-
-                    {(action.kind === 'accepted' || action.kind === 'incoming' || action.kind === 'sent') && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onOpenInvites(action.kind === 'accepted' ? action.invite.threadId : undefined)
-                        }
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-bold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>{action.label}</span>
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
               </article>
             );

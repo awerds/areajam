@@ -29,7 +29,7 @@ export function CardArtwork({
     <div
       className={
         compact
-          ? `card-art-${paletteIdx} relative ${hasPortrait ? 'h-52' : 'h-44'} w-full overflow-hidden rounded-2xl`
+          ? `card-art-${paletteIdx} relative aspect-[4/5] w-full overflow-hidden`
           : `card-art-${paletteIdx} pointer-events-none absolute inset-0 overflow-hidden`
       }
       style={{ backgroundColor: 'var(--art-base)' }}
@@ -40,7 +40,7 @@ export function CardArtwork({
           alt={listing.portraitAlt || listing.title}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover object-[50%_20%]"
+          className="aspect-[4/5] h-full w-full object-cover object-[50%_20%]"
         />
       ) : (
         <svg
