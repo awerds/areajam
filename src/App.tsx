@@ -135,7 +135,8 @@ export function App() {
     () => parseUrlState().profileId ?? null
   );
   const [chipFilter, setChipFilter] = useState<string>('All');
-  const [discoverView, setDiscoverView] = useState<'grid' | 'deck'>('grid');
+  const [discoverStage, setDiscoverStage] = useState<'carousel' | 'swipe'>('carousel');
+  const [focusedDeckId, setFocusedDeckId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [mobileSearchOpen, setMobileSearchOpen] = useState<boolean>(false);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
@@ -165,7 +166,6 @@ export function App() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  const browseSectionRef = useRef<HTMLDivElement>(null);
   const toastTimerRef = useRef<number | undefined>(undefined);
   const activeUidRef = useRef<string | null>(null);
 
@@ -604,13 +604,37 @@ export function App() {
     user,
   ]);
 
+  const orderedDeckCards = useMemo(() => {
+    if (!focusedDeckId) return deckCards;
+    const idx = deckCards.findIndex((item) => item.id === focusedDeckId);
+    if (idx <= 0) return deckCards;
+    return [deckCards[idx], ...deckCards.slice(0, idx), ...deckCards.slice(idx + 1)];
+  }, [deckCards, focusedDeckId]);
+
   const handleTabChange = (nextTab: NavTab) => {
     stopCardPreview();
     setActiveProfileId(null);
     setActiveTab(nextTab);
+    if (nextTab === 'discover') {
+      setDiscoverStage('carousel');
+    }
     if (nextTab !== 'matches') {
       setSelectedThreadId(null);
     }
+  };
+
+  const handleSelectCarouselListing = (listing: Listing) => {
+    stopCardPreview();
+    if (state.swiped[listing.id]) {
+      setState((prev) => {
+        if (!prev.swiped[listing.id]) return prev;
+        const nextSwiped = { ...prev.swiped };
+        delete nextSwiped[listing.id];
+        return { ...prev, swiped: nextSwiped };
+      });
+    }
+    setFocusedDeckId(listing.id);
+    setDiscoverStage('swipe');
   };
 
   const handleOpenProfile = (listing: Listing) => {
@@ -622,6 +646,7 @@ export function App() {
 
   const handleSwipe = (listing: Listing, decision: SwipeDecision) => {
     stopCardPreview();
+    setFocusedDeckId(null);
 
     if (decision === 'like' && !listing.isSample) {
       handleRequestInvite(listing);
@@ -934,8 +959,19 @@ export function App() {
           ? '16.5rem'
           : '13.25rem';
 
+  const isDiscoverViewportLock =
+    !activeProfile &&
+    !(activeProfileId && (deepLinkLoading || resolvedProfileId !== activeProfileId)) &&
+    activeTab === 'discover';
+
   return (
-    <div className="relative min-h-dvh overflow-x-clip pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12">
+    <div
+      className={`relative flex min-h-dvh flex-col overflow-x-clip ${
+        isDiscoverViewportLock
+          ? 'pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-0'
+          : 'pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12'
+      }`}
+    >
       <InstrumentIconSprite />
 
       {/* Architectural pink/gigs acoustic contour lines */}
@@ -1132,50 +1168,25 @@ export function App() {
         </div>
       )}
 
-      {/* Edge-to-edge panoramic curved hero when on Discover */}
-      {!activeProfile &&
-        !(activeProfileId && (deepLinkLoading || resolvedProfileId !== activeProfileId)) &&
-        activeTab === 'discover' && (
-          <div className={discoverView === 'deck' ? 'hidden md:block' : undefined}>
-            <PanoramicHero
-              listings={regionalPool}
-              region={currentRegion}
-              detectedCityLabel={state.detectedCityLabel}
-              totalCount={regionalPool.length}
-              soundEnabled={soundEnabled}
-              onToggleSound={() => setSoundEnabled((s) => !s)}
-              onPickRegion={() => setRegionModalOpen(true)}
-              onOpenProfile={handleOpenProfile}
-              onBrowseAll={() => {
-                setDiscoverView('grid');
-                if (window.matchMedia('(min-width: 768px)').matches) {
-                  requestAnimationFrame(() => {
-                    browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-                  });
-                } else {
-                  handleTabChange('browse');
-                }
-              }}
-              onOpenSwipeDeck={() => {
-                setDiscoverView('deck');
-                requestAnimationFrame(() => {
-                  if (window.matchMedia('(min-width: 768px)').matches) {
-                    browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }
-                });
-              }}
-              onGoToPost={() => handleTabChange('post')}
-            />
-          </div>
-        )}
-
-      {/* Full-width main container */}
-      <main
-        style={{ '--mobile-deck-offset': mobileDeckOffset } as CSSProperties}
-        className="relative z-10 mx-auto w-full max-w-[1440px] px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10"
-      >
+      {/* Discover Carousel Landing vs Main Workspace */}
+      {isDiscoverViewportLock && discoverStage === 'carousel' ? (
+        <main className="relative z-10 flex w-full flex-1 flex-col">
+          <PanoramicHero
+            listings={regionalPool}
+            region={currentRegion}
+            detectedCityLabel={state.detectedCityLabel}
+            totalCount={regionalPool.length}
+            onPickRegion={() => setRegionModalOpen(true)}
+            onSelectListing={handleSelectCarouselListing}
+            onBrowseAll={() => handleTabChange('browse')}
+            onGoToPost={() => handleTabChange('post')}
+          />
+        </main>
+      ) : (
+        <main
+          style={{ '--mobile-deck-offset': mobileDeckOffset } as CSSProperties}
+          className="relative z-10 mx-auto w-full max-w-[1440px] flex-1 px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10"
+        >
         {activeProfile ? (
           <ProfilePage
             key={activeProfile.id}
@@ -1216,169 +1227,182 @@ export function App() {
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div
-                ref={browseSectionRef}
-                className={
-                  discoverView === 'deck'
-                    ? 'scroll-mt-20 space-y-4 md:space-y-8 md:pt-4'
-                    : 'scroll-mt-20 hidden space-y-8 pt-6 md:block md:space-y-10'
-                }
-              >
-                {/* Mobile Swipe Deck single-row bar (visible when user opens Swipe reels on mobile) */}
-                {discoverView === 'deck' && (
-                  <div className="md:hidden">
-                    {mobileSearchOpen ? (
-                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5">
-                        <div className="relative min-w-0">
-                          <label htmlFor="mobile-discover-search" className="visually-hidden">
-                            Search players, gear, genres, or neighborhoods
-                          </label>
-                          <Search
-                            className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted)]"
-                            aria-hidden="true"
-                          />
-                          <input
-                            ref={mobileSearchInputRef}
-                            id="mobile-discover-search"
-                            type="search"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search name, gear, genre..."
-                            className="w-full rounded-full border border-[var(--accent)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] focus:outline-none"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setMobileSearchOpen(false)}
-                          aria-label="Close search bar"
-                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:text-[var(--ink)]"
-                        >
-                          <X className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[auto_minmax(0,1fr)]">
-                        <button
-                          type="button"
-                          onClick={() => setMobileSearchOpen(true)}
-                          aria-label="Search players, gear, genre, or neighborhood"
-                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition"
-                          style={
-                            searchQuery.trim().length > 0
-                              ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                  borderColor: 'var(--accent)',
-                                }
-                              : {
-                                  backgroundColor: 'var(--pill-bg)',
-                                  color: 'var(--ink)',
-                                  borderColor: 'var(--border)',
-                                }
-                          }
-                        >
-                          <Search className="h-4 w-4" aria-hidden="true" />
-                        </button>
+              <div className="grid grid-cols-1 items-start gap-2 md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
+                {/* Mobile single-row bar: search toggle, Carousel return + instrument pills, pinned Samples switch */}
+                {mobileSearchOpen ? (
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 md:hidden">
+                    <div className="relative min-w-0">
+                      <label htmlFor="mobile-discover-search" className="visually-hidden">
+                        Search players, gear, genres, or neighborhoods
+                      </label>
+                      <Search
+                        className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted)]"
+                        aria-hidden="true"
+                      />
+                      <input
+                        ref={mobileSearchInputRef}
+                        id="mobile-discover-search"
+                        type="search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search name, gear, genre..."
+                        className="w-full rounded-full border border-[var(--accent)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setMobileSearchOpen(false)}
+                      aria-label="Close search bar"
+                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:text-[var(--ink)]"
+                    >
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[auto_minmax(0,1fr)] md:hidden">
+                    <button
+                      type="button"
+                      onClick={() => setMobileSearchOpen(true)}
+                      aria-label="Search players, gear, genre, or neighborhood"
+                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition"
+                      style={
+                        searchQuery.trim().length > 0
+                          ? {
+                              backgroundColor: 'var(--accent)',
+                              color: 'var(--accent-ink)',
+                              borderColor: 'var(--accent)',
+                            }
+                          : {
+                              backgroundColor: 'var(--pill-bg)',
+                              color: 'var(--ink)',
+                              borderColor: 'var(--border)',
+                            }
+                      }
+                    >
+                      <Search className="h-4 w-4" aria-hidden="true" />
+                    </button>
 
-                        <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
+                    <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
+                      <button
+                        type="button"
+                        onClick={() => setDiscoverStage('carousel')}
+                        className="shrink-0 rounded-full border border-[var(--border-strong)] bg-[var(--surface-solid)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)]"
+                      >
+                        Carousel
+                      </button>
+
+                      {searchQuery.trim().length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          aria-label={`Clear search "${searchQuery.trim()}"`}
+                          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-ink)]"
+                        >
+                          <span className="max-w-[7rem] truncate">{searchQuery.trim()}</span>
+                          <X className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        </button>
+                      )}
+
+                      {(activePrefs.length > 0 || chipFilter !== 'All') && (
+                        <button
+                          type="button"
+                          onClick={clearAllFilters}
+                          className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
+                        >
+                          Clear
+                        </button>
+                      )}
+
+                      {prefChoices.map((pref) => {
+                        const selected = activePrefs.includes(pref);
+                        return (
                           <button
+                            key={pref}
                             type="button"
-                            onClick={() => setDiscoverView('grid')}
-                            className="shrink-0 rounded-full border border-[var(--border-strong)] bg-[var(--surface-solid)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)]"
+                            aria-pressed={selected}
+                            onClick={() => togglePreference(pref)}
+                            className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
+                            style={
+                              selected
+                                ? {
+                                    backgroundColor: 'var(--accent)',
+                                    color: 'var(--accent-ink)',
+                                    borderColor: 'var(--accent)',
+                                  }
+                                : {
+                                    backgroundColor: 'var(--pill-bg)',
+                                    color: 'var(--muted)',
+                                    borderColor: 'var(--border)',
+                                  }
+                            }
                           >
-                            Showcase
+                            {pref}
                           </button>
+                        );
+                      })}
+                    </div>
 
-                          {searchQuery.trim().length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => setSearchQuery('')}
-                              aria-label={`Clear search "${searchQuery.trim()}"`}
-                              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-ink)]"
-                            >
-                              <span className="max-w-[7rem] truncate">{searchQuery.trim()}</span>
-                              <X className="h-3 w-3 shrink-0" aria-hidden="true" />
-                            </button>
-                          )}
-
-                          {(activePrefs.length > 0 || chipFilter !== 'All') && (
-                            <button
-                              type="button"
-                              onClick={clearAllFilters}
-                              className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
-                            >
-                              Clear
-                            </button>
-                          )}
-
-                          {prefChoices.map((pref) => {
-                            const selected = activePrefs.includes(pref);
-                            return (
-                              <button
-                                key={pref}
-                                type="button"
-                                aria-pressed={selected}
-                                onClick={() => togglePreference(pref)}
-                                className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
-                                style={
-                                  selected
-                                    ? {
-                                        backgroundColor: 'var(--accent)',
-                                        color: 'var(--accent-ink)',
-                                        borderColor: 'var(--accent)',
-                                      }
-                                    : {
-                                        backgroundColor: 'var(--pill-bg)',
-                                        color: 'var(--muted)',
-                                        borderColor: 'var(--border)',
-                                      }
-                                }
-                              >
-                                {pref}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={samplesEnabled}
-                          aria-label="Show sample profiles"
-                          onClick={handleToggleSamples}
-                          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:hidden"
-                        >
-                          <span>Samples</span>
-                          <span
-                            aria-hidden="true"
-                            className="relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors"
-                            style={{
-                              backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
-                            }}
-                          >
-                            <span
-                              className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${
-                                samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
-                              }`}
-                              style={{
-                                backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
-                              }}
-                            />
-                          </span>
-                        </button>
-                      </div>
-                    )}
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={samplesEnabled}
+                      aria-label="Show sample profiles"
+                      onClick={handleToggleSamples}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:hidden"
+                    >
+                      <span>Samples</span>
+                      <span
+                        aria-hidden="true"
+                        className="relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors"
+                        style={{
+                          backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
+                        }}
+                      >
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${
+                            samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
+                          }`}
+                          style={{
+                            backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
+                          }}
+                        />
+                      </span>
+                    </button>
                   </div>
                 )}
 
-                {/* Unified Search, Genre & Equal-Cell Instrument Filter Panel + View Switcher (Tablet & Desktop) */}
-                <div className="glass-surface hidden space-y-3.5 rounded-3xl p-4 md:block lg:p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="font-display text-base font-bold text-[var(--ink)]">
-                      Filter and discover local players
-                    </h2>
+                {/* Desktop & Tablet Left Column: Original Hero + Unified Filter Grid + CTAs */}
+                <div className="hidden space-y-5 md:col-span-6 md:block lg:col-span-7">
+                  <div className="space-y-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                        {currentRegion.label}
+                        {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
+                      </span>
 
-                    <div className="flex flex-wrap items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setDiscoverStage('carousel')}
+                        className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)] transition hover:bg-[var(--surface-hover)]"
+                      >
+                        Back to carousel
+                      </button>
+                    </div>
+
+                    <h1 className="hero-title font-bold text-[var(--ink)]">
+                      Find your people. Make some noise.
+                    </h1>
+
+                    <p className="max-w-xl text-sm leading-relaxed text-[var(--muted)]">
+                      Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
+                    </p>
+                  </div>
+
+                  <div className="glass-surface space-y-3 rounded-3xl p-4 lg:p-5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h2 className="font-display text-sm font-bold">
+                        Filter by instrument or search local players
+                      </h2>
                       {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
                         <button
                           type="button"
@@ -1388,221 +1412,136 @@ export function App() {
                           Clear filters
                         </button>
                       )}
+                    </div>
 
-                      <div
-                        role="group"
-                        aria-label="Discovery view mode"
-                        className="inline-flex rounded-full border border-[var(--border)] bg-[var(--pill-bg)] p-1"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setDiscoverView('grid')}
-                          aria-pressed={discoverView === 'grid'}
-                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition"
-                          style={
-                            discoverView === 'grid'
-                              ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                }
-                              : {
-                                  color: 'var(--muted)',
-                                }
-                          }
-                        >
-                          <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>Directory</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setDiscoverView('deck')}
-                          aria-pressed={discoverView === 'deck'}
-                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition"
-                          style={
-                            discoverView === 'deck'
-                              ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                }
-                              : {
-                                  color: 'var(--muted)',
-                                }
-                          }
-                        >
-                          <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>Swipe deck</span>
-                        </button>
+                    <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_12rem]">
+                      <div className="relative min-w-0">
+                        <label htmlFor="discover-search" className="visually-hidden">
+                          Search players, gear, genres, or neighborhoods
+                        </label>
+                        <Search
+                          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
+                          aria-hidden="true"
+                        />
+                        <input
+                          id="discover-search"
+                          type="search"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search name, gear, genre..."
+                          className="field-control w-full py-2 pl-10 text-xs"
+                        />
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleTabChange('post')}
-                        className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition hover:opacity-90"
-                        style={{
-                          backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                          color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                        }}
-                      >
-                        <Video className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Build profile &amp; clips</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_12rem]">
-                    <div className="relative min-w-0">
-                      <label htmlFor="discover-search" className="visually-hidden">
-                        Search players, gear, genres, or neighborhoods
-                      </label>
-                      <Search
-                        className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
-                        aria-hidden="true"
-                      />
-                      <input
-                        id="discover-search"
-                        type="search"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search name, gear, genre..."
-                        className="field-control w-full py-2 pl-10 text-xs"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="discover-genre" className="visually-hidden">
-                        Filter by genre
-                      </label>
-                      <select
-                        id="discover-genre"
-                        aria-label="Filter by genre"
-                        value={chipFilter}
-                        onChange={(e) => handleSelectChipFilter(e.target.value)}
-                        className="field-control w-full py-2 text-xs font-semibold"
-                      >
-                        <option value="All">All genres</option>
-                        {availableFilters
-                          .filter((f) => f !== 'All')
-                          .map((genre) => (
-                            <option key={genre} value={genre}>
-                              {genre}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                    {prefChoices.map((pref) => {
-                      const selected = activePrefs.includes(pref);
-                      return (
-                        <button
-                          key={pref}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => togglePreference(pref)}
-                          className="filter-chip-btn inline-flex w-full items-center justify-center whitespace-nowrap rounded-xl border px-2 py-2 text-center text-xs font-semibold"
-                          style={
-                            selected
-                              ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                  borderColor: 'var(--accent)',
-                                }
-                              : {
-                                  backgroundColor: 'var(--pill-bg)',
-                                  color: 'var(--ink)',
-                                  borderColor: 'var(--border)',
-                                }
-                          }
+                      <div>
+                        <label htmlFor="discover-genre" className="visually-hidden">
+                          Filter by genre
+                        </label>
+                        <select
+                          id="discover-genre"
+                          aria-label="Filter by genre"
+                          value={chipFilter}
+                          onChange={(e) => handleSelectChipFilter(e.target.value)}
+                          className="field-control w-full py-2 text-xs font-semibold"
                         >
-                          {pref}
-                        </button>
-                      );
-                    })}
+                          <option value="All">All genres</option>
+                          {availableFilters
+                            .filter((f) => f !== 'All')
+                            .map((genre) => (
+                              <option key={genre} value={genre}>
+                                {genre}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                      {prefChoices.map((pref) => {
+                        const selected = activePrefs.includes(pref);
+                        return (
+                          <button
+                            key={pref}
+                            type="button"
+                            aria-pressed={selected}
+                            onClick={() => togglePreference(pref)}
+                            className="filter-chip-btn inline-flex w-full items-center justify-center whitespace-nowrap rounded-xl border px-2 py-2 text-center text-xs font-semibold"
+                            style={
+                              selected
+                                ? {
+                                    backgroundColor: 'var(--accent)',
+                                    color: 'var(--accent-ink)',
+                                    borderColor: 'var(--accent)',
+                                  }
+                                : {
+                                    backgroundColor: 'var(--pill-bg)',
+                                    color: 'var(--ink)',
+                                    borderColor: 'var(--border)',
+                                  }
+                            }
+                          >
+                            {pref}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange('browse')}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                    >
+                      <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+                      <span>Browse all ({regionalPool.length})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange('post')}
+                      className="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold transition hover:opacity-90"
+                      style={{
+                        backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                        color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                      }}
+                    >
+                      <Video className="h-4 w-4" aria-hidden="true" />
+                      <span>Build profile &amp; clips</span>
+                    </button>
                   </div>
                 </div>
 
-                {discoverView === 'deck' ? (
-                  <div className="flex justify-center">
-                    <SwipeDeck
-                      cards={deckCards}
-                      mode={state.mode}
-                      region={currentRegion}
-                      allRegions={allRegions}
-                      canUndo={canUndo}
-                      includeNearbyRegions={state.includeNearbyRegions}
-                      showingNearestFallback={showingDeckNearestFallback}
-                      showSampleCards={samplesEnabled}
-                      filterKey={`${activePrefs.join('|')}::${chipFilter}`}
-                      soundEnabled={soundEnabled}
-                      currentUserUid={user?.uid}
-                      inviteByTargetUid={inviteByTargetUid}
-                      onToggleSound={() => setSoundEnabled((s) => !s)}
-                      onSwipe={handleSwipe}
-                      onUndo={handleUndo}
-                      onOpenDetails={setDetailListing}
-                      onOpenProfile={handleOpenProfile}
-                      onInvite={handleRequestInvite}
-                      onOpenInvites={handleOpenInvites}
-                      onEnableNearby={() =>
-                        setState((prev) => ({ ...prev, includeNearbyRegions: true }))
-                      }
-                      onToggleSampleCards={handleToggleSamples}
-                      onResetPassed={handleResetPassed}
-                      onGoToPost={() => handleTabChange('post')}
-                    />
-                  </div>
-                ) : (
-                  <div className="hidden md:block">
-                    <BrowseGrid
-                      listings={regionalPool}
-                      mode={state.mode}
-                      region={currentRegion}
-                      allRegions={allRegions}
-                      swiped={state.swiped}
-                      showingNearestFallback={showingNearestFallback}
-                      currentUserUid={user?.uid}
-                      inviteByTargetUid={inviteByTargetUid}
-                      searchQuery={searchQuery}
-                      onSearchQueryChange={setSearchQuery}
-                      hideSearch
-                      onInspect={setDetailListing}
-                      onOpenProfile={handleOpenProfile}
-                      onSwipe={handleSwipe}
-                      onInvite={handleRequestInvite}
-                      onOpenInvites={handleOpenInvites}
-                      onGoToPost={() => handleTabChange('post')}
-                    />
-                  </div>
-                )}
-
-                {/* Balanced 3-column feature highlights band below workspace */}
-                <section
-                  aria-label="How AreaJam works"
-                  className="hidden border-t border-[var(--border)] pt-8 md:block"
-                >
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                      <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
-                      <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                        Matches your city first and sorts nearby musicians by rough distance.
-                      </p>
-                    </div>
-                    <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                      <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
-                      <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                        Embed public Reels, YouTube, or SoundCloud clips plus your IG handle.
-                      </p>
-                    </div>
-                    <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                      <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
-                      <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                        Accept or decline invites to unlock a private 1-on-1 Firestore thread.
-                      </p>
-                    </div>
-                  </div>
-                </section>
+                {/* Right Column: Live 9:16 SwipeDeck stage */}
+                <div className="md:col-span-6 lg:col-span-5">
+                  <SwipeDeck
+                    cards={orderedDeckCards}
+                    mode={state.mode}
+                    region={currentRegion}
+                    allRegions={allRegions}
+                    canUndo={canUndo}
+                    includeNearbyRegions={state.includeNearbyRegions}
+                    showingNearestFallback={showingDeckNearestFallback}
+                    showSampleCards={samplesEnabled}
+                    filterKey={`${activePrefs.join('|')}::${chipFilter}`}
+                    soundEnabled={soundEnabled}
+                    currentUserUid={user?.uid}
+                    inviteByTargetUid={inviteByTargetUid}
+                    onToggleSound={() => setSoundEnabled((s) => !s)}
+                    onSwipe={handleSwipe}
+                    onUndo={handleUndo}
+                    onOpenDetails={setDetailListing}
+                    onOpenProfile={handleOpenProfile}
+                    onInvite={handleRequestInvite}
+                    onOpenInvites={handleOpenInvites}
+                    onEnableNearby={() =>
+                      setState((prev) => ({ ...prev, includeNearbyRegions: true }))
+                    }
+                    onToggleSampleCards={handleToggleSamples}
+                    onResetPassed={handleResetPassed}
+                    onGoToPost={() => handleTabChange('post')}
+                  />
+                </div>
               </div>
             )}
 
@@ -1695,7 +1634,12 @@ export function App() {
                   onSwipe={handleSwipe}
                   onInvite={handleRequestInvite}
                   onOpenInvites={handleOpenInvites}
-                  onWatchInReels={() => handleTabChange('discover')}
+                  onWatchInReels={() => {
+                    stopCardPreview();
+                    setActiveProfileId(null);
+                    setActiveTab('discover');
+                    setDiscoverStage('swipe');
+                  }}
                   onGoToPost={() => handleTabChange('post')}
                 />
               </div>
@@ -1761,6 +1705,7 @@ export function App() {
           </>
         )}
       </main>
+      )}
 
       {/* Custom Mobile Phone 4-Tab Bottom Glass Dock */}
       <nav

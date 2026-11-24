@@ -996,6 +996,30 @@ html {
   aspect-ratio: 9 / 16;
 }
 
+@keyframes panoramic-spin {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.panoramic-marquee-track {
+  animation: panoramic-spin 58s linear infinite;
+}
+
+.panoramic-marquee-stage:hover .panoramic-marquee-track,
+.panoramic-marquee-stage:focus-within .panoramic-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panoramic-marquee-track {
+    animation: none;
+  }
+}
+
 .card-glare {
   pointer-events: none;
   background: radial-gradient(

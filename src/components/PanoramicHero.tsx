@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Flame, LayoutGrid, MapPin, Volume2, VolumeX } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ChevronDown, MapPin, Video } from 'lucide-react';
 import type { Listing, Region } from '../types';
 import { CardArtwork } from './CardArtwork';
 
@@ -8,25 +9,10 @@ interface PanoramicHeroProps {
   region: Region;
   detectedCityLabel?: string;
   totalCount: number;
-  soundEnabled: boolean;
-  onToggleSound: () => void;
   onPickRegion: () => void;
-  onOpenProfile: (listing: Listing) => void;
+  onSelectListing: (listing: Listing) => void;
   onBrowseAll: () => void;
-  onOpenSwipeDeck: () => void;
   onGoToPost: () => void;
-}
-
-function getHeroVideoUrl(listing: Listing): string | null {
-  const featured =
-    (listing.featuredClipId
-      ? listing.clips.find((c) => c.id === listing.featuredClipId)
-      : undefined) ?? listing.clips[0];
-  if (featured?.kind === 'video' && featured.embedUrl) {
-    return featured.embedUrl;
-  }
-  const anyVideo = listing.clips.find((c) => c.kind === 'video' && Boolean(c.embedUrl));
-  return anyVideo?.embedUrl ?? null;
 }
 
 function getHeroPosterUrl(listing: Listing): string | undefined {
@@ -42,184 +28,85 @@ export function PanoramicHero({
   region,
   detectedCityLabel,
   totalCount,
-  soundEnabled,
-  onToggleSound,
   onPickRegion,
-  onOpenProfile,
+  onSelectListing,
   onBrowseAll,
-  onOpenSwipeDeck,
   onGoToPost,
 }: PanoramicHeroProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const [isFalling, setIsFalling] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
-    setActiveIndex(0);
-  }, [listings.length, region.id]);
+    return () => {
+      timelineRef.current?.kill();
+    };
+  }, []);
 
-  const count = listings.length;
-  const safeIndex = count > 0 ? ((activeIndex % count) + count) % count : 0;
-
-  const handleStep = (delta: number) => {
-    if (count === 0) return;
-    setActiveIndex((prev) => (((prev + delta) % count) + count) % count);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length !== 1) return;
-    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    const start = touchStartRef.current;
-    touchStartRef.current = null;
-    if (!start || e.changedTouches.length === 0) return;
-    const dx = e.changedTouches[0].clientX - start.x;
-    const dy = e.changedTouches[0].clientY - start.y;
-    if (Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-      handleStep(dx < 0 ? 1 : -1);
+  // Repeat items so one half of the marquee always exceeds wide viewport widths cleanly.
+  const halfTrack = useMemo(() => {
+    if (listings.length === 0) return [];
+    const out: Listing[] = [];
+    while (out.length < 12) {
+      out.push(...listings);
+      if (listings.length >= 12) break;
     }
-  };
+    return out;
+  }, [listings]);
 
-  const resolveSlotItem = (offset: number): { listing: Listing; realIndex: number } | null => {
-    if (count === 0) return null;
-    const realIndex = (((safeIndex + offset) % count) + count) % count;
-    return { listing: listings[realIndex], realIndex };
-  };
+  const handleSelectCard = (listing: Listing) => {
+    if (isFalling) return;
+    setIsFalling(true);
 
-  const renderCard = (offset: number, slotKey: string, extraClass = '') => {
-    const entry = resolveSlotItem(offset);
-    if (!entry) {
-      return (
-        <button
-          key={slotKey}
-          type="button"
-          onClick={onGoToPost}
-          className={`group relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-4 text-center ${extraClass}`}
-        >
-          <span className="font-display text-sm font-bold text-[var(--ink)]">
-            Share your reel
-          </span>
-          <span className="mt-1 text-xs text-[var(--muted)]">Add clips in {region.city}</span>
-        </button>
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onSelectListing(listing);
+      return;
+    }
+
+    timelineRef.current?.kill();
+    const tl = gsap.timeline({
+      onComplete: () => {
+        onSelectListing(listing);
+      },
+    });
+    timelineRef.current = tl;
+
+    if (headerRef.current) {
+      tl.to(headerRef.current, { opacity: 0, y: -14, duration: 0.28, ease: 'power2.in' }, 0);
+    }
+    if (ctaRef.current) {
+      tl.to(ctaRef.current, { opacity: 0, y: 14, duration: 0.26, ease: 'power2.in' }, 0);
+    }
+    if (stageRef.current) {
+      tl.to(
+        stageRef.current,
+        { y: 120, rotateX: -14, scale: 0.92, opacity: 0, duration: 0.42, ease: 'power3.in' },
+        0.04
       );
     }
-
-    const { listing, realIndex } = entry;
-    const isCenter = offset === 0;
-    const videoUrl = isCenter ? getHeroVideoUrl(listing) : null;
-    const posterUrl = getHeroPosterUrl(listing);
-    const primaryRole = listing.instruments[0] ?? listing.roleCategory;
-
-    return (
-      <div
-        key={`${slotKey}-${listing.id}`}
-        className={`group relative h-full w-full overflow-hidden rounded-2xl border transition-all duration-300 ${
-          isCenter
-            ? 'border-[var(--border-strong)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)]'
-            : 'border-[var(--border)] bg-[#10131d] opacity-85 hover:opacity-100'
-        } ${extraClass}`}
-      >
-        {videoUrl ? (
-          <video
-            src={videoUrl}
-            poster={posterUrl}
-            preload="auto"
-            autoPlay
-            loop
-            playsInline
-            muted={!soundEnabled}
-            className="pointer-events-none h-full w-full object-cover object-[50%_20%]"
-          />
-        ) : posterUrl ? (
-          <img
-            src={posterUrl}
-            alt={listing.portraitAlt || listing.title}
-            loading={Math.abs(offset) <= 1 ? 'eager' : 'lazy'}
-            decoding="async"
-            className="pointer-events-none h-full w-full object-cover object-[50%_20%] transition duration-500 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <CardArtwork listing={listing} compact={false} showTopBadges={false} />
-        )}
-
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[56%]"
-          style={{
-            background: isCenter
-              ? 'linear-gradient(180deg, transparent 0%, rgba(10,12,20,0.42) 38%, rgba(10,12,20,0.92) 92%)'
-              : 'linear-gradient(180deg, transparent 0%, rgba(10,12,20,0.35) 45%, rgba(10,12,20,0.88) 95%)',
-          }}
-        />
-
-        <button
-          type="button"
-          onClick={() => {
-            if (isCenter) {
-              onOpenProfile(listing);
-            } else {
-              setActiveIndex(realIndex);
-            }
-          }}
-          aria-label={
-            isCenter
-              ? `Open profile for ${listing.title}`
-              : `Spotlight ${listing.title} in center view`
-          }
-          className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--accent)]"
-        />
-
-        {isCenter && videoUrl && (
-          <button
-            type="button"
-            onClick={onToggleSound}
-            aria-pressed={soundEnabled}
-            aria-label={soundEnabled ? 'Mute spotlight sound' : 'Turn spotlight sound on'}
-            className="absolute right-2.5 top-[11%] z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/55 text-white backdrop-blur-md transition hover:bg-black/75 sm:h-9 sm:w-9"
-          >
-            {soundEnabled ? (
-              <Volume2 className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
-            ) : (
-              <VolumeX className="h-3.5 w-3.5" aria-hidden="true" />
-            )}
-          </button>
-        )}
-
-        <div
-          className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 px-3 ${
-            isCenter ? 'pb-7 sm:pb-9 md:pb-10' : 'pb-5 sm:pb-7 md:pb-8'
-          }`}
-        >
-          <p className="font-display truncate text-xs font-bold leading-tight text-white sm:text-sm md:text-base">
-            {listing.title}
-          </p>
-          <p className="mt-0.5 truncate text-[10px] font-medium text-white/80 sm:text-[11px]">
-            {primaryRole}
-          </p>
-        </div>
-      </div>
-    );
   };
 
   return (
     <section
-      aria-label="Featured local musicians panoramic showcase"
-      className="hero-ambient-stage relative w-full overflow-x-clip border-b border-[var(--border)] py-3 sm:py-4 md:py-5"
+      aria-label="Featured local musicians carousel"
+      className="hero-ambient-stage relative flex flex-1 flex-col justify-center overflow-x-clip py-4 md:py-6"
     >
       {/* Inline SVG arc clip definitions (kept 0x0 in layout, not display:none) */}
       <svg className="pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
         <defs>
           <clipPath id="areajam-hero-arc-desktop" clipPathUnits="objectBoundingBox">
-            <path d="M 0,0 Q 0.5,0.14 1,0 L 1,1 Q 0.5,0.86 0,1 Z" />
+            <path d="M 0,0 Q 0.5,0.11 1,0 L 1,1 Q 0.5,0.89 0,1 Z" />
           </clipPath>
           <clipPath id="areajam-hero-arc-mobile" clipPathUnits="objectBoundingBox">
-            <path d="M 0,0 Q 0.5,0.10 1,0 L 1,1 Q 0.5,0.90 0,1 Z" />
+            <path d="M 0,0 Q 0.5,0.08 1,0 L 1,1 Q 0.5,0.92 0,1 Z" />
           </clipPath>
         </defs>
       </svg>
 
       {/* Centered editorial headline */}
-      <div className="mx-auto max-w-3xl px-4 text-center">
+      <div ref={headerRef} className="mx-auto max-w-3xl px-4 text-center">
         <button
           type="button"
           onClick={onPickRegion}
@@ -228,9 +115,7 @@ export function PanoramicHero({
         >
           <MapPin className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
           <span>
-            {totalCount > 0
-              ? `${totalCount} musicians near ${region.city}`
-              : region.label}
+            {totalCount > 0 ? `${totalCount} musicians near ${region.city}` : region.label}
             {detectedCityLabel ? ` (${detectedCityLabel})` : ''}
           </span>
           <ChevronDown className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
@@ -242,58 +127,96 @@ export function PanoramicHero({
           Make some noise.
         </h1>
 
-        <p className="mx-auto mt-2 max-w-xl text-xs leading-relaxed text-[var(--muted)] sm:mt-2.5 sm:text-sm md:text-[15px]">
-          Hear real performance clips from nearby musicians. Spot their instruments, send a Jam invite, and start playing.
+        <p className="mx-auto mt-2 max-w-xl text-xs leading-relaxed text-[var(--muted)] sm:mt-2.5 sm:text-sm">
+          Click any player to launch their live reel and start swiping nearby musicians.
         </p>
       </div>
 
-      {/* Full-bleed concave panoramic card arc */}
-      <div
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        className="relative mt-3 w-full select-none overflow-x-clip sm:mt-4 md:mt-5"
-      >
-        {count > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={() => handleStep(-1)}
-              aria-label="Previous featured musician"
-              className="glass-surface absolute left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[var(--ink)] transition hover:scale-105 sm:inline-flex md:left-5"
+      {/* Slowly spinning concave 9:16 phone carousel */}
+      <div className="mt-4 w-full overflow-x-clip sm:mt-5 md:mt-6" style={{ perspective: '1100px' }}>
+        <div
+          ref={stageRef}
+          className="panoramic-marquee-stage panoramic-ribbon-clip-mobile md:panoramic-ribbon-clip-desktop relative w-full overflow-x-clip"
+        >
+          {halfTrack.length === 0 ? (
+            <div className="mx-auto flex justify-center px-4">
+              <button
+                type="button"
+                onClick={onGoToPost}
+                className="glass-surface reel-aspect flex w-[9.25rem] flex-col items-center justify-center rounded-2xl p-4 text-center transition hover:scale-[1.02]"
+              >
+                <span className="font-display text-sm font-bold text-[var(--ink)]">
+                  Share your reel
+                </span>
+                <span className="mt-1 text-xs text-[var(--muted)]">
+                  Add clips in {region.city}
+                </span>
+              </button>
+            </div>
+          ) : (
+            <div
+              className="panoramic-marquee-track flex w-max items-center"
+              style={{ animationPlayState: isFalling ? 'paused' : undefined }}
             >
-              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleStep(1)}
-              aria-label="Next featured musician"
-              className="glass-surface absolute right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[var(--ink)] transition hover:scale-105 sm:inline-flex md:right-5"
-            >
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </>
-        )}
+              {[0, 1].map((copyIdx) => (
+                <div
+                  key={copyIdx}
+                  aria-hidden={copyIdx === 1 || undefined}
+                  className="flex shrink-0 items-center gap-2.5 pr-2.5 sm:gap-3 sm:pr-3"
+                >
+                  {halfTrack.map((listing, idx) => {
+                    const posterUrl = getHeroPosterUrl(listing);
+                    const primaryRole = listing.instruments[0] ?? listing.roleCategory;
+                    const isDuplicate = copyIdx === 1;
+                    return (
+                      <button
+                        key={`${copyIdx}-${idx}-${listing.id}`}
+                        type="button"
+                        tabIndex={isDuplicate ? -1 : undefined}
+                        onClick={() => handleSelectCard(listing)}
+                        aria-label={isDuplicate ? undefined : `Open swipe reel for ${listing.title}`}
+                        className="group reel-aspect relative w-[7rem] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-[var(--border)] bg-[#10131d] text-left shadow-[0_14px_34px_var(--glass-shadow)] transition duration-200 hover:-translate-y-1 hover:border-[var(--border-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] sm:w-[8rem] lg:w-[9.25rem] xl:w-[9.75rem]"
+                      >
+                        {posterUrl ? (
+                          <img
+                            src={posterUrl}
+                            alt={isDuplicate ? '' : listing.portraitAlt || listing.title}
+                            loading={idx < 8 && copyIdx === 0 ? 'eager' : 'lazy'}
+                            decoding="async"
+                            className="pointer-events-none h-full w-full object-cover object-[50%_20%] transition duration-500 group-hover:scale-[1.04]"
+                          />
+                        ) : (
+                          <CardArtwork listing={listing} compact={false} showTopBadges={false} />
+                        )}
 
-        {/* Mobile 3-card curved strip */}
-        <div className="panoramic-ribbon-clip-mobile -ml-[16%] grid h-[clamp(15.5rem,34dvh,19.5rem)] w-[132%] grid-cols-3 gap-2 md:hidden">
-          {([-1, 0, 1] as const).map((offset) => renderCard(offset, `mob-${offset}`))}
-        </div>
+                        <div
+                          className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%]"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, transparent 0%, rgba(10,12,20,0.45) 45%, rgba(10,12,20,0.92) 94%)',
+                          }}
+                        />
 
-        {/* Tablet 5-card curved strip */}
-        <div className="panoramic-ribbon-clip-desktop -ml-[8%] hidden h-[clamp(18rem,36dvh,22rem)] w-[116%] grid-cols-5 gap-2.5 md:grid lg:hidden">
-          {([-2, -1, 0, 1, 2] as const).map((offset) => renderCard(offset, `tab-${offset}`))}
-        </div>
-
-        {/* Desktop 7-card curved strip */}
-        <div className="panoramic-ribbon-clip-desktop -ml-[7%] hidden h-[clamp(17.5rem,37dvh,22.5rem)] w-[114%] grid-cols-7 gap-3 lg:grid">
-          {([-3, -2, -1, 0, 1, 2, 3] as const).map((offset) =>
-            renderCard(offset, `desk-${offset}`)
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-2.5 pb-4 sm:px-3 sm:pb-5">
+                          <p className="font-display truncate text-xs font-bold leading-tight text-white sm:text-sm">
+                            {listing.title}
+                          </p>
+                          <p className="mt-0.5 truncate text-[10px] font-medium text-white/80">
+                            {primaryRole}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
 
       {/* Centered primary CTA row */}
-      <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2.5 px-4 sm:mt-4 md:mt-5">
+      <div ref={ctaRef} className="mt-4 flex flex-wrap items-center justify-center gap-2.5 px-4 sm:mt-5 md:mt-6">
         <button
           type="button"
           onClick={onBrowseAll}
@@ -303,17 +226,16 @@ export function PanoramicHero({
             color: 'var(--jam-ink)',
           }}
         >
-          <LayoutGrid className="h-4 w-4" aria-hidden="true" />
           <span>Browse musicians</span>
         </button>
 
         <button
           type="button"
-          onClick={onOpenSwipeDeck}
+          onClick={onGoToPost}
           className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-hover)]"
         >
-          <Flame className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
-          <span>Swipe reels</span>
+          <Video className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+          <span>Build profile &amp; clips</span>
         </button>
       </div>
     </section>
