@@ -9,6 +9,7 @@ import {
   Moon,
   Navigation,
   PlusSquare,
+  Search,
   Sun,
   UserCheck,
   Video,
@@ -132,6 +133,7 @@ export function App() {
     () => parseUrlState().profileId ?? null
   );
   const [chipFilter, setChipFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
   const [ipDetecting, setIpDetecting] = useState<boolean>(false);
 
@@ -418,15 +420,6 @@ export function App() {
     });
   };
 
-  const clearPreferences = () => {
-    runFilterTransition(() => {
-      setState((prev) => ({
-        ...prev,
-        [prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs']: [],
-      }));
-    });
-  };
-
   const handleSelectChipFilter = (filter: string) => {
     runFilterTransition(() => {
       setChipFilter(filter);
@@ -534,11 +527,29 @@ export function App() {
     }
   }, [availableFilters, chipFilter]);
 
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    runFilterTransition(() => {
+      setChipFilter('All');
+      setState((prev) => ({
+        ...prev,
+        [prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs']: [],
+      }));
+    });
+  };
+
   const { localFiltered, otherFiltered, showingNearestFallback } = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     const matchesCurrentFilters = (item: Listing) => {
       if (!matchesPreferences(item, activePrefs)) return false;
-      if (chipFilter === 'All') return true;
-      return item.genres.includes(chipFilter) || item.tags.includes(chipFilter);
+      if (chipFilter !== 'All' && !item.genres.includes(chipFilter) && !item.tags.includes(chipFilter)) {
+        return false;
+      }
+      if (!q) return true;
+      const gearText = item.gearLocker.map((g) => `${g.name} ${g.notes ?? ''}`).join(' ');
+      return `${item.title} ${item.subtitle} ${item.neighborhood} ${item.roleCategory} ${item.genres.join(' ')} ${item.tags.join(' ')} ${item.seekingOrOffer} ${gearText}`
+        .toLowerCase()
+        .includes(q);
     };
     const nextLocal = localUnfiltered.filter(matchesCurrentFilters);
     const nextOther = otherUnfiltered.filter(matchesCurrentFilters);
@@ -547,7 +558,7 @@ export function App() {
       otherFiltered: nextOther,
       showingNearestFallback: nextLocal.length === 0 && nextOther.length > 0,
     };
-  }, [localUnfiltered, otherUnfiltered, activePrefs, chipFilter]);
+  }, [localUnfiltered, otherUnfiltered, activePrefs, chipFilter, searchQuery]);
 
   const regionalPool = useMemo(() => {
     if (showingNearestFallback) return otherFiltered;
@@ -911,23 +922,23 @@ export function App() {
 
       {/* Full-width edge-to-edge sticky header */}
       <header className="safe-top sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-xl">
-        <div className="toolbar mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 px-4 pb-3 md:px-6 xl:px-10">
-          <div className="flex items-center gap-4">
+        <div className="toolbar mx-auto flex w-full max-w-[1440px] items-center justify-between gap-2 px-3 pb-2 md:px-6 md:pb-2.5 xl:px-10">
+          <div className="flex items-center gap-3 md:gap-4">
             <button
               type="button"
               onClick={() => handleTabChange('discover')}
               aria-label="AreaJam home"
-              className="flex items-center gap-2.5 text-left"
+              className="flex items-center gap-2 text-left sm:gap-2.5"
             >
-              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1.5 shadow-sm sm:hidden">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1 shadow-sm sm:hidden">
                 <AreaJamMark className="h-full w-full" />
               </span>
-              <span className="font-display text-base font-bold leading-none tracking-tight text-[var(--ink)] sm:hidden">
+              <span className="font-display text-[15px] font-bold leading-none tracking-tight text-[var(--ink)] sm:hidden">
                 AreaJam
               </span>
 
               <span className="hidden items-center sm:inline-flex">
-                <AreaJamLogo className="h-10 w-[164px] shrink-0 text-[var(--ink)]" />
+                <AreaJamLogo className="h-9 w-[150px] shrink-0 text-[var(--ink)]" />
               </span>
             </button>
 
@@ -959,19 +970,19 @@ export function App() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => setRegionModalOpen(true)}
               aria-label={`Change local region, currently ${currentRegion.label}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
+              className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] sm:gap-1.5 sm:px-3"
             >
-              <MapPin className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
-              <span>
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
+              <span className="max-w-[7.25rem] truncate sm:max-w-none">
                 {currentRegion.city}
                 {currentRegion.areaCode !== 'LOC' ? `, ${currentRegion.areaCode}` : ''}
               </span>
-              <ChevronDown className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
+              <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--muted)]" aria-hidden="true" />
             </button>
 
             <button
@@ -981,7 +992,7 @@ export function App() {
               aria-label="Show sample profiles"
               title="Turn sample preview profiles on or off"
               onClick={handleToggleSamples}
-              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+              className="hidden shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:inline-flex"
             >
               <span>Samples</span>
               <span
@@ -1006,7 +1017,7 @@ export function App() {
               type="button"
               onClick={handleToggleColorScheme}
               title="Switch light or dark theme"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:h-10 sm:w-10"
             >
               <span className="if-dark inline-flex items-center justify-center">
                 <Sun className="h-4 w-4 text-amber-400" aria-hidden="true" />
@@ -1022,7 +1033,7 @@ export function App() {
               type="button"
               onClick={() => setHowItWorksOpen(true)}
               aria-label="How AreaJam works"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ink)] sm:h-10 sm:w-10"
             >
               <HelpCircle className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -1053,16 +1064,16 @@ export function App() {
       {/* Opt-in IP Geolocation consent bar */}
       {!activeProfileId && state.locationConsent === 'unknown' && (
         <div className="relative z-10 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
-          <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-1.5 text-xs md:gap-3 md:px-6 md:py-2.5 xl:px-10">
-            <div className="flex items-center gap-1.5 text-[var(--ink)] md:gap-2">
+          <div className="mx-auto flex w-full max-w-[1440px] flex-nowrap items-center justify-between gap-2 px-3 py-1 text-xs md:gap-3 md:px-6 md:py-1.5 xl:px-10">
+            <div className="flex min-w-0 items-center gap-1.5 text-[var(--ink)] md:gap-2">
               <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)] md:h-4 md:w-4" aria-hidden="true" />
               <span className="hidden sm:inline">
                 Use your IP address to jump to musicians near your city automatically?
               </span>
-              <span className="sm:hidden">Detect city via IP?</span>
+              <span className="truncate sm:hidden">Detect city?</span>
             </div>
 
-            <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
               <button
                 type="button"
                 disabled={ipDetecting}
@@ -1095,7 +1106,7 @@ export function App() {
       )}
 
       {/* Full-width main container */}
-      <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-4 pt-2.5 md:px-6 md:pt-8 xl:px-10">
+      <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-3 pt-2 md:px-6 md:pt-3 xl:px-10">
         {activeProfile ? (
           <ProfilePage
             key={activeProfile.id}
@@ -1136,105 +1147,39 @@ export function App() {
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div className="space-y-8 md:space-y-12">
-                <div className="grid grid-cols-1 items-start gap-2.5 md:gap-8 lg:grid-cols-12 lg:items-center lg:gap-10">
-                  {/* Mobile single-row compact filter strip */}
-                  <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:hidden">
-                    {activePrefs.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={clearPreferences}
-                        className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
-                      >
-                        Clear ({activePrefs.length})
-                      </button>
-                    )}
-                    {prefChoices.map((pref) => {
-                      const selected = activePrefs.includes(pref);
-                      return (
-                        <button
-                          key={pref}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => togglePreference(pref)}
-                          className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
-                          style={
-                            selected
-                              ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                  borderColor: 'var(--accent)',
-                                }
-                              : {
-                                  backgroundColor: 'var(--pill-bg)',
-                                  color: 'var(--muted)',
-                                  borderColor: 'var(--border)',
-                                }
-                          }
-                        >
-                          {pref}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Desktop & Tablet Intro + How it Works + Looking For selector */}
-                  <div className="hidden space-y-6 md:block lg:col-span-7">
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
-                          {currentRegion.label}
-                          {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
-                        </span>
+              <div className="space-y-10 md:space-y-12">
+                {/* Above-the-fold spotlight discovery stage */}
+                <section aria-label="Local reel discovery spotlight" className="space-y-2.5 md:space-y-3">
+                  <div className="mx-auto w-full max-w-[1180px] space-y-2">
+                    <div className="flex flex-col gap-1.5 md:flex-row md:flex-wrap md:items-center md:justify-center md:gap-2">
+                      <div className="relative w-full shrink-0 md:w-56 lg:w-64">
+                        <label htmlFor="discover-search" className="visually-hidden">
+                          Search players, gear, genres, or neighborhoods
+                        </label>
+                        <Search
+                          className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted)]"
+                          aria-hidden="true"
+                        />
+                        <input
+                          id="discover-search"
+                          type="search"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search name, gear, genre, neighborhood..."
+                          className="w-full rounded-full border border-[var(--border)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] transition focus:border-[var(--accent)] focus:outline-none"
+                        />
                       </div>
 
-                      <h1 className="hero-title font-bold text-[var(--ink)]">
-                        Find your people. Make some noise.
-                      </h1>
-
-                      <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
-                        Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
-                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Matches your area first and shows the nearest musicians with rough distance whenever your town is quiet.
-                        </p>
-                      </div>
-                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
-                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Paste public Reels, YouTube, TikTok, or SoundCloud links and showcase your Instagram handle.
-                        </p>
-                      </div>
-                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
-                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Accept or decline invites on your terms to open a single private 1-on-1 Firestore thread.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="glass-surface space-y-3 rounded-3xl p-5">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h2 className="font-display text-base font-bold">
-                          What kind of players are you looking to jam with?
-                        </h2>
-                        {activePrefs.length > 0 && (
+                      <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:flex-wrap md:justify-center md:overflow-visible md:pb-0">
+                        {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
                           <button
                             type="button"
-                            onClick={clearPreferences}
-                            className="text-xs font-semibold text-[var(--accent-text)] hover:underline"
+                            onClick={clearAllFilters}
+                            className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)] transition hover:bg-[var(--surface-hover)]"
                           >
-                            Show all ({activePrefs.length} selected)
+                            Clear
                           </button>
                         )}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
                         {prefChoices.map((pref) => {
                           const selected = activePrefs.includes(pref);
                           return (
@@ -1243,7 +1188,7 @@ export function App() {
                               type="button"
                               aria-pressed={selected}
                               onClick={() => togglePreference(pref)}
-                              className="filter-chip-btn rounded-full border px-3.5 py-2 text-xs font-semibold"
+                              className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
                               style={
                                 selected
                                   ? {
@@ -1253,7 +1198,7 @@ export function App() {
                                     }
                                   : {
                                       backgroundColor: 'var(--pill-bg)',
-                                      color: 'var(--ink)',
+                                      color: 'var(--muted)',
                                       borderColor: 'var(--border)',
                                     }
                               }
@@ -1262,39 +1207,37 @@ export function App() {
                             </button>
                           );
                         })}
+
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={samplesEnabled}
+                          aria-label="Show sample profiles"
+                          onClick={handleToggleSamples}
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:hidden"
+                        >
+                          <span>Samples</span>
+                          <span
+                            aria-hidden="true"
+                            className="relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors"
+                            style={{
+                              backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
+                            }}
+                          >
+                            <span
+                              className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${
+                                samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
+                              }`}
+                              style={{
+                                backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
+                              }}
+                            />
+                          </span>
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
-                        }
-                        className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
-                      >
-                        <LayoutGrid className="h-4 w-4" aria-hidden="true" />
-                        <span>Browse all ({regionalPool.length})</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleTabChange('post')}
-                        className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition hover:opacity-90"
-                        style={{
-                          backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                          color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                        }}
-                      >
-                        <Video className="h-4 w-4" aria-hidden="true" />
-                        <span>Build profile &amp; clips</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Live 9:16 TikTok / Tinder card stage */}
-                  <div className="space-y-3 lg:col-span-5">
-                    <div className="no-scrollbar hidden items-center justify-start gap-2 overflow-x-auto pb-1 md:flex lg:justify-center">
+                    <div className="hidden flex-wrap items-center justify-center gap-1.5 md:flex">
                       {availableFilters.map((filter) => {
                         const active = chipFilter === filter;
                         return (
@@ -1302,7 +1245,7 @@ export function App() {
                             key={filter}
                             type="button"
                             onClick={() => handleSelectChipFilter(filter)}
-                            className="filter-chip-btn shrink-0 rounded-full border px-3 py-1 text-xs font-semibold"
+                            className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
                             style={
                               active
                                 ? {
@@ -1322,7 +1265,9 @@ export function App() {
                         );
                       })}
                     </div>
+                  </div>
 
+                  <div className="flex justify-center pt-0.5">
                     <SwipeDeck
                       cards={deckCards}
                       mode={state.mode}
@@ -1351,7 +1296,83 @@ export function App() {
                       onGoToPost={() => handleTabChange('post')}
                     />
                   </div>
-                </div>
+                </section>
+
+                {/* Editorial intro & how-it-works below the spotlight fold */}
+                <section
+                  aria-label="About AreaJam and how it works"
+                  className="border-t border-[var(--border)] pt-8 md:pt-10"
+                >
+                  <div className="mx-auto max-w-5xl space-y-6">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                          {currentRegion.label}
+                          {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
+                        </span>
+                      </div>
+
+                      <h1 className="hero-title font-bold text-[var(--ink)]">
+                        Find your people. Make some noise.
+                      </h1>
+
+                      <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
+                        Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                          Matches your area first and shows the nearest musicians with rough distance whenever your town is quiet.
+                        </p>
+                      </div>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                          Paste public Reels, YouTube, TikTok, or SoundCloud links and showcase your Instagram handle.
+                        </p>
+                      </div>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                          Accept or decline invites on your terms to open a single private 1-on-1 Firestore thread.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.matchMedia('(min-width: 768px)').matches) {
+                            browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+                          } else {
+                            handleTabChange('browse');
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                      >
+                        <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+                        <span>Browse all ({regionalPool.length})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTabChange('post')}
+                        className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition hover:opacity-90"
+                        style={{
+                          backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                          color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                        }}
+                      >
+                        <Video className="h-4 w-4" aria-hidden="true" />
+                        <span>Build profile &amp; clips</span>
+                      </button>
+                    </div>
+                  </div>
+                </section>
 
                 <div
                   ref={browseSectionRef}
@@ -1366,6 +1387,9 @@ export function App() {
                     showingNearestFallback={showingNearestFallback}
                     currentUserUid={user?.uid}
                     inviteByTargetUid={inviteByTargetUid}
+                    searchQuery={searchQuery}
+                    onSearchQueryChange={setSearchQuery}
+                    hideSearch
                     onInspect={setDetailListing}
                     onOpenProfile={handleOpenProfile}
                     onSwipe={handleSwipe}
@@ -1386,10 +1410,10 @@ export function App() {
                         ? 'Filter by players you want to match with'
                         : 'Filter by gig or band type'}
                     </p>
-                    {activePrefs.length > 0 && (
+                    {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
                       <button
                         type="button"
-                        onClick={clearPreferences}
+                        onClick={clearAllFilters}
                         className="text-xs font-semibold text-[var(--accent-text)]"
                       >
                         Clear filters
@@ -1436,6 +1460,8 @@ export function App() {
                   showingNearestFallback={showingNearestFallback}
                   currentUserUid={user?.uid}
                   inviteByTargetUid={inviteByTargetUid}
+                  searchQuery={searchQuery}
+                  onSearchQueryChange={setSearchQuery}
                   onInspect={setDetailListing}
                   onOpenProfile={handleOpenProfile}
                   onSwipe={handleSwipe}

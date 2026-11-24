@@ -18,6 +18,9 @@ interface BrowseGridProps {
   showingNearestFallback?: boolean;
   currentUserUid?: string;
   inviteByTargetUid?: Record<string, JamInvite>;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
+  hideSearch?: boolean;
   onInspect: (listing: Listing) => void;
   onOpenProfile: (listing: Listing) => void;
   onSwipe: (listing: Listing, decision: SwipeDecision) => void;
@@ -35,13 +38,18 @@ export function BrowseGrid({
   showingNearestFallback = false,
   currentUserUid,
   inviteByTargetUid,
+  searchQuery,
+  onSearchQueryChange,
+  hideSearch = false,
   onOpenProfile,
   onInvite,
   onOpenInvites,
   onWatchInReels,
   onGoToPost,
 }: BrowseGridProps) {
-  const [query, setQuery] = useState('');
+  const [localQuery, setLocalQuery] = useState('');
+  const query = searchQuery ?? localQuery;
+  const setQuery = onSearchQueryChange ?? setLocalQuery;
   const [playingId, setPlayingId] = useState<string | null>(() => getPlayingListingId());
 
   useEffect(() => {
@@ -93,35 +101,39 @@ export function BrowseGrid({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative min-w-[17.5rem] flex-1 sm:w-[21rem] sm:flex-initial">
-            <label htmlFor="browse-search" className="visually-hidden">
-              Search players, instruments, gear, or neighborhoods
-            </label>
-            <Search
-              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
-              aria-hidden="true"
-            />
-            <input
-              id="browse-search"
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search instruments, gear, genre..."
-              className="field-control pl-10"
-            />
-          </div>
+        {(!hideSearch || onWatchInReels) && (
+          <div className="flex flex-wrap items-center gap-2.5">
+            {!hideSearch && (
+              <div className="relative min-w-[17.5rem] flex-1 sm:w-[21rem] sm:flex-initial">
+                <label htmlFor="browse-search" className="visually-hidden">
+                  Search players, instruments, gear, or neighborhoods
+                </label>
+                <Search
+                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
+                  aria-hidden="true"
+                />
+                <input
+                  id="browse-search"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search instruments, gear, genre..."
+                  className="field-control pl-10"
+                />
+              </div>
+            )}
 
-          {onWatchInReels && (
-            <button
-              type="button"
-              onClick={onWatchInReels}
-              className="shrink-0 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
-            >
-              Open clip reels
-            </button>
-          )}
-        </div>
+            {onWatchInReels && (
+              <button
+                type="button"
+                onClick={onWatchInReels}
+                className="shrink-0 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)]"
+              >
+                Open clip reels
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {filtered.length === 0 ? (
