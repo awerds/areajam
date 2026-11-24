@@ -914,10 +914,27 @@ html {
 
 .hero-title {
   font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-  font-size: clamp(1.85rem, 1.2rem + 2vw, 3.25rem);
-  line-height: 1.04;
-  letter-spacing: -0.03em;
+  font-size: clamp(2rem, 1.35rem + 2.3vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 800;
   text-wrap: balance;
+}
+
+.hero-ambient-stage {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(62% 72% at 6% 18%, var(--orb-jam), transparent 68%),
+    radial-gradient(58% 72% at 94% 24%, var(--orb-gigs), transparent 68%),
+    radial-gradient(60% 45% at 50% 96%, var(--orb-sec-a), transparent 72%);
+}
+
+.panoramic-ribbon-clip-desktop {
+  clip-path: url(#areajam-hero-arc-desktop);
+}
+
+.panoramic-ribbon-clip-mobile {
+  clip-path: url(#areajam-hero-arc-mobile);
 }
 
 .safe-top {
