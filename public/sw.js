@@ -1,4 +1,4 @@
-const CACHE_NAME = 'areajam-shell-v38';
+const CACHE_NAME = 'areajam-shell-v39';
 const CORE_ASSETS = [
   './',
   './index.html',

@@ -122,7 +122,7 @@ export function PanoramicHero({
         </button>
 
         <h1 className="hero-title mt-2.5 font-bold text-[var(--ink)] sm:mt-3">
-          Find your people.
+          Find your tribe.
           <br />
           Make a joyful noise.
         </h1>
