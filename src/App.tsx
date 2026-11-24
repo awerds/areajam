@@ -1390,7 +1390,7 @@ export function App() {
                     </div>
 
                     <h1 className="hero-title font-bold text-[var(--ink)]">
-                      Find your people. Make some noise.
+                      Find your people. Make a joyful noise.
                     </h1>
 
                     <p className="max-w-xl text-sm leading-relaxed text-[var(--muted)]">

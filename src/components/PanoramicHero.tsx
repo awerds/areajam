@@ -124,7 +124,7 @@ export function PanoramicHero({
         <h1 className="hero-title mt-2.5 font-bold text-[var(--ink)] sm:mt-3">
           Find your people.
           <br />
-          Make some noise.
+          Make a joyful noise.
         </h1>
 
         <p className="mx-auto mt-2 max-w-xl text-xs leading-relaxed text-[var(--muted)] sm:mt-2.5 sm:text-sm">
