@@ -501,7 +501,6 @@ export function SwipeDeck({
           className={`isolate absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:rounded-[2rem] ${
             topIsEmbed ? 'bg-[var(--surface-solid)]' : 'bg-[#10131d]'
           }`}
-          style={{ transformStyle: 'preserve-3d' }}
         >
           {/* Media stage (full-bleed vertical for video/portrait, 2-zone split for iframe embeds) */}
           <div className={`relative overflow-hidden ${topIsEmbed ? 'min-h-0 flex-1' : 'h-full w-full'}`}>
