@@ -839,8 +839,8 @@ export function SwipeDeck({
         </button>
       </div>
 
-      <p className="mt-1.5 hidden text-xs text-[var(--muted)] md:block">
-        Arrow keys to swipe, Up for full page, Space or M for sound, Z to undo
+      <p className="mt-1.5 hidden whitespace-nowrap text-center text-xs text-[var(--muted)] md:block">
+        Arrows to swipe, Up for page, Space/M sound, Z undo
       </p>
     </div>
   );

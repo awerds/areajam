@@ -1147,7 +1147,7 @@ export function App() {
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div className="space-y-10 md:space-y-12">
+              <div className="space-y-16 md:space-y-12">
                 {/* Above-the-fold spotlight discovery stage */}
                 <section aria-label="Local reel discovery spotlight" className="space-y-2.5 md:space-y-3">
                   <div className="mx-auto w-full max-w-[1180px] space-y-2">
@@ -1165,7 +1165,7 @@ export function App() {
                           type="search"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search name, gear, genre, neighborhood..."
+                          placeholder="Search name, gear, genre..."
                           className="w-full rounded-full border border-[var(--border)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] transition focus:border-[var(--accent)] focus:outline-none"
                         />
                       </div>
