@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AlertCircle,
   ArrowLeft,
   Check,
   ChevronRight,
@@ -16,7 +17,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
-import { subscribeThreadMessages } from '../lib/firestorePilot';
+import { ensureThreadForAcceptedInvite, subscribeThreadMessages } from '../lib/firestorePilot';
 import type {
   AuthUser,
   InboxFolder,
@@ -178,9 +179,14 @@ export function MatchesView({
   const [sending, setSending] = useState(false);
   const [busyInviteId, setBusyInviteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [actionError, setActionError] = useState<{ scope: 'list' | 'chat'; text: string } | null>(
+    null
+  );
+  const [threadSubNonce, setThreadSubNonce] = useState(0);
 
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const healedThreadsRef = useRef<Set<string>>(new Set());
   const tabButtonRefs = useRef<Record<InboxFolder, HTMLButtonElement | null>>({
     inbox: null,
     requests: null,
@@ -199,12 +205,55 @@ export function MatchesView({
       setMessages([]);
       return;
     }
-    return subscribeThreadMessages(selectedThread.id, setMessages);
-  }, [user?.uid, selectedThread?.id]);
+    const matchingAccepted = invites.find(
+      (i) => i.threadId === selectedThread.id && i.status === 'accepted'
+    );
+    let cancelled = false;
+    const unsub = subscribeThreadMessages(
+      selectedThread.id,
+      setMessages,
+      (err) => {
+        if (cancelled) return;
+        if (matchingAccepted && !healedThreadsRef.current.has(selectedThread.id)) {
+          healedThreadsRef.current.add(selectedThread.id);
+          void ensureThreadForAcceptedInvite(matchingAccepted, user)
+            .then(() => {
+              if (!cancelled) setThreadSubNonce((n) => n + 1);
+            })
+            .catch(() => {
+              if (!cancelled) {
+                setActionError({
+                  scope: 'chat',
+                  text: 'Could not open this conversation yet. Try sending a message or reloading.',
+                });
+              }
+            });
+          return;
+        }
+        console.error('[AreaJam] subscribeThreadMessages error:', err);
+        setActionError({
+          scope: 'chat',
+          text: 'Could not sync message history right now.',
+        });
+      }
+    );
+    return () => {
+      cancelled = true;
+      unsub();
+    };
+  }, [user?.uid, selectedThread?.id, threadSubNonce]);
 
   useEffect(() => {
     setDraft('');
+    setActionError(null);
+    if (selectedThread && window.matchMedia('(min-width: 1024px)').matches) {
+      composerRef.current?.focus();
+    }
   }, [selectedThread?.id]);
+
+  useEffect(() => {
+    setActionError(null);
+  }, [activeFolder]);
 
   useEffect(() => {
     if (!selectedThread) return;
@@ -368,18 +417,38 @@ export function MatchesView({
   }
 
   const handleInviteDecision = async (invite: JamInvite, decision: 'accepted' | 'declined') => {
+    setActionError(null);
     setBusyInviteId(invite.id);
     try {
       await onRespondInvite(invite, decision);
+    } catch (err) {
+      console.error('[AreaJam] respond invite failed:', err);
+      setActionError({
+        scope: 'list',
+        text:
+          err instanceof Error && err.message
+            ? err.message
+            : 'Could not update this jam request. Try again.',
+      });
     } finally {
       setBusyInviteId(null);
     }
   };
 
   const handleInviteCancel = async (inviteId: string) => {
+    setActionError(null);
     setBusyInviteId(inviteId);
     try {
       await onCancelInvite(inviteId);
+    } catch (err) {
+      console.error('[AreaJam] cancel invite failed:', err);
+      setActionError({
+        scope: 'list',
+        text:
+          err instanceof Error && err.message
+            ? err.message
+            : 'Could not cancel request. Try again.',
+      });
     } finally {
       setBusyInviteId(null);
     }
@@ -410,10 +479,20 @@ export function MatchesView({
     if (!selectedThread) return;
     const text = draft.trim();
     if (!text || sending) return;
+    setActionError(null);
     setSending(true);
     try {
       await onSendMessage(selectedThread.id, text);
       setDraft('');
+    } catch (err) {
+      console.error('[AreaJam] send failed:', err);
+      setActionError({
+        scope: 'chat',
+        text:
+          err instanceof Error && err.message
+            ? err.message
+            : 'Message failed to send. Tap send to retry.',
+      });
     } finally {
       setSending(false);
     }
@@ -654,6 +733,26 @@ export function MatchesView({
         </div>
 
         {/* Folder panels grid (no padding/border/margin on role="tabpanel" itself) */}
+        {actionError?.scope === 'list' && (
+          <div
+            role="alert"
+            className="mx-3 mt-2.5 flex items-start justify-between gap-2 rounded-xl border border-[var(--err)] bg-[var(--err-bg)] px-3 py-2 text-xs text-[var(--err)]"
+          >
+            <span className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>{actionError.text}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              aria-label="Dismiss error"
+              className="shrink-0 rounded-full p-0.5 hover:opacity-80"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
         <div className="grid min-h-0 flex-1">
           {/* Inbox tabpanel */}
           <div
@@ -1154,7 +1253,10 @@ export function MatchesView({
                   &ldquo;{selectedMeta.matchingInvite.note}&rdquo;
                 </p>
               )}
-              <p className="mt-1 text-[10px] text-[var(--muted)]">
+              <p className="mt-1 text-[11px] font-medium text-[var(--muted)]">
+                Matched — send messages anytime
+              </p>
+              <p className="mt-0.5 text-[10px] text-[var(--muted)]">
                 {formatMessageTime(selectedMeta.matchingInvite?.createdAt ?? selectedThread.createdAt)}
               </p>
             </div>
@@ -1223,6 +1325,25 @@ export function MatchesView({
           </div>
 
           {/* IME-safe auto-growing composer */}
+          {actionError?.scope === 'chat' && (
+            <div
+              role="alert"
+              className="mx-3.5 mt-2 flex items-start justify-between gap-2 rounded-xl border border-[var(--err)] bg-[var(--err-bg)] px-3 py-2 text-xs text-[var(--err)]"
+            >
+              <span className="flex items-start gap-2">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>{actionError.text}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setActionError(null)}
+                aria-label="Dismiss error"
+                className="shrink-0 rounded-full p-0.5 hover:opacity-80"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          )}
           <form
             onSubmit={(e) => void handleSend(e)}
             className="flex items-end gap-2 border-t border-[var(--border)] bg-[var(--surface-solid)] p-3.5"

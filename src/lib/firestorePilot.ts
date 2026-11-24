@@ -204,20 +204,21 @@ export function subscribePublishedProfiles(
   (async () => {
     try {
       const db = await getFirestoreDb();
-      const { collection, limit, onSnapshot, orderBy, query, where } = await import(
+      const { collection, limit, onSnapshot, query, where } = await import(
         'firebase/firestore'
       );
       if (cancelled) return;
       const q = query(
         collection(db, 'profiles'),
         where('isPublished', '==', true),
-        orderBy('createdAt', 'desc'),
         limit(200)
       );
       unsub = onSnapshot(
         q,
         (snap) => {
-          const list = snap.docs.map((d) => normalizeRemoteProfile(d.id, d.data()));
+          const list = snap.docs
+            .map((d) => normalizeRemoteProfile(d.id, d.data()))
+            .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
           onData(list);
         },
         (err) => {
@@ -334,6 +335,75 @@ export async function deleteProfileWallNote(profileId: string, noteId: string): 
   await deleteDoc(doc(db, 'profiles', profileId, 'wallNotes', noteId));
 }
 
+export function buildThreadFromInvite(
+  invite: JamInvite,
+  currentUser?: AuthUser,
+  overrideTimeMs?: number
+): PrivateThread {
+  const fromName =
+    currentUser && currentUser.uid === invite.fromUid
+      ? currentUser.displayName.trim().slice(0, 64) || invite.fromName
+      : invite.fromName.trim().slice(0, 64) || 'Musician';
+  const toName =
+    currentUser && currentUser.uid === invite.toUid
+      ? currentUser.displayName.trim().slice(0, 64) || invite.toName
+      : invite.toName.trim().slice(0, 64) || 'Musician';
+  const timestamp = Math.floor(overrideTimeMs ?? invite.updatedAt ?? invite.createdAt ?? Date.now());
+  const createdAt = Math.floor(overrideTimeMs ?? invite.createdAt ?? timestamp);
+
+  return {
+    id: invite.threadId,
+    participants: sortedParticipants(invite.participants[0], invite.participants[1]),
+    participantNames: {
+      [invite.fromUid]: fromName,
+      [invite.toUid]: toName,
+    },
+    profileId: invite.targetProfileId.slice(0, 128),
+    profileTitle: invite.targetProfileTitle.slice(0, 128),
+    regionId: invite.regionId.slice(0, 64),
+    lastMessageText: invite.note.slice(0, 500),
+    lastMessageAt: timestamp,
+    createdAt,
+  };
+}
+
+function serializeThreadDoc(thread: PrivateThread): Omit<PrivateThread, 'id'> {
+  return {
+    participants: thread.participants,
+    participantNames: thread.participantNames,
+    profileId: thread.profileId,
+    profileTitle: thread.profileTitle,
+    regionId: thread.regionId,
+    lastMessageText: thread.lastMessageText,
+    lastMessageAt: Math.floor(thread.lastMessageAt),
+    createdAt: Math.floor(thread.createdAt),
+  };
+}
+
+export async function ensureThreadForAcceptedInvite(
+  invite: JamInvite,
+  currentUser: AuthUser
+): Promise<PrivateThread> {
+  const db = await getFirestoreDb();
+  const { doc, getDoc, setDoc } = await import('firebase/firestore');
+  const threadRef = doc(db, 'threads', invite.threadId);
+  const built = buildThreadFromInvite(invite, currentUser);
+
+  try {
+    await setDoc(threadRef, serializeThreadDoc(built));
+    return built;
+  } catch (err) {
+    const snap = await getDoc(threadRef);
+    if (snap.exists()) {
+      return {
+        id: snap.id,
+        ...(snap.data() as Omit<PrivateThread, 'id'>),
+      };
+    }
+    throw err;
+  }
+}
+
 export function subscribeMyInvites(
   uid: string,
   onData: (invites: JamInvite[]) => void,
@@ -345,22 +415,23 @@ export function subscribeMyInvites(
   (async () => {
     try {
       const db = await getFirestoreDb();
-      const { collection, onSnapshot, orderBy, query, where } = await import(
+      const { collection, onSnapshot, query, where } = await import(
         'firebase/firestore'
       );
       if (cancelled) return;
       const q = query(
         collection(db, 'jamInvites'),
-        where('participants', 'array-contains', uid),
-        orderBy('updatedAt', 'desc')
+        where('participants', 'array-contains', uid)
       );
       unsub = onSnapshot(
         q,
         (snap) => {
-          const items = snap.docs.map((d) => ({
-            id: d.id,
-            ...(d.data() as Omit<JamInvite, 'id'>),
-          }));
+          const items = snap.docs
+            .map((d) => ({
+              id: d.id,
+              ...(d.data() as Omit<JamInvite, 'id'>),
+            }))
+            .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
           onData(items);
         },
         (err) => onError?.(err)
@@ -380,11 +451,19 @@ export async function sendJamInvite(params: {
   fromUser: AuthUser;
   targetListing: Listing;
   note: string;
+  existingInvite?: JamInvite;
 }): Promise<'sent' | 'already-accepted' | 'already-pending' | 'incoming-pending'> {
-  const { fromUser, targetListing, note } = params;
+  const { fromUser, targetListing, note, existingInvite } = params;
   const toUid = targetListing.ownerUid;
   if (!toUid || toUid === fromUser.uid) {
     throw new Error('Cannot send a jam invite without a recipient account.');
+  }
+
+  if (existingInvite?.status === 'accepted') {
+    return 'already-accepted';
+  }
+  if (existingInvite?.status === 'pending') {
+    return existingInvite.fromUid === toUid ? 'incoming-pending' : 'already-pending';
   }
 
   const db = await getFirestoreDb();
@@ -392,37 +471,12 @@ export async function sendJamInvite(params: {
   const inviteId = pairIdFor(fromUser.uid, toUid);
   const participants = sortedParticipants(fromUser.uid, toUid);
   const inviteRef = doc(db, 'jamInvites', inviteId);
-  const existing = await getDoc(inviteRef);
   const now = Math.floor(Date.now());
   const trimmedNote = note.trim().slice(0, 280);
   const fromName = fromUser.displayName.trim().slice(0, 64) || 'Musician';
   const toName = (targetListing.ownerName || targetListing.title).trim().slice(0, 64) || 'Musician';
 
-  if (existing.exists()) {
-    const prev = existing.data() as Omit<JamInvite, 'id'>;
-    if (prev.status === 'accepted') {
-      return 'already-accepted';
-    }
-    if (prev.status === 'pending') {
-      return prev.fromUid === toUid ? 'incoming-pending' : 'already-pending';
-    }
-    await updateDoc(inviteRef, {
-      fromUid: fromUser.uid,
-      toUid,
-      fromName,
-      toName,
-      targetProfileId: targetListing.id,
-      targetProfileTitle: targetListing.title.trim().slice(0, 64),
-      regionId: targetListing.regionId,
-      note: trimmedNote,
-      status: 'pending',
-      updatedAt: now,
-    });
-    return 'sent';
-  }
-
-  await setDoc(inviteRef, {
-    participants,
+  const reinviteFields = {
     fromUid: fromUser.uid,
     toUid,
     fromName,
@@ -431,21 +485,47 @@ export async function sendJamInvite(params: {
     targetProfileTitle: targetListing.title.trim().slice(0, 64),
     regionId: targetListing.regionId,
     note: trimmedNote,
-    status: 'pending',
-    threadId: inviteId,
-    createdAt: now,
+    status: 'pending' as const,
     updatedAt: now,
-  });
+  };
 
-  return 'sent';
+  if (existingInvite) {
+    await updateDoc(inviteRef, reinviteFields);
+    return 'sent';
+  }
+
+  try {
+    await setDoc(inviteRef, {
+      participants,
+      ...reinviteFields,
+      threadId: inviteId,
+      createdAt: now,
+    });
+    return 'sent';
+  } catch (err) {
+    const snap = await getDoc(inviteRef);
+    if (snap.exists()) {
+      const prev = snap.data() as Omit<JamInvite, 'id'>;
+      if (prev.status === 'accepted') {
+        return 'already-accepted';
+      }
+      if (prev.status === 'pending') {
+        return prev.fromUid === toUid ? 'incoming-pending' : 'already-pending';
+      }
+      await updateDoc(inviteRef, reinviteFields);
+      return 'sent';
+    }
+    throw err;
+  }
 }
 
 export async function respondToJamInvite(params: {
   invite: JamInvite;
   responderUser: AuthUser;
   decision: 'accepted' | 'declined';
-}): Promise<string | null> {
-  const { invite, responderUser, decision } = params;
+  existingThread?: PrivateThread;
+}): Promise<PrivateThread | null> {
+  const { invite, responderUser, decision, existingThread } = params;
   const db = await getFirestoreDb();
   const { doc, getDoc, updateDoc, writeBatch } = await import('firebase/firestore');
   const inviteRef = doc(db, 'jamInvites', invite.id);
@@ -459,36 +539,48 @@ export async function respondToJamInvite(params: {
     return null;
   }
 
-  const threadRef = doc(db, 'threads', invite.threadId);
-  const existingThread = await getDoc(threadRef);
-  if (existingThread.exists()) {
+  if (invite.status === 'accepted') {
+    return existingThread ?? (await ensureThreadForAcceptedInvite(invite, responderUser));
+  }
+
+  if (existingThread) {
     await updateDoc(inviteRef, {
       status: 'accepted',
       updatedAt: now,
     });
-    return invite.threadId;
+    return existingThread;
   }
 
-  const batch = writeBatch(db);
-  batch.update(inviteRef, {
-    status: 'accepted',
-    updatedAt: now,
-  });
-  batch.set(threadRef, {
-    participants: invite.participants,
-    participantNames: {
-      [invite.fromUid]: invite.fromName,
-      [invite.toUid]: responderUser.displayName.trim().slice(0, 64) || invite.toName,
-    },
-    profileId: invite.targetProfileId,
-    profileTitle: invite.targetProfileTitle,
-    regionId: invite.regionId,
-    lastMessageText: invite.note.slice(0, 500),
-    lastMessageAt: now,
-    createdAt: now,
-  });
-  await batch.commit();
-  return invite.threadId;
+  const threadRef = doc(db, 'threads', invite.threadId);
+  const builtThread = buildThreadFromInvite(invite, responderUser, now);
+
+  try {
+    const batch = writeBatch(db);
+    batch.update(inviteRef, {
+      status: 'accepted',
+      updatedAt: now,
+    });
+    batch.set(threadRef, serializeThreadDoc(builtThread));
+    await batch.commit();
+    return builtThread;
+  } catch (err) {
+    await updateDoc(inviteRef, {
+      status: 'accepted',
+      updatedAt: now,
+    });
+    try {
+      const snap = await getDoc(threadRef);
+      if (snap.exists()) {
+        return {
+          id: snap.id,
+          ...(snap.data() as Omit<PrivateThread, 'id'>),
+        };
+      }
+    } catch {
+      // Fallback to deterministic thread object since invite is now accepted.
+    }
+    return builtThread;
+  }
 }
 
 export async function cancelJamInvite(inviteId: string): Promise<void> {
@@ -511,22 +603,23 @@ export function subscribeMyThreads(
   (async () => {
     try {
       const db = await getFirestoreDb();
-      const { collection, onSnapshot, orderBy, query, where } = await import(
+      const { collection, onSnapshot, query, where } = await import(
         'firebase/firestore'
       );
       if (cancelled) return;
       const q = query(
         collection(db, 'threads'),
-        where('participants', 'array-contains', uid),
-        orderBy('lastMessageAt', 'desc')
+        where('participants', 'array-contains', uid)
       );
       unsub = onSnapshot(
         q,
         (snap) => {
-          const list = snap.docs.map((d) => ({
-            id: d.id,
-            ...(d.data() as Omit<PrivateThread, 'id'>),
-          }));
+          const list = snap.docs
+            .map((d) => ({
+              id: d.id,
+              ...(d.data() as Omit<PrivateThread, 'id'>),
+            }))
+            .sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0));
           onData(list);
         },
         (err) => onError?.(err)
@@ -588,29 +681,44 @@ export async function sendThreadMessage(params: {
   threadId: string;
   user: AuthUser;
   text: string;
+  acceptedInvite?: JamInvite;
 }): Promise<void> {
-  const { threadId, user, text } = params;
+  const { threadId, user, text, acceptedInvite } = params;
   const trimmed = text.trim().slice(0, 1000);
   if (!trimmed) return;
 
   const db = await getFirestoreDb();
   const { collection, doc, writeBatch } = await import('firebase/firestore');
-  const now = Math.floor(Date.now());
-  const msgRef = doc(collection(db, 'threads', threadId, 'messages'));
-  const threadRef = doc(db, 'threads', threadId);
 
-  const batch = writeBatch(db);
-  batch.set(msgRef, {
-    senderUid: user.uid,
-    senderName: user.displayName.trim().slice(0, 64) || 'Musician',
-    text: trimmed,
-    sentAt: now,
-  });
-  batch.update(threadRef, {
-    lastMessageText: trimmed.slice(0, 500),
-    lastMessageAt: now,
-  });
-  await batch.commit();
+  const commitMessage = async () => {
+    const now = Math.floor(Date.now());
+    const msgRef = doc(collection(db, 'threads', threadId, 'messages'));
+    const threadRef = doc(db, 'threads', threadId);
+
+    const batch = writeBatch(db);
+    batch.set(msgRef, {
+      senderUid: user.uid,
+      senderName: user.displayName.trim().slice(0, 64) || 'Musician',
+      text: trimmed,
+      sentAt: now,
+    });
+    batch.update(threadRef, {
+      lastMessageText: trimmed.slice(0, 500),
+      lastMessageAt: now,
+    });
+    await batch.commit();
+  };
+
+  try {
+    await commitMessage();
+  } catch (err) {
+    if (acceptedInvite?.status === 'accepted') {
+      await ensureThreadForAcceptedInvite(acceptedInvite, user);
+      await commitMessage();
+      return;
+    }
+    throw err;
+  }
 }
 
 export function subscribeMyBlocks(

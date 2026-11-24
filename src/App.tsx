@@ -35,9 +35,11 @@ import { SAMPLE_PROFILES } from './data/sampleProfiles';
 import {
   addProfileWallNote,
   blockUser,
+  buildThreadFromInvite,
   cancelJamInvite,
   deleteProfileWallNote,
   deleteSharedProfile,
+  ensureThreadForAcceptedInvite,
   fetchProfileById,
   respondToJamInvite,
   saveSharedProfile,
@@ -201,7 +203,9 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    return subscribePublishedProfiles(setRemoteProfiles, () => { });
+    return subscribePublishedProfiles(setRemoteProfiles, (err) => {
+      console.error('[AreaJam] profiles subscription error:', err);
+    });
   }, []);
 
   useEffect(() => {
@@ -211,9 +215,15 @@ export function App() {
       setBlocks([]);
       return;
     }
-    const unsubInvites = subscribeMyInvites(user.uid, setInvites, () => { });
-    const unsubThreads = subscribeMyThreads(user.uid, setThreads, () => { });
-    const unsubBlocks = subscribeMyBlocks(user.uid, setBlocks, () => { });
+    const unsubInvites = subscribeMyInvites(user.uid, setInvites, (err) => {
+      console.error('[AreaJam] invites subscription error:', err);
+    });
+    const unsubThreads = subscribeMyThreads(user.uid, setThreads, (err) => {
+      console.error('[AreaJam] threads subscription error:', err);
+    });
+    const unsubBlocks = subscribeMyBlocks(user.uid, setBlocks, (err) => {
+      console.error('[AreaJam] blocks subscription error:', err);
+    });
     return () => {
       unsubInvites();
       unsubThreads();
@@ -283,6 +293,21 @@ export function App() {
     () => threads.filter((t) => t.participants.every((uid) => !blockedUidSet.has(uid))),
     [threads, blockedUidSet]
   );
+
+  const effectiveThreads = useMemo(() => {
+    const byId = new Map<string, PrivateThread>();
+    for (const thread of visibleThreads) {
+      byId.set(thread.id, thread);
+    }
+    for (const inv of visibleInvites) {
+      if (inv.status === 'accepted' && !byId.has(inv.threadId)) {
+        byId.set(inv.threadId, buildThreadFromInvite(inv, user ?? undefined));
+      }
+    }
+    return Array.from(byId.values()).sort(
+      (a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0)
+    );
+  }, [visibleThreads, visibleInvites, user]);
 
   const incomingPendingCount = useMemo(
     () =>
@@ -760,12 +785,32 @@ export function App() {
     if (threadId) {
       setInboxFolder('inbox');
       setSelectedThreadId(threadId);
+      if (user && !visibleThreads.some((t) => t.id === threadId)) {
+        const acceptedInvite = visibleInvites.find(
+          (inv) => inv.threadId === threadId && inv.status === 'accepted'
+        );
+        if (acceptedInvite) {
+          void ensureThreadForAcceptedInvite(acceptedInvite, user);
+        }
+      }
     } else if (folder) {
       setInboxFolder(folder);
       setSelectedThreadId(null);
     } else {
-      setInboxFolder(incomingPendingCount > 0 && visibleThreads.length === 0 ? 'requests' : 'inbox');
+      setInboxFolder(incomingPendingCount > 0 && effectiveThreads.length === 0 ? 'requests' : 'inbox');
       setSelectedThreadId(null);
+    }
+  };
+
+  const handleSelectInboxThread = (threadId: string | null) => {
+    setSelectedThreadId(threadId);
+    if (threadId && user && !visibleThreads.some((t) => t.id === threadId)) {
+      const acceptedInvite = visibleInvites.find(
+        (inv) => inv.threadId === threadId && inv.status === 'accepted'
+      );
+      if (acceptedInvite) {
+        void ensureThreadForAcceptedInvite(acceptedInvite, user);
+      }
     }
   };
 
@@ -799,13 +844,16 @@ export function App() {
 
   const handleSubmitInvite = async (listing: Listing, note: string) => {
     if (!user) return;
-    const outcome = await sendJamInvite({ fromUser: user, targetListing: listing, note });
+    const existingInvite = listing.ownerUid ? inviteByTargetUid[listing.ownerUid] : undefined;
+    const outcome = await sendJamInvite({
+      fromUser: user,
+      targetListing: listing,
+      note,
+      existingInvite,
+    });
     if (outcome === 'already-accepted') {
       showToast(`You are already matched with ${listing.title} — opening Messages.`);
-      handleOpenInvites(
-        listing.ownerUid ? inviteByTargetUid[listing.ownerUid]?.threadId : undefined,
-        'inbox'
-      );
+      handleOpenInvites(existingInvite?.threadId, 'inbox');
     } else if (outcome === 'incoming-pending') {
       showToast(`${listing.title} already sent you a jam request — check Requests!`);
       handleOpenInvites(undefined, 'requests');
@@ -821,10 +869,17 @@ export function App() {
     decision: 'accepted' | 'declined'
   ) => {
     if (!user) return;
-    const openedThreadId = await respondToJamInvite({ invite, responderUser: user, decision });
-    if (decision === 'accepted' && openedThreadId) {
+    const existingThread = visibleThreads.find((t) => t.id === invite.threadId);
+    const openedThread = await respondToJamInvite({
+      invite,
+      responderUser: user,
+      decision,
+      existingThread,
+    });
+    if (decision === 'accepted' && openedThread) {
+      setThreads((prev) => [openedThread, ...prev.filter((t) => t.id !== openedThread.id)]);
       setInboxFolder('inbox');
-      setSelectedThreadId(openedThreadId);
+      setSelectedThreadId(openedThread.id);
       showToast(`Matched with ${invite.fromName}! You can now message directly.`);
     } else {
       showToast(`Declined request from ${invite.fromName}.`);
@@ -842,7 +897,16 @@ export function App() {
       setAuthModalOpen(true);
       return;
     }
-    await sendThreadMessage({ threadId, user, text });
+    const acceptedInvite = visibleInvites.find(
+      (inv) => inv.threadId === threadId && inv.status === 'accepted'
+    );
+    try {
+      await sendThreadMessage({ threadId, user, text, acceptedInvite });
+    } catch (err) {
+      console.error('[AreaJam] sendThreadMessage failed:', err);
+      showToast('Could not send message. Please try again.');
+      throw err;
+    }
   };
 
   const handleSafetyAction = (target: SafetyTarget) => {
@@ -1028,7 +1092,7 @@ export function App() {
                   item.id === 'matches'
                     ? incomingPendingCount > 0
                       ? incomingPendingCount
-                      : visibleThreads.length
+                      : effectiveThreads.length
                     : 0;
                 const msgHasRequests = item.id === 'matches' && incomingPendingCount > 0;
                 return (
@@ -1676,13 +1740,13 @@ export function App() {
               <MatchesView
                 user={user}
                 invites={visibleInvites}
-                threads={visibleThreads}
+                threads={effectiveThreads}
                 listings={allListings}
                 regions={allRegions}
                 activeFolder={inboxFolder}
                 onSelectFolder={setInboxFolder}
                 selectedThreadId={selectedThreadId}
-                onSelectThread={setSelectedThreadId}
+                onSelectThread={handleSelectInboxThread}
                 onRespondInvite={handleRespondInvite}
                 onCancelInvite={handleCancelInvite}
                 onSendMessage={handleSendMessage}
@@ -1770,7 +1834,7 @@ export function App() {
           >
             <span className="relative">
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              {(incomingPendingCount > 0 || visibleThreads.length > 0) && (
+              {(incomingPendingCount > 0 || effectiveThreads.length > 0) && (
                 <span
                   className="absolute -right-2.5 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
                   style={
@@ -1779,7 +1843,7 @@ export function App() {
                       : { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
                   }
                 >
-                  {incomingPendingCount > 0 ? incomingPendingCount : visibleThreads.length}
+                  {incomingPendingCount > 0 ? incomingPendingCount : effectiveThreads.length}
                 </span>
               )}
             </span>

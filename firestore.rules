@@ -151,6 +151,15 @@ service cloud.firestore {
              participants[0] < participants[1];
     }
 
+    function pairContainsUser(docId, uid) {
+      let parts = docId.split('__');
+      return parts.size() == 2 &&
+             isBoundedString(parts[0], 1, 128) &&
+             isBoundedString(parts[1], 1, 128) &&
+             parts[0] != parts[1] &&
+             uid in parts;
+    }
+
     // ===============================================================
     // Profile Domain Validators
     // ===============================================================
@@ -499,7 +508,11 @@ service cloud.firestore {
 
     // Consent-gated jam/gig invites keyed deterministically by pairId(fromUid, toUid).
     match /jamInvites/{inviteId} {
-      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow get: if isSignedIn() &&
+                    ((resource == null && pairContainsUser(inviteId, request.auth.uid)) ||
+                     (resource != null && request.auth.uid in resource.data.participants));
+
+      allow list: if isSignedIn() && request.auth.uid in resource.data.participants;
 
       allow create: if isSignedIn() &&
                        isValidInvite(request.resource.data, inviteId) &&
@@ -520,7 +533,11 @@ service cloud.firestore {
 
     // 1:1 messaging threads unlocked only once the matching jamInvite is accepted.
     match /threads/{threadId} {
-      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow get: if isSignedIn() &&
+                    ((resource == null && pairContainsUser(threadId, request.auth.uid)) ||
+                     (resource != null && request.auth.uid in resource.data.participants));
+
+      allow list: if isSignedIn() && request.auth.uid in resource.data.participants;
 
       allow create: if isSignedIn() &&
                        isValidThread(request.resource.data, threadId) &&
