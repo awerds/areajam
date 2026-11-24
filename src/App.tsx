@@ -1220,8 +1220,8 @@ export function App() {
                 ref={browseSectionRef}
                 className={
                   discoverView === 'deck'
-                    ? 'space-y-4 md:space-y-8 md:pt-4'
-                    : 'hidden space-y-8 pt-6 md:block md:space-y-10'
+                    ? 'scroll-mt-20 space-y-4 md:space-y-8 md:pt-4'
+                    : 'scroll-mt-20 hidden space-y-8 pt-6 md:block md:space-y-10'
                 }
               >
                 {/* Mobile Swipe Deck single-row bar (visible when user opens Swipe reels on mobile) */}
