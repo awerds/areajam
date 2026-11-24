@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ChevronDown, MapPin, Video } from 'lucide-react';
 import type { Listing, Region } from '../types';
@@ -156,7 +156,12 @@ export function PanoramicHero({
           ) : (
             <div
               className="panoramic-marquee-track flex w-max items-center"
-              style={{ animationPlayState: isFalling ? 'paused' : undefined }}
+              style={
+                {
+                  '--panoramic-duration': `${Math.max(halfTrack.length, 12) * 20}s`,
+                  animationPlayState: isFalling ? 'paused' : undefined,
+                } as CSSProperties
+              }
             >
               {[0, 1].map((copyIdx) => (
                 <div

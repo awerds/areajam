@@ -1006,7 +1006,7 @@ html {
 }
 
 .panoramic-marquee-track {
-  animation: panoramic-spin 130s linear infinite;
+  animation: panoramic-spin var(--panoramic-duration, 360s) linear infinite;
 }
 
 .panoramic-marquee-stage:hover .panoramic-marquee-track,
