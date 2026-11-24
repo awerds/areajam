@@ -440,7 +440,7 @@ export function SwipeDeck({
     : '';
 
   return (
-    <div className="mx-auto flex w-full max-w-[22rem] flex-col items-center">
+    <div className="mx-auto flex w-full flex-col items-center md:max-w-[24rem]">
       {showingNearestFallback && (
         <div className="mb-2.5 flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md">
           <span className="flex min-w-0 items-start gap-2 font-medium leading-snug text-[var(--ink)]">
@@ -458,12 +458,12 @@ export function SwipeDeck({
           </button>
         </div>
       )}
-      <div className="deck-perspective relative mx-auto aspect-[9/16] w-[min(100%,calc(60dvh*0.5625),19.5rem)] md:w-[min(20.5rem,calc(61dvh*0.5625))] select-none">
+      <div className="deck-perspective relative mx-auto h-[clamp(24rem,calc(100dvh-var(--mobile-deck-offset,13rem)),41rem)] w-full select-none md:aspect-[9/16] md:h-auto md:w-[min(100%,21rem,calc(65dvh*0.5625))] lg:w-[min(100%,23.5rem,calc(65dvh*0.5625))]">
         {nextCard && (
           <article
             ref={nextCardRef}
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 hidden flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)] md:flex"
+            className="pointer-events-none absolute inset-0 hidden flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)] md:flex md:rounded-[2rem]"
             style={{
               transform: 'translate3d(0, 14px, 0) scale(0.94)',
               opacity: 0.65,
@@ -498,7 +498,7 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className={`absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing ${
+          className={`absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:rounded-[2rem] ${
             topIsEmbed ? 'bg-[var(--surface-solid)]' : 'bg-[#10131d]'
           }`}
           style={{ transformStyle: 'preserve-3d' }}
@@ -611,7 +611,7 @@ export function SwipeDeck({
                   }}
                 />
 
-                <div className="dark-stage absolute inset-x-0 bottom-0 z-10 p-3.5 pr-[3.75rem] md:p-5 md:pr-5">
+                <div className="dark-stage absolute inset-x-0 bottom-0 z-10 p-4 pr-16 md:p-5 md:pr-5">
                   <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/85">
                     <span className="truncate">{topLocationLabel}</span>
                     {topRoughDistanceCompact && (
@@ -635,7 +635,7 @@ export function SwipeDeck({
                     onClick={() => onOpenProfile(topCard)}
                     className="mt-1 block w-full text-left transition hover:opacity-85"
                   >
-                    <h2 className="font-display truncate text-xl font-bold leading-tight tracking-tight text-white sm:text-2xl">
+                    <h2 className="font-display truncate text-2xl font-bold leading-tight tracking-tight text-white">
                       {topCard.title}
                     </h2>
                   </button>

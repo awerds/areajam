@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import {
   ChevronDown,
   Compass,
@@ -134,7 +135,15 @@ export function App() {
   );
   const [chipFilter, setChipFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState<boolean>(false);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      mobileSearchInputRef.current?.focus();
+    }
+  }, [mobileSearchOpen]);
   const [ipDetecting, setIpDetecting] = useState<boolean>(false);
 
   const [regionModalOpen, setRegionModalOpen] = useState(false);
@@ -187,7 +196,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    return subscribePublishedProfiles(setRemoteProfiles, () => {});
+    return subscribePublishedProfiles(setRemoteProfiles, () => { });
   }, []);
 
   useEffect(() => {
@@ -197,9 +206,9 @@ export function App() {
       setBlocks([]);
       return;
     }
-    const unsubInvites = subscribeMyInvites(user.uid, setInvites, () => {});
-    const unsubThreads = subscribeMyThreads(user.uid, setThreads, () => {});
-    const unsubBlocks = subscribeMyBlocks(user.uid, setBlocks, () => {});
+    const unsubInvites = subscribeMyInvites(user.uid, setInvites, () => { });
+    const unsubThreads = subscribeMyThreads(user.uid, setThreads, () => { });
+    const unsubBlocks = subscribeMyBlocks(user.uid, setBlocks, () => { });
     return () => {
       unsubInvites();
       unsubThreads();
@@ -208,7 +217,7 @@ export function App() {
   }, [user?.uid]);
 
   useEffect(() => {
-    return subscribeColorScheme(() => {});
+    return subscribeColorScheme(() => { });
   }, []);
 
   useEffect(() => {
@@ -401,7 +410,7 @@ export function App() {
       setLiveWallNotes([]);
       return;
     }
-    return subscribeProfileWallNotes(activeProfile.id, setLiveWallNotes, () => {});
+    return subscribeProfileWallNotes(activeProfile.id, setLiveWallNotes, () => { });
   }, [activeProfile?.id, activeProfile?.isSample]);
 
   const activePrefs = state.lookingForJam;
@@ -913,6 +922,16 @@ export function App() {
     }
   };
 
+  const hasMobileIpBar = !activeProfileId && state.locationConsent === 'unknown';
+  const mobileDeckOffset =
+    hasMobileIpBar && showingDeckNearestFallback
+      ? '19.75rem'
+      : hasMobileIpBar
+        ? '16.5rem'
+        : showingDeckNearestFallback
+          ? '16.5rem'
+          : '13.25rem';
+
   return (
     <div className="relative min-h-dvh pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12">
       <InstrumentIconSprite />
@@ -1003,9 +1022,8 @@ export function App() {
                 }}
               >
                 <span
-                  className={`h-3 w-3 rounded-full shadow-xs transition-transform ${
-                    samplesEnabled ? 'translate-x-3' : 'translate-x-0'
-                  }`}
+                  className={`h-3 w-3 rounded-full shadow-xs transition-transform ${samplesEnabled ? 'translate-x-3' : 'translate-x-0'
+                    }`}
                   style={{
                     backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
                   }}
@@ -1106,7 +1124,10 @@ export function App() {
       )}
 
       {/* Full-width main container */}
-      <main className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-3 pt-2 md:px-6 md:pt-3 xl:px-10">
+      <main
+        style={{ '--mobile-deck-offset': mobileDeckOffset } as CSSProperties}
+        className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10"
+      >
         {activeProfile ? (
           <ProfilePage
             key={activeProfile.id}
@@ -1147,13 +1168,13 @@ export function App() {
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div className="space-y-16 md:space-y-12">
-                {/* Above-the-fold spotlight discovery stage */}
-                <section aria-label="Local reel discovery spotlight" className="space-y-2.5 md:space-y-3">
-                  <div className="mx-auto w-full max-w-[1180px] space-y-2">
-                    <div className="flex flex-col gap-1.5 md:flex-row md:flex-wrap md:items-center md:justify-center md:gap-2">
-                      <div className="relative w-full shrink-0 md:w-56 lg:w-64">
-                        <label htmlFor="discover-search" className="visually-hidden">
+              <div className="space-y-8 md:space-y-10">
+                <div className="grid grid-cols-1 items-start gap-2 md:grid-cols-12 md:items-center md:gap-6 lg:gap-10">
+                  {/* Mobile single-row search toggle + compact instrument filter strip */}
+                  {mobileSearchOpen ? (
+                    <div className="flex items-center gap-1.5 md:hidden">
+                      <div className="relative min-w-0 flex-1">
+                        <label htmlFor="mobile-discover-search" className="visually-hidden">
                           Search players, gear, genres, or neighborhoods
                         </label>
                         <Search
@@ -1161,21 +1182,65 @@ export function App() {
                           aria-hidden="true"
                         />
                         <input
-                          id="discover-search"
+                          ref={mobileSearchInputRef}
+                          id="mobile-discover-search"
                           type="search"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Search name, gear, genre..."
-                          className="w-full rounded-full border border-[var(--border)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] transition focus:border-[var(--accent)] focus:outline-none"
+                          className="w-full rounded-full border border-[var(--accent)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] focus:outline-none"
                         />
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => setMobileSearchOpen(false)}
+                        aria-label="Close search bar"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:text-[var(--ink)]"
+                      >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 md:hidden">
+                      <button
+                        type="button"
+                        onClick={() => setMobileSearchOpen(true)}
+                        aria-label="Search players, gear, genre, or neighborhood"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition"
+                        style={
+                          searchQuery.trim().length > 0
+                            ? {
+                              backgroundColor: 'var(--accent)',
+                              color: 'var(--accent-ink)',
+                              borderColor: 'var(--accent)',
+                            }
+                            : {
+                              backgroundColor: 'var(--pill-bg)',
+                              color: 'var(--ink)',
+                              borderColor: 'var(--border)',
+                            }
+                        }
+                      >
+                        <Search className="h-4 w-4" aria-hidden="true" />
+                      </button>
 
-                      <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5 md:flex-wrap md:justify-center md:overflow-visible md:pb-0">
-                        {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
+                      <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-0.5">
+                        {searchQuery.trim().length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            aria-label={`Clear search "${searchQuery.trim()}"`}
+                            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-ink)]"
+                          >
+                            <span className="max-w-[7rem] truncate">{searchQuery.trim()}</span>
+                            <X className="h-3 w-3 shrink-0" aria-hidden="true" />
+                          </button>
+                        )}
+                        {(activePrefs.length > 0 || chipFilter !== 'All') && (
                           <button
                             type="button"
                             onClick={clearAllFilters}
-                            className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)] transition hover:bg-[var(--surface-hover)]"
+                            className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
                           >
                             Clear
                           </button>
@@ -1192,15 +1257,15 @@ export function App() {
                               style={
                                 selected
                                   ? {
-                                      backgroundColor: 'var(--accent)',
-                                      color: 'var(--accent-ink)',
-                                      borderColor: 'var(--accent)',
-                                    }
+                                    backgroundColor: 'var(--accent)',
+                                    color: 'var(--accent-ink)',
+                                    borderColor: 'var(--accent)',
+                                  }
                                   : {
-                                      backgroundColor: 'var(--pill-bg)',
-                                      color: 'var(--muted)',
-                                      borderColor: 'var(--border)',
-                                    }
+                                    backgroundColor: 'var(--pill-bg)',
+                                    color: 'var(--muted)',
+                                    borderColor: 'var(--border)',
+                                  }
                               }
                             >
                               {pref}
@@ -1225,9 +1290,8 @@ export function App() {
                             }}
                           >
                             <span
-                              className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${
-                                samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
-                              }`}
+                              className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
+                                }`}
                               style={{
                                 backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
                               }}
@@ -1236,7 +1300,142 @@ export function App() {
                         </button>
                       </div>
                     </div>
+                  )}
 
+                  {/* Desktop & Tablet Left Column: Hero + Inline Search + Instrument Filters + CTAs */}
+                  <div className="hidden space-y-3.5 md:col-span-6 md:block lg:col-span-7">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                          {currentRegion.label}
+                          {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
+                        </span>
+                      </div>
+
+                      <h1 className="hero-title font-bold text-[var(--ink)]">
+                        Find your people. Make some noise.
+                      </h1>
+
+                      <p className="max-w-xl text-sm leading-relaxed text-[var(--muted)]">
+                        Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
+                      </p>
+                    </div>
+
+                    <div className="glass-surface space-y-2.5 rounded-3xl p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h2 className="font-display text-sm font-bold">
+                          Filter by instrument or search local players
+                        </h2>
+                        {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
+                          <button
+                            type="button"
+                            onClick={clearAllFilters}
+                            className="text-xs font-semibold text-[var(--accent-text)] hover:underline"
+                          >
+                            Clear filters
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="relative">
+                        <label htmlFor="discover-search" className="visually-hidden">
+                          Search players, gear, genres, or neighborhoods
+                        </label>
+                        <Search
+                          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]"
+                          aria-hidden="true"
+                        />
+                        <input
+                          id="discover-search"
+                          type="search"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search name, gear, genre, or neighborhood..."
+                          className="field-control py-2 pl-10 text-xs"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        {prefChoices.map((pref) => {
+                          const selected = activePrefs.includes(pref);
+                          return (
+                            <button
+                              key={pref}
+                              type="button"
+                              aria-pressed={selected}
+                              onClick={() => togglePreference(pref)}
+                              className="filter-chip-btn rounded-full border px-3 py-1.5 text-xs font-semibold"
+                              style={
+                                selected
+                                  ? {
+                                    backgroundColor: 'var(--accent)',
+                                    color: 'var(--accent-ink)',
+                                    borderColor: 'var(--accent)',
+                                  }
+                                  : {
+                                    backgroundColor: 'var(--pill-bg)',
+                                    color: 'var(--ink)',
+                                    borderColor: 'var(--border)',
+                                  }
+                              }
+                            >
+                              {pref}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="hidden gap-2.5 lg:grid lg:grid-cols-3">
+                      <div className="glass-surface brand-card-accent rounded-2xl p-3.5">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
+                        <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
+                          Matches your city first and sorts nearby musicians by rough distance.
+                        </p>
+                      </div>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-3.5">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
+                        <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
+                          Embed public Reels, YouTube, or SoundCloud clips plus your IG handle.
+                        </p>
+                      </div>
+                      <div className="glass-surface brand-card-accent rounded-2xl p-3.5">
+                        <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
+                        <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
+                          Accept or decline invites to unlock a private 1-on-1 Firestore thread.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+                        }
+                        className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                      >
+                        <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+                        <span>Browse all ({regionalPool.length})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTabChange('post')}
+                        className="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold transition hover:opacity-90"
+                        style={{
+                          backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
+                          color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
+                        }}
+                      >
+                        <Video className="h-4 w-4" aria-hidden="true" />
+                        <span>Build profile &amp; clips</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Live 9:16 TikTok / Tinder card stage */}
+                  <div className="space-y-2.5 md:col-span-6 lg:col-span-5">
                     <div className="hidden flex-wrap items-center justify-center gap-1.5 md:flex">
                       {availableFilters.map((filter) => {
                         const active = chipFilter === filter;
@@ -1249,15 +1448,15 @@ export function App() {
                             style={
                               active
                                 ? {
-                                    backgroundColor: 'var(--accent)',
-                                    color: 'var(--accent-ink)',
-                                    borderColor: 'var(--accent)',
-                                  }
+                                  backgroundColor: 'var(--accent)',
+                                  color: 'var(--accent-ink)',
+                                  borderColor: 'var(--accent)',
+                                }
                                 : {
-                                    backgroundColor: 'var(--pill-bg)',
-                                    color: 'var(--muted)',
-                                    borderColor: 'var(--border)',
-                                  }
+                                  backgroundColor: 'var(--pill-bg)',
+                                  color: 'var(--muted)',
+                                  borderColor: 'var(--border)',
+                                }
                             }
                           >
                             {filter}
@@ -1265,9 +1464,7 @@ export function App() {
                         );
                       })}
                     </div>
-                  </div>
 
-                  <div className="flex justify-center pt-0.5">
                     <SwipeDeck
                       cards={deckCards}
                       mode={state.mode}
@@ -1296,83 +1493,7 @@ export function App() {
                       onGoToPost={() => handleTabChange('post')}
                     />
                   </div>
-                </section>
-
-                {/* Editorial intro & how-it-works below the spotlight fold */}
-                <section
-                  aria-label="About AreaJam and how it works"
-                  className="border-t border-[var(--border)] pt-8 md:pt-10"
-                >
-                  <div className="mx-auto max-w-5xl space-y-6">
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
-                          {currentRegion.label}
-                          {state.detectedCityLabel ? ` (near ${state.detectedCityLabel})` : ''}
-                        </span>
-                      </div>
-
-                      <h1 className="hero-title font-bold text-[var(--ink)]">
-                        Find your people. Make some noise.
-                      </h1>
-
-                      <p className="max-w-2xl text-base leading-relaxed text-[var(--muted)]">
-                        Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Nearby players</p>
-                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Matches your area first and shows the nearest musicians with rough distance whenever your town is quiet.
-                        </p>
-                      </div>
-                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Linked clips + IG</p>
-                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Paste public Reels, YouTube, TikTok, or SoundCloud links and showcase your Instagram handle.
-                        </p>
-                      </div>
-                      <div className="glass-surface brand-card-accent rounded-2xl p-4">
-                        <p className="text-xs font-bold text-[var(--accent-text)]">Invite to jam</p>
-                        <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
-                          Accept or decline invites on your terms to open a single private 1-on-1 Firestore thread.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.matchMedia('(min-width: 768px)').matches) {
-                            browseSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-                          } else {
-                            handleTabChange('browse');
-                          }
-                        }}
-                        className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
-                      >
-                        <LayoutGrid className="h-4 w-4" aria-hidden="true" />
-                        <span>Browse all ({regionalPool.length})</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleTabChange('post')}
-                        className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition hover:opacity-90"
-                        style={{
-                          backgroundColor: state.mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                          color: state.mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                        }}
-                      >
-                        <Video className="h-4 w-4" aria-hidden="true" />
-                        <span>Build profile &amp; clips</span>
-                      </button>
-                    </div>
-                  </div>
-                </section>
+                </div>
 
                 <div
                   ref={browseSectionRef}
@@ -1433,15 +1554,15 @@ export function App() {
                           style={
                             selected
                               ? {
-                                  backgroundColor: 'var(--accent)',
-                                  color: 'var(--accent-ink)',
-                                  borderColor: 'var(--accent)',
-                                }
+                                backgroundColor: 'var(--accent)',
+                                color: 'var(--accent-ink)',
+                                borderColor: 'var(--accent)',
+                              }
                               : {
-                                  backgroundColor: 'var(--pill-bg)',
-                                  color: 'var(--muted)',
-                                  borderColor: 'var(--border)',
-                                }
+                                backgroundColor: 'var(--pill-bg)',
+                                color: 'var(--muted)',
+                                borderColor: 'var(--border)',
+                              }
                           }
                         >
                           {pref}
@@ -1676,7 +1797,7 @@ export function App() {
         regionLabel={
           inviteTarget
             ? allRegions.find((r) => r.id === inviteTarget.regionId)?.label ??
-              inviteTarget.regionLabel
+            inviteTarget.regionLabel
             : undefined
         }
         onClose={() => setInviteTarget(null)}

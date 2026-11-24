@@ -914,7 +914,7 @@ html {
 
 .hero-title {
   font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-  font-size: clamp(2rem, 1.35rem + 2.2vw, 3.85rem);
+  font-size: clamp(1.85rem, 1.2rem + 2vw, 3.25rem);
   line-height: 1.04;
   letter-spacing: -0.03em;
   text-wrap: balance;
