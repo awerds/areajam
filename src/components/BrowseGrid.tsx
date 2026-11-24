@@ -5,7 +5,7 @@ import { getPlayingListingId, subscribeAudioState, toggleCardPreview } from '../
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import { cardViewTransitionName } from '../lib/viewTransition';
-import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
+import type { AppMode, InboxFolder, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { CardArtwork } from './CardArtwork';
 import { InstrumentBadgeRow } from './InstrumentIcons';
 
@@ -25,7 +25,7 @@ interface BrowseGridProps {
   onOpenProfile: (listing: Listing) => void;
   onSwipe: (listing: Listing, decision: SwipeDecision) => void;
   onInvite: (listing: Listing) => void;
-  onOpenInvites: (threadId?: string) => void;
+  onOpenInvites: (threadId?: string, folder?: InboxFolder) => void;
   onWatchInReels?: () => void;
   onGoToPost?: () => void;
 }
@@ -258,7 +258,14 @@ export function BrowseGrid({
                         <button
                           type="button"
                           onClick={() =>
-                            onOpenInvites(action.kind === 'accepted' ? action.invite.threadId : undefined)
+                            onOpenInvites(
+                              action.kind === 'accepted' ? action.invite.threadId : undefined,
+                              action.kind === 'accepted'
+                                ? 'inbox'
+                                : action.kind === 'incoming'
+                                  ? 'requests'
+                                  : 'sent'
+                            )
                           }
                           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-bold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
                         >

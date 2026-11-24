@@ -67,6 +67,7 @@ import type {
   AppState,
   AuthUser,
   BlockedUser,
+  InboxFolder,
   JamInvite,
   Listing,
   NavTab,
@@ -164,6 +165,7 @@ export function App() {
   const [inviteTarget, setInviteTarget] = useState<Listing | null>(null);
   const [safetyTarget, setSafetyTarget] = useState<SafetyTarget | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  const [inboxFolder, setInboxFolder] = useState<InboxFolder>('inbox');
   const [toast, setToast] = useState<string | null>(null);
 
   const toastTimerRef = useRef<number | undefined>(undefined);
@@ -183,6 +185,7 @@ export function App() {
         setInviteTarget(null);
         setSafetyTarget(null);
         setSelectedThreadId(null);
+        setInboxFolder('inbox');
         setInvites([]);
         setThreads([]);
         setBlocks([]);
@@ -749,12 +752,21 @@ export function App() {
     showToast(`Created regional board for ${newRegion.label}`);
   };
 
-  const handleOpenInvites = (threadId?: string) => {
+  const handleOpenInvites = (threadId?: string, folder?: InboxFolder) => {
     stopCardPreview();
     setActiveProfileId(null);
     setDetailListing(null);
     setActiveTab('matches');
-    setSelectedThreadId(threadId ?? null);
+    if (threadId) {
+      setInboxFolder('inbox');
+      setSelectedThreadId(threadId);
+    } else if (folder) {
+      setInboxFolder(folder);
+      setSelectedThreadId(null);
+    } else {
+      setInboxFolder(incomingPendingCount > 0 && visibleThreads.length === 0 ? 'requests' : 'inbox');
+      setSelectedThreadId(null);
+    }
   };
 
   const handleRequestInvite = (listing: Listing) => {
@@ -774,11 +786,11 @@ export function App() {
     }
     const existing = inviteByTargetUid[listing.ownerUid];
     if (existing?.status === 'accepted') {
-      handleOpenInvites(existing.threadId);
+      handleOpenInvites(existing.threadId, 'inbox');
       return;
     }
     if (existing?.status === 'pending') {
-      handleOpenInvites();
+      handleOpenInvites(undefined, existing.toUid === user.uid ? 'requests' : 'sent');
       return;
     }
     setDetailListing(null);
@@ -789,15 +801,18 @@ export function App() {
     if (!user) return;
     const outcome = await sendJamInvite({ fromUser: user, targetListing: listing, note });
     if (outcome === 'already-accepted') {
-      showToast(`You already have a private thread with ${listing.title}.`);
-      handleOpenInvites();
+      showToast(`You are already matched with ${listing.title} — opening Messages.`);
+      handleOpenInvites(
+        listing.ownerUid ? inviteByTargetUid[listing.ownerUid]?.threadId : undefined,
+        'inbox'
+      );
     } else if (outcome === 'incoming-pending') {
-      showToast(`${listing.title} already invited you — check Incoming invites!`);
-      handleOpenInvites();
+      showToast(`${listing.title} already sent you a jam request — check Requests!`);
+      handleOpenInvites(undefined, 'requests');
     } else if (outcome === 'already-pending') {
       showToast(`Jam invite already pending for ${listing.title}.`);
     } else {
-      showToast(`Sent jam invite to ${listing.title}.`);
+      showToast(`Sent jam request to ${listing.title}. Track it in Messages.`);
     }
   };
 
@@ -808,16 +823,17 @@ export function App() {
     if (!user) return;
     const openedThreadId = await respondToJamInvite({ invite, responderUser: user, decision });
     if (decision === 'accepted' && openedThreadId) {
+      setInboxFolder('inbox');
       setSelectedThreadId(openedThreadId);
-      showToast(`Private thread opened with ${invite.fromName}.`);
+      showToast(`Matched with ${invite.fromName}! You can now message directly.`);
     } else {
-      showToast(`Declined jam invite from ${invite.fromName}.`);
+      showToast(`Declined request from ${invite.fromName}.`);
     }
   };
 
   const handleCancelInvite = async (inviteId: string) => {
     await cancelJamInvite(inviteId);
-    showToast('Withdrew jam invite.');
+    showToast('Cancelled sent request.');
   };
 
   const handleSendMessage = async (threadId: string, text: string) => {
@@ -1004,31 +1020,42 @@ export function App() {
                 [
                   { id: 'discover', compactLabel: 'Discover', label: 'Discover' },
                   { id: 'browse', compactLabel: 'Browse', label: 'Browse players' },
-                  {
-                    id: 'matches',
-                    compactLabel:
-                      incomingPendingCount + visibleThreads.length > 0
-                        ? `Invites (${incomingPendingCount + visibleThreads.length})`
-                        : 'Invites',
-                    label:
-                      incomingPendingCount + visibleThreads.length > 0
-                        ? `Invites (${incomingPendingCount + visibleThreads.length})`
-                        : 'Invites',
-                  },
+                  { id: 'matches', compactLabel: 'Messages', label: 'Messages' },
                   { id: 'post', compactLabel: 'Studio', label: 'Profile & studio' },
                 ] as const
-              ).map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-current={!activeProfileId && activeTab === item.id ? 'page' : undefined}
-                  onClick={() => handleTabChange(item.id)}
-                  className="nav-pill-btn shrink-0 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)] lg:px-3.5 lg:py-2"
-                >
-                  <span className="xl:hidden">{item.compactLabel}</span>
-                  <span className="hidden xl:inline">{item.label}</span>
-                </button>
-              ))}
+              ).map((item) => {
+                const msgCount =
+                  item.id === 'matches'
+                    ? incomingPendingCount > 0
+                      ? incomingPendingCount
+                      : visibleThreads.length
+                    : 0;
+                const msgHasRequests = item.id === 'matches' && incomingPendingCount > 0;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-current={!activeProfileId && activeTab === item.id ? 'page' : undefined}
+                    onClick={() => handleTabChange(item.id)}
+                    className="nav-pill-btn inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)] lg:px-3.5 lg:py-2"
+                  >
+                    <span className="xl:hidden">{item.compactLabel}</span>
+                    <span className="hidden xl:inline">{item.label}</span>
+                    {msgCount > 0 && (
+                      <span
+                        className="inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none"
+                        style={
+                          msgHasRequests
+                            ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
+                            : { backgroundColor: 'var(--surface-hover)', color: 'var(--ink)' }
+                        }
+                      >
+                        {msgCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </nav>
           </div>
 
@@ -1394,7 +1421,7 @@ export function App() {
                     </h1>
 
                     <p className="max-w-xl text-sm leading-relaxed text-[var(--muted)]">
-                      Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a Jam invite with a note, and unlock one private thread when they accept.
+                      Hear linked Instagram Reels, YouTube clips, and SoundCloud tracks right on the card. Spot instruments fast, send a jam invite, and message in your inbox once they accept.
                     </p>
                   </div>
 
@@ -1652,6 +1679,8 @@ export function App() {
                 threads={visibleThreads}
                 listings={allListings}
                 regions={allRegions}
+                activeFolder={inboxFolder}
+                onSelectFolder={setInboxFolder}
                 selectedThreadId={selectedThreadId}
                 onSelectThread={setSelectedThreadId}
                 onRespondInvite={handleRespondInvite}
@@ -1741,19 +1770,20 @@ export function App() {
           >
             <span className="relative">
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              {incomingPendingCount + visibleThreads.length > 0 && (
+              {(incomingPendingCount > 0 || visibleThreads.length > 0) && (
                 <span
                   className="absolute -right-2.5 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
-                  style={{
-                    backgroundColor: 'var(--jam)',
-                    color: 'var(--jam-ink)',
-                  }}
+                  style={
+                    incomingPendingCount > 0
+                      ? { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
+                      : { backgroundColor: 'var(--ink)', color: 'var(--bg)' }
+                  }
                 >
-                  {incomingPendingCount + visibleThreads.length}
+                  {incomingPendingCount > 0 ? incomingPendingCount : visibleThreads.length}
                 </span>
               )}
             </span>
-            <span>Invites</span>
+            <span>Messages</span>
           </button>
 
           <button

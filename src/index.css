@@ -1276,3 +1276,42 @@ dialog.areajam-dialog::backdrop {
 .browse-card:has(a.card-link:hover) {
   border-color: var(--border-strong);
 }
+
+/* Messages inbox tabs, matches rail, and auto-sizing chat composer */
+.inbox-tab {
+  position: relative;
+  color: var(--muted);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.inbox-tab:hover {
+  color: var(--ink);
+}
+
+.inbox-tab[aria-selected='true'] {
+  color: var(--ink);
+}
+
+.inbox-tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  border-block-end: 2.5px solid var(--accent);
+}
+
+.matches-rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 1rem;
+  overscroll-behavior-x: contain;
+}
+
+.chat-composer-input {
+  field-sizing: content;
+  width: 100%;
+  height: auto;
+  min-block-size: 2.75rem;
+  max-block-size: 8.5rem;
+  resize: none;
+}

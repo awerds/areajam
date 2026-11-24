@@ -39,13 +39,13 @@ export function getProfileActionState(
   }
   const invite = inviteByTargetUid?.[listing.ownerUid];
   if (invite?.status === 'accepted') {
-    return { kind: 'accepted', label: 'Open thread', invite };
+    return { kind: 'accepted', label: 'Message', invite };
   }
   if (invite?.status === 'pending') {
     if (invite.toUid === currentUserUid) {
-      return { kind: 'incoming', label: 'Respond to invite', invite };
+      return { kind: 'incoming', label: 'Review request', invite };
     }
-    return { kind: 'sent', label: 'Invite sent', invite };
+    return { kind: 'sent', label: 'Request sent', invite };
   }
   return { kind: 'invite', label: 'Invite to jam', invite };
 }

@@ -89,9 +89,9 @@ export function HowItWorksDialog({
           <li className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Invite to jam &amp; safety controls</p>
+              <p className="font-semibold">Matches &amp; Messages inbox</p>
               <p className="text-xs text-[var(--muted)]">
-                Accepting a Jam invite opens one private 1-on-1 thread backed by Firebase Auth and Firestore security rules, with instant Block and Report controls. Build{' '}
+                Accepting a jam request opens a direct 1-on-1 chat in your Messages inbox backed by Firebase Auth and Firestore security rules, with instant Block and Report controls. Build{' '}
                 <code className="rounded bg-[var(--pill-bg)] px-1 py-0.5 text-[11px] text-[var(--ink)]">
                   {import.meta.env.VITE_BUILD_SHA || 'local'}
                 </code>

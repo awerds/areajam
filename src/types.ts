@@ -2,6 +2,8 @@ export type AppMode = 'jam' | 'gigs';
 
 export type NavTab = 'discover' | 'browse' | 'matches' | 'post';
 
+export type InboxFolder = 'inbox' | 'requests' | 'sent';
+
 export type GigSubtype = 'band-for-hire' | 'open-gig';
 
 export type SwipeDecision = 'like' | 'pass';

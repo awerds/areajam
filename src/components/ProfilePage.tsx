@@ -33,6 +33,7 @@ import type {
   AuthUser,
   GearCategory,
   GearItem,
+  InboxFolder,
   JamInvite,
   Listing,
   ProfileThemeId,
@@ -56,7 +57,7 @@ interface ProfilePageProps {
   onToggleSound: () => void;
   onBack: () => void;
   onInvite: (listing: Listing) => void;
-  onOpenInvites: (threadId?: string) => void;
+  onOpenInvites: (threadId?: string, folder?: InboxFolder) => void;
   onSafetyAction: (target: SafetyTarget) => void;
   onOpenProfile: (listing: Listing) => void;
   onUpdateListing: (updated: Listing) => void;
@@ -385,30 +386,30 @@ export function ProfilePage({
             {actionState.kind === 'accepted' ? (
               <button
                 type="button"
-                onClick={() => onOpenInvites(actionState.invite.threadId)}
+                onClick={() => onOpenInvites(actionState.invite.threadId, 'inbox')}
                 className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
                 style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
                 <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                <span>Open private thread</span>
+                <span>Open messages</span>
               </button>
             ) : actionState.kind === 'incoming' ? (
               <button
                 type="button"
-                onClick={() => onOpenInvites()}
+                onClick={() => onOpenInvites(undefined, 'requests')}
                 className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
                 style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
                 <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                <span>Respond to jam invite</span>
+                <span>Review request in Messages</span>
               </button>
             ) : actionState.kind === 'sent' ? (
               <button
                 type="button"
-                onClick={() => onOpenInvites()}
+                onClick={() => onOpenInvites(undefined, 'sent')}
                 className="inline-flex items-center gap-2 rounded-2xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-6 py-3.5 text-sm font-bold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
               >
-                <span>Invite sent — view status</span>
+                <span>Request sent — view in Sent</span>
               </button>
             ) : actionState.kind === 'invite' ? (
               <button

@@ -124,7 +124,7 @@ export function JamInviteDialog({
           )}
 
           <p className="text-xs text-[var(--muted)]">
-            If {listing.title} accepts, a single private thread opens between the two of you.
+            If {listing.title} accepts, they move to your Matches and you can message directly in your Inbox.
           </p>
 
           <div className="flex flex-col-reverse gap-2.5 sm:flex-row">

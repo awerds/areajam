@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Flame, Info, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
-import type { AppMode, JamInvite, Listing, Region, SwipeDecision } from '../types';
+import type { AppMode, InboxFolder, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import { AreaJamMark } from './BrandLogo';
@@ -27,7 +27,7 @@ interface SwipeDeckProps {
   onOpenDetails: (listing: Listing) => void;
   onOpenProfile: (listing: Listing) => void;
   onInvite: (listing: Listing) => void;
-  onOpenInvites: (threadId?: string) => void;
+  onOpenInvites: (threadId?: string, folder?: InboxFolder) => void;
   onEnableNearby: () => void;
   onToggleSampleCards?: () => void;
   onResetPassed: () => void;
@@ -179,9 +179,11 @@ export function SwipeDeck({
       }
       const action = getProfileActionState(topCard, currentUserUid, inviteByTargetUid);
       if (action.kind === 'accepted') {
-        onOpenInvites(action.invite.threadId);
-      } else if (action.kind === 'incoming' || action.kind === 'sent') {
-        onOpenInvites();
+        onOpenInvites(action.invite.threadId, 'inbox');
+      } else if (action.kind === 'incoming') {
+        onOpenInvites(undefined, 'requests');
+      } else if (action.kind === 'sent') {
+        onOpenInvites(undefined, 'sent');
       } else if (action.kind === 'self') {
         onOpenProfile(topCard);
       } else {
@@ -657,9 +659,11 @@ export function SwipeDeck({
                           type="button"
                           onClick={() => {
                             if (topAction.kind === 'accepted') {
-                              onOpenInvites(topAction.invite.threadId);
-                            } else if (topAction.kind === 'incoming' || topAction.kind === 'sent') {
-                              onOpenInvites();
+                              onOpenInvites(topAction.invite.threadId, 'inbox');
+                            } else if (topAction.kind === 'incoming') {
+                              onOpenInvites(undefined, 'requests');
+                            } else if (topAction.kind === 'sent') {
+                              onOpenInvites(undefined, 'sent');
                             } else {
                               onInvite(topCard);
                             }
@@ -742,9 +746,11 @@ export function SwipeDeck({
                       type="button"
                       onClick={() => {
                         if (topAction.kind === 'accepted') {
-                          onOpenInvites(topAction.invite.threadId);
-                        } else if (topAction.kind === 'incoming' || topAction.kind === 'sent') {
-                          onOpenInvites();
+                          onOpenInvites(topAction.invite.threadId, 'inbox');
+                        } else if (topAction.kind === 'incoming') {
+                          onOpenInvites(undefined, 'requests');
+                        } else if (topAction.kind === 'sent') {
+                          onOpenInvites(undefined, 'sent');
                         } else {
                           onInvite(topCard);
                         }

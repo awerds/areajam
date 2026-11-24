@@ -2,7 +2,7 @@ import { Calendar, ExternalLink, Flame, Instagram, MapPin, Maximize2, MessageCir
 import { safeHttpsUrl } from '../data/themes';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
-import type { JamInvite, Listing, Region, SwipeDecision } from '../types';
+import type { InboxFolder, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { ClipPlayer } from './ClipPlayer';
 import { InstrumentBadgeRow } from './InstrumentIcons';
 import { NativeDialog } from './NativeDialog';
@@ -19,7 +19,7 @@ interface DetailDialogProps {
   onOpenProfile?: (listing: Listing) => void;
   onSwipe?: (listing: Listing, decision: SwipeDecision) => void;
   onInvite?: (listing: Listing) => void;
-  onOpenInvites?: (threadId?: string) => void;
+  onOpenInvites?: (threadId?: string, folder?: InboxFolder) => void;
 }
 
 export function DetailDialog({
@@ -228,7 +228,14 @@ export function DetailDialog({
                     type="button"
                     onClick={() => {
                       onClose();
-                      onOpenInvites(action.kind === 'accepted' ? action.invite.threadId : undefined);
+                      onOpenInvites(
+                        action.kind === 'accepted' ? action.invite.threadId : undefined,
+                        action.kind === 'accepted'
+                          ? 'inbox'
+                          : action.kind === 'incoming'
+                            ? 'requests'
+                            : 'sent'
+                      );
                     }}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
                     style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}

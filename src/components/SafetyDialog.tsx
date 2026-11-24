@@ -114,7 +114,7 @@ export function SafetyDialog({
                 Blocking hides {target.targetName} across AreaJam
               </p>
               <p>
-                Their profiles, wall notes, pending jam invites, and private thread will be hidden from your views, and Firestore rules prevent new invites or messages between you. You can unblock them anytime from Profile &amp; studio.
+                Their profiles, wall notes, pending jam requests, and messages will be hidden from your views, and Firestore rules prevent new invites or messages between you. You can unblock them anytime from Profile &amp; studio.
               </p>
             </div>
           </div>
