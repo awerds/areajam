@@ -511,6 +511,7 @@ export function SwipeDeck({
               soundEnabled={soundEnabled}
               onToggleSound={onToggleSound}
               hideClipTitle={!topIsEmbed}
+              hideMobileSoundButton
             />
 
             <div ref={glareRef} className="card-glare absolute inset-0 opacity-0" aria-hidden="true" />

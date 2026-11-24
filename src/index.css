@@ -920,10 +920,6 @@ html {
   text-wrap: balance;
 }
 
-.stage-shell {
-  container: stage / inline-size;
-}
-
 .safe-top {
   padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
 }

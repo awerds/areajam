@@ -84,6 +84,7 @@ interface ClipPlayerProps {
   compact?: boolean;
   showMetadataOverlay?: boolean;
   hideClipTitle?: boolean;
+  hideMobileSoundButton?: boolean;
   activeClipId?: string;
   onActiveClipChange?: (clipId: string) => void;
 }
@@ -97,6 +98,7 @@ export function ClipPlayer({
   compact: _compact = false,
   showMetadataOverlay = true,
   hideClipTitle = false,
+  hideMobileSoundButton = false,
   activeClipId,
   onActiveClipChange,
 }: ClipPlayerProps) {
@@ -517,7 +519,9 @@ export function ClipPlayer({
                 }}
                 aria-pressed={soundEnabled}
                 aria-label={soundEnabled ? 'Mute reel audio' : 'Unmute reel audio'}
-                className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md transition ${
+                className={`pointer-events-auto items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md transition ${
+                  hideMobileSoundButton ? 'hidden md:inline-flex' : 'inline-flex'
+                } ${
                   hasRealVideo
                     ? 'border-white/20 bg-black/55 text-white hover:bg-black/75'
                     : 'border-[var(--border)] bg-[var(--card-hud-bg)] text-[var(--ink)] hover:bg-[var(--surface-solid)]'

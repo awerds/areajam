@@ -933,7 +933,7 @@ export function App() {
           : '13.25rem';
 
   return (
-    <div className="relative min-h-dvh pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12">
+    <div className="relative min-h-dvh overflow-x-clip pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12">
       <InstrumentIconSprite />
 
       {/* Architectural pink/gigs acoustic contour lines */}
@@ -1133,7 +1133,7 @@ export function App() {
       {/* Full-width main container */}
       <main
         style={{ '--mobile-deck-offset': mobileDeckOffset } as CSSProperties}
-        className="stage-shell relative z-10 mx-auto w-full max-w-[1440px] px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10"
+        className="relative z-10 mx-auto w-full max-w-[1440px] px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10"
       >
         {activeProfile ? (
           <ProfilePage
@@ -1231,7 +1231,7 @@ export function App() {
                         <Search className="h-4 w-4" aria-hidden="true" />
                       </button>
 
-                      <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto pb-0.5">
+                      <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
                         {searchQuery.trim().length > 0 && (
                           <button
                             type="button"
