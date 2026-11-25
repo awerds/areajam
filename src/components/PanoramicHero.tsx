@@ -106,7 +106,7 @@ export function PanoramicHero({
       </svg>
 
       {/* Centered editorial headline */}
-      <div ref={headerRef} className="mx-auto max-w-3xl px-4 text-center">
+      <div ref={headerRef} className="mx-auto max-w-4xl px-4 text-center">
         <button
           type="button"
           onClick={onPickRegion}
@@ -124,7 +124,7 @@ export function PanoramicHero({
         <h1 className="hero-title mt-2.5 font-bold text-[var(--ink)] sm:mt-3">
           Find your tribe.
           <br />
-          Match with local musicians today.
+          Match with locals today.
         </h1>
 
         <p className="mx-auto mt-2 max-w-xl text-xs leading-relaxed text-[var(--muted)] sm:mt-2.5 sm:text-sm">

@@ -1481,7 +1481,7 @@ export function App() {
                     </div>
 
                     <h1 className="hero-title font-bold text-[var(--ink)]">
-                      Find your tribe. Match with local musicians today.
+                      Find your tribe. Match with locals today.
                     </h1>
 
                     <p className="max-w-xl text-sm leading-relaxed text-[var(--muted)]">
