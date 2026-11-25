@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import {
   ChevronDown,
-  Compass,
+  Flame,
   HelpCircle,
   LayoutGrid,
   MapPin,
@@ -665,6 +665,12 @@ export function App() {
     setDiscoverStage('swipe');
   };
 
+  const handleStartSwipe = () => {
+    stopCardPreview();
+    setFocusedDeckId(null);
+    setDiscoverStage('swipe');
+  };
+
   const handleOpenProfile = (listing: Listing) => {
     stopCardPreview();
     setDetailListing(null);
@@ -1043,10 +1049,15 @@ export function App() {
     !activeProfile &&
     !(activeProfileId && (deepLinkLoading || resolvedProfileId !== activeProfileId)) &&
     activeTab === 'discover';
+  const isMobileSwipeLock = isDiscoverViewportLock && discoverStage === 'swipe';
 
   return (
     <div
-      className={`relative flex min-h-dvh flex-col overflow-x-clip ${
+      className={`relative flex flex-col overflow-x-clip ${
+        isMobileSwipeLock
+          ? 'h-dvh overflow-hidden md:h-auto md:min-h-dvh md:overflow-visible'
+          : 'min-h-dvh'
+      } ${
         isDiscoverViewportLock
           ? 'pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-0'
           : 'pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:pb-12'
@@ -1217,7 +1228,11 @@ export function App() {
 
       {/* Opt-in IP Geolocation consent bar */}
       {!activeProfileId && state.locationConsent === 'unknown' && (
-        <div className="relative z-10 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
+        <div
+          className={`relative z-10 border-b border-[var(--border)] bg-[var(--surface-subtle)] ${
+            isDiscoverViewportLock && discoverStage === 'carousel' ? 'hidden md:block' : ''
+          }`}
+        >
           <div className="mx-auto flex w-full max-w-[1440px] flex-nowrap items-center justify-between gap-2 px-3 py-1 text-xs md:gap-3 md:px-6 md:py-1.5 xl:px-10">
             <div className="flex min-w-0 items-center gap-1.5 text-[var(--ink)] md:gap-2">
               <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)] md:h-4 md:w-4" aria-hidden="true" />
@@ -1269,6 +1284,7 @@ export function App() {
             totalCount={regionalPool.length}
             onPickRegion={() => setRegionModalOpen(true)}
             onSelectListing={handleSelectCarouselListing}
+            onStartSwipe={handleStartSwipe}
             onBrowseAll={() => handleTabChange('browse')}
             onGoToPost={() => handleTabChange('post')}
           />
@@ -1276,7 +1292,9 @@ export function App() {
       ) : (
         <main
           style={{ '--mobile-deck-offset': mobileDeckOffset } as CSSProperties}
-          className="relative z-10 mx-auto w-full max-w-[1440px] flex-1 px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10"
+          className={`relative z-10 mx-auto w-full max-w-[1440px] flex-1 px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10 ${
+            isMobileSwipeLock ? 'flex min-h-0 flex-col md:block' : ''
+          }`}
         >
         {activeProfile ? (
           <ProfilePage
@@ -1318,10 +1336,10 @@ export function App() {
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div className="grid grid-cols-1 items-start gap-2 md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
-                {/* Mobile single-row bar: search toggle, Carousel return + instrument pills, pinned Samples switch */}
+              <div className="flex min-h-0 flex-1 flex-col gap-2 md:grid md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
+                {/* Mobile single-row bar: search toggle, swipeable instrument pills, pinned Samples switch */}
                 {mobileSearchOpen ? (
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 md:hidden">
+                  <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 md:hidden">
                     <div className="relative min-w-0">
                       <label htmlFor="mobile-discover-search" className="visually-hidden">
                         Search players, gear, genres, or neighborhoods
@@ -1350,7 +1368,7 @@ export function App() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[auto_minmax(0,1fr)] md:hidden">
+                  <div className="grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[auto_minmax(0,1fr)] md:hidden">
                     <button
                       type="button"
                       onClick={() => setMobileSearchOpen(true)}
@@ -1373,20 +1391,13 @@ export function App() {
                       <Search className="h-4 w-4" aria-hidden="true" />
                     </button>
 
-                    <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
-                      <button
-                        type="button"
-                        onClick={() => setDiscoverStage('carousel')}
-                        className="shrink-0 rounded-full border border-[var(--border-strong)] bg-[var(--surface-solid)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)]"
-                      >
-                        Carousel
-                      </button>
-
+                    <div className="swipe-chip-strip no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
                       {searchQuery.trim().length > 0 && (
                         <button
                           type="button"
                           onClick={() => setSearchQuery('')}
                           aria-label={`Clear search "${searchQuery.trim()}"`}
+                          style={{ scrollSnapAlign: 'start' }}
                           className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-ink)]"
                         >
                           <span className="max-w-[7rem] truncate">{searchQuery.trim()}</span>
@@ -1398,6 +1409,7 @@ export function App() {
                         <button
                           type="button"
                           onClick={clearAllFilters}
+                          style={{ scrollSnapAlign: 'start' }}
                           className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
                         >
                           Clear
@@ -1416,11 +1428,13 @@ export function App() {
                             style={
                               selected
                                 ? {
+                                    scrollSnapAlign: 'start',
                                     backgroundColor: 'var(--accent)',
                                     color: 'var(--accent-ink)',
                                     borderColor: 'var(--accent)',
                                   }
                                 : {
+                                    scrollSnapAlign: 'start',
                                     backgroundColor: 'var(--pill-bg)',
                                     color: 'var(--muted)',
                                     borderColor: 'var(--border)',
@@ -1604,7 +1618,7 @@ export function App() {
                 </div>
 
                 {/* Right Column: Live 9:16 SwipeDeck stage */}
-                <div className="md:col-span-6 lg:col-span-5">
+                <div className="flex min-h-0 flex-1 flex-col md:col-span-6 md:block lg:col-span-5">
                   <SwipeDeck
                     cards={orderedDeckCards}
                     mode={state.mode}
@@ -1809,11 +1823,16 @@ export function App() {
           <button
             type="button"
             aria-current={!activeProfileId && activeTab === 'discover' ? 'page' : undefined}
-            onClick={() => handleTabChange('discover')}
+            onClick={() => {
+              stopCardPreview();
+              setActiveProfileId(null);
+              setActiveTab('discover');
+              setDiscoverStage('swipe');
+            }}
             className="nav-pill-btn flex flex-col items-center justify-center gap-0.5 rounded-full py-1.5 text-[11px] font-semibold text-[var(--muted)]"
           >
-            <Compass className="h-4 w-4" aria-hidden="true" />
-            <span>Reels</span>
+            <Flame className="h-4 w-4" aria-hidden="true" />
+            <span>Swipe</span>
           </button>
 
           <button

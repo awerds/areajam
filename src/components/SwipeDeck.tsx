@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Flame, Info, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, Volume2, VolumeX, X } from 'lucide-react';
+import { Flame, Info, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, X } from 'lucide-react';
 import type { AppMode, InboxFolder, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
@@ -132,7 +132,7 @@ export function SwipeDeck({
               gsap.fromTo(
                 nextCardRef.current,
                 { scale: 0.88, y: 34, opacity: 0 },
-                { scale: 0.94, y: 14, opacity: 0.65, duration: 0.36, delay: 0.05, ease: 'power3.out' }
+                { scale: 0.95, y: 12, opacity: 0.72, duration: 0.36, delay: 0.05, ease: 'power3.out' }
               );
             }
           } else {
@@ -271,9 +271,9 @@ export function SwipeDeck({
       if (nextCardRef.current) {
         const progress = Math.min(1, Math.abs(dx) / 220);
         gsap.set(nextCardRef.current, {
-          scale: 0.94 + progress * 0.06,
-          y: 14 - progress * 14,
-          opacity: 0.65 + progress * 0.35,
+          scale: 0.95 + progress * 0.05,
+          y: 12 - progress * 12,
+          opacity: 0.72 + progress * 0.28,
         });
       }
       setDragState({ x: dx, dragging: true });
@@ -310,9 +310,9 @@ export function SwipeDeck({
     startRef.current = null;
     setDragState({ x: 0, dragging: false });
 
-    if (dx > 92) {
+    if (dx > 78) {
       triggerSwipe('like');
-    } else if (dx < -92) {
+    } else if (dx < -78) {
       triggerSwipe('pass');
     } else if (cardRef.current) {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -329,9 +329,9 @@ export function SwipeDeck({
       }
       if (nextCardRef.current) {
         gsap.to(nextCardRef.current, {
-          scale: 0.94,
-          y: 14,
-          opacity: 0.65,
+          scale: 0.95,
+          y: 12,
+          opacity: 0.72,
           duration: 0.32,
           ease: 'power2.out',
         });
@@ -442,9 +442,9 @@ export function SwipeDeck({
     : '';
 
   return (
-    <div className="mx-auto flex w-full flex-col items-center md:max-w-[24rem]">
+    <div className="mx-auto flex w-full min-h-0 flex-1 flex-col items-center md:flex-none md:max-w-[24rem]">
       {showingNearestFallback && (
-        <div className="mb-2.5 flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md">
+        <div className="mb-2.5 flex w-full shrink-0 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md">
           <span className="flex min-w-0 items-start gap-2 font-medium leading-snug text-[var(--ink)]">
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <span>
@@ -460,15 +460,15 @@ export function SwipeDeck({
           </button>
         </div>
       )}
-      <div className="deck-perspective reel-aspect relative mx-auto w-[min(100%,calc((100dvh-var(--mobile-deck-offset,13.25rem))*0.5625))] select-none md:w-[min(100%,21rem,calc(68dvh*0.5625))] lg:w-[min(100%,23.5rem,calc(71dvh*0.5625))]">
+      <div className="deck-perspective relative mx-auto w-full max-w-[26rem] min-h-[17rem] flex-1 select-none md:flex-none md:reel-aspect md:w-[min(100%,21rem,calc(68dvh*0.5625))] lg:w-[min(100%,23.5rem,calc(71dvh*0.5625))]">
         {nextCard && (
           <article
             ref={nextCardRef}
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 hidden flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)] md:flex md:rounded-[2rem]"
+            className="pointer-events-none absolute inset-0 flex flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)] md:rounded-[2rem]"
             style={{
-              transform: 'translate3d(0, 14px, 0) scale(0.94)',
-              opacity: 0.65,
+              transform: 'translate3d(0, 12px, 0) scale(0.95)',
+              opacity: 0.72,
             }}
           >
             <ClipPlayer
@@ -500,8 +500,8 @@ export function SwipeDeck({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerLeave={handlePointerLeave}
-          className={`isolate absolute inset-0 flex touch-pan-y cursor-grab flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:rounded-[2rem] ${
-            topIsEmbed ? 'bg-[var(--surface-solid)]' : 'bg-[#10131d]'
+          className={`isolate absolute inset-0 flex cursor-grab flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] shadow-[0_24px_60px_var(--glass-shadow)] active:cursor-grabbing md:rounded-[2rem] ${
+            topIsEmbed ? 'touch-pan-y bg-[var(--surface-solid)]' : 'touch-none bg-[#10131d]'
           }`}
         >
           {/* Media stage (full-bleed vertical for video/portrait, 2-zone split for iframe embeds) */}
@@ -513,7 +513,6 @@ export function SwipeDeck({
               soundEnabled={soundEnabled}
               onToggleSound={onToggleSound}
               hideClipTitle={!topIsEmbed}
-              hideMobileSoundButton
             />
 
             <div ref={glareRef} className="card-glare absolute inset-0 opacity-0" aria-hidden="true" />
@@ -538,71 +537,6 @@ export function SwipeDeck({
               Pass
             </div>
 
-            {/* Mobile right-edge action rail inside media stage */}
-            <div
-              onPointerDown={(e) => e.stopPropagation()}
-              className="absolute bottom-3 right-2.5 z-20 flex flex-col items-center gap-1.5 md:hidden"
-            >
-              <button
-                type="button"
-                onClick={() => triggerSwipe('like')}
-                aria-label={mode === 'jam' ? `Jam with ${topCard.title}` : `Book ${topCard.title}`}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition active:scale-90"
-                style={{
-                  backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
-                  color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
-                }}
-              >
-                {mode === 'jam' ? (
-                  <Flame className="h-5 w-5 fill-current" aria-hidden="true" />
-                ) : (
-                  <Ticket className="h-5 w-5" aria-hidden="true" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => triggerSwipe('pass')}
-                aria-label={`Pass on ${topCard.title}`}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-[var(--err)] backdrop-blur-md active:scale-90"
-              >
-                <X className="h-5 w-5" aria-hidden="true" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onOpenProfile(topCard)}
-                aria-label={`Open full profile page for ${topCard.title}`}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-white backdrop-blur-md active:scale-90"
-              >
-                <Maximize2 className="h-4 w-4" aria-hidden="true" />
-              </button>
-
-              <button
-                type="button"
-                onClick={onToggleSound}
-                aria-pressed={soundEnabled}
-                aria-label={soundEnabled ? 'Mute sound' : 'Turn sound on'}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-white backdrop-blur-md active:scale-90"
-              >
-                {soundEnabled ? (
-                  <Volume2 className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
-                ) : (
-                  <VolumeX className="h-4 w-4" aria-hidden="true" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={onUndo}
-                disabled={!canUndo}
-                aria-label="Undo last swipe"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/65 text-white backdrop-blur-md disabled:opacity-35"
-              >
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-
             {!topIsEmbed && (
               <>
                 <div
@@ -613,7 +547,7 @@ export function SwipeDeck({
                   }}
                 />
 
-                <div className="dark-stage absolute inset-x-0 bottom-0 z-10 p-4 pr-16 md:p-5 md:pr-5">
+                <div className="dark-stage absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5">
                   <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/85">
                     <span className="truncate">{topLocationLabel}</span>
                     {topRoughDistanceCompact && (
@@ -707,7 +641,7 @@ export function SwipeDeck({
           </div>
 
           {topIsEmbed && (
-            <div className="relative z-10 shrink-0 border-t border-[var(--border)] bg-[var(--surface-solid)] p-3.5 pr-16 sm:p-4 md:pr-4">
+            <div className="relative z-10 shrink-0 border-t border-[var(--border)] bg-[var(--surface-solid)] p-3.5 sm:p-4">
               <div className="flex items-start justify-between gap-2">
                 <button
                   type="button"
@@ -793,14 +727,14 @@ export function SwipeDeck({
         </article>
       </div>
 
-      {/* Tablet & Desktop floating action orbs */}
-      <div className="mt-2.5 hidden items-center justify-center gap-3 md:flex">
+      {/* Tinder 5-orb circular action bar (always visible on mobile & desktop) */}
+      <div className="mt-3 flex shrink-0 items-center justify-center gap-3 sm:gap-4 md:mt-2.5">
         <button
           type="button"
           onClick={onUndo}
           disabled={!canUndo}
           aria-label="Undo last swipe"
-          className="glass-surface inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--muted)] transition hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+          className="tinder-orb glass-surface inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
         >
           <RotateCcw className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -809,16 +743,16 @@ export function SwipeDeck({
           type="button"
           onClick={() => triggerSwipe('pass')}
           aria-label={`Pass on ${topCard.title}`}
-          className="glass-surface inline-flex h-12 w-12 items-center justify-center rounded-full text-[var(--err)] transition hover:scale-105 active:scale-95"
+          className="tinder-orb glass-surface inline-flex h-14 w-14 items-center justify-center rounded-full border-[var(--err)]/30 text-[var(--err)] md:h-12 md:w-12"
         >
-          <X className="h-6 w-6 stroke-[2.25]" aria-hidden="true" />
+          <X className="h-7 w-7 stroke-[2.25] md:h-6 md:w-6" aria-hidden="true" />
         </button>
 
         <button
           type="button"
           onClick={() => onOpenDetails(topCard)}
           aria-label={`Quick gear & rig summary for ${topCard.title}`}
-          className="glass-surface inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--ink)] transition hover:scale-105"
+          className="tinder-orb glass-surface inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--ink)]"
         >
           <Info className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -827,7 +761,7 @@ export function SwipeDeck({
           type="button"
           onClick={() => triggerSwipe('like')}
           aria-label={mode === 'jam' ? `Jam with ${topCard.title}` : `Book ${topCard.title}`}
-          className="inline-flex h-12 w-12 items-center justify-center rounded-full transition hover:scale-105 active:scale-95"
+          className="tinder-orb inline-flex h-14 w-14 items-center justify-center rounded-full md:h-12 md:w-12"
           style={{
             backgroundColor: mode === 'jam' ? 'var(--jam)' : 'var(--gigs)',
             color: mode === 'jam' ? 'var(--jam-ink)' : 'var(--gigs-ink)',
@@ -838,10 +772,19 @@ export function SwipeDeck({
           }}
         >
           {mode === 'jam' ? (
-            <Flame className="h-6 w-6 fill-current" aria-hidden="true" />
+            <Flame className="h-7 w-7 fill-current md:h-6 md:w-6" aria-hidden="true" />
           ) : (
-            <Ticket className="h-6 w-6" aria-hidden="true" />
+            <Ticket className="h-7 w-7 md:h-6 md:w-6" aria-hidden="true" />
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onOpenProfile(topCard)}
+          aria-label={`Open full profile page for ${topCard.title}`}
+          className="tinder-orb glass-surface inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--ink)]"
+        >
+          <Maximize2 className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 

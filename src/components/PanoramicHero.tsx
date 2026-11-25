@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import gsap from 'gsap';
-import { ChevronDown, MapPin, Video } from 'lucide-react';
+import { ChevronDown, Flame, MapPin, Video } from 'lucide-react';
 import type { Listing, Region } from '../types';
 import { CardArtwork } from './CardArtwork';
 
@@ -11,6 +11,7 @@ interface PanoramicHeroProps {
   totalCount: number;
   onPickRegion: () => void;
   onSelectListing: (listing: Listing) => void;
+  onStartSwipe: () => void;
   onBrowseAll: () => void;
   onGoToPost: () => void;
 }
@@ -30,6 +31,7 @@ export function PanoramicHero({
   totalCount,
   onPickRegion,
   onSelectListing,
+  onStartSwipe,
   onBrowseAll,
   onGoToPost,
 }: PanoramicHeroProps) {
@@ -56,20 +58,18 @@ export function PanoramicHero({
     return out;
   }, [listings]);
 
-  const handleSelectCard = (listing: Listing) => {
+  const runFallAway = (onDone: () => void) => {
     if (isFalling) return;
     setIsFalling(true);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      onSelectListing(listing);
+      onDone();
       return;
     }
 
     timelineRef.current?.kill();
     const tl = gsap.timeline({
-      onComplete: () => {
-        onSelectListing(listing);
-      },
+      onComplete: onDone,
     });
     timelineRef.current = tl;
 
@@ -86,6 +86,14 @@ export function PanoramicHero({
         0.04
       );
     }
+  };
+
+  const handleSelectCard = (listing: Listing) => {
+    runFallAway(() => onSelectListing(listing));
+  };
+
+  const handleStartSwipe = () => {
+    runFallAway(onStartSwipe);
   };
 
   return (
@@ -128,7 +136,12 @@ export function PanoramicHero({
         </h1>
 
         <p className="mx-auto mt-2 max-w-xl text-xs leading-relaxed text-[var(--muted)] sm:mt-2.5 sm:text-sm">
-          Click any player to launch their live reel and start swiping nearby musicians.
+          <span className="md:hidden">
+            Tap any player or Start swiping to jump right in.
+          </span>
+          <span className="hidden md:inline">
+            Click any player to launch their live reel and start swiping nearby musicians.
+          </span>
         </p>
       </div>
 
@@ -136,6 +149,11 @@ export function PanoramicHero({
       <div className="mt-4 w-full overflow-x-clip sm:mt-5 md:mt-6" style={{ perspective: '1100px' }}>
         <div
           ref={stageRef}
+          onClick={(e) => {
+            if (!(e.target as HTMLElement).closest('button')) {
+              handleStartSwipe();
+            }
+          }}
           className="panoramic-marquee-stage panoramic-ribbon-clip-mobile md:panoramic-ribbon-clip-desktop relative w-full overflow-x-clip"
         >
           {halfTrack.length === 0 ? (
@@ -178,9 +196,12 @@ export function PanoramicHero({
                         key={`${copyIdx}-${idx}-${listing.id}`}
                         type="button"
                         tabIndex={isDuplicate ? -1 : undefined}
-                        onClick={() => handleSelectCard(listing)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectCard(listing);
+                        }}
                         aria-label={isDuplicate ? undefined : `Open swipe reel for ${listing.title}`}
-                        className="group reel-aspect relative w-[7rem] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-[var(--border)] bg-[#10131d] text-left shadow-[0_14px_34px_var(--glass-shadow)] transition duration-200 hover:-translate-y-1 hover:border-[var(--border-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] sm:w-[8rem] lg:w-[9.25rem] xl:w-[9.75rem]"
+                        className="group reel-aspect relative w-[7.75rem] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-[var(--border)] bg-[#10131d] text-left shadow-[0_14px_34px_var(--glass-shadow)] transition duration-200 hover:-translate-y-1 hover:border-[var(--border-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] sm:w-[8.25rem] lg:w-[9.25rem] xl:w-[9.75rem]"
                       >
                         {posterUrl ? (
                           <img
@@ -220,28 +241,54 @@ export function PanoramicHero({
         </div>
       </div>
 
-      {/* Centered primary CTA row */}
-      <div ref={ctaRef} className="mt-4 flex flex-wrap items-center justify-center gap-2.5 px-4 sm:mt-5 md:mt-6">
-        <button
-          type="button"
-          onClick={onBrowseAll}
-          className="inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold shadow-sm transition hover:opacity-90"
-          style={{
-            backgroundColor: 'var(--jam)',
-            color: 'var(--jam-ink)',
-          }}
-        >
-          <span>Browse musicians</span>
-        </button>
+      {/* Primary CTAs */}
+      <div ref={ctaRef} className="mt-4 sm:mt-5 md:mt-6">
+        <div className="flex flex-col items-center gap-2.5 px-5 md:hidden">
+          <button
+            type="button"
+            onClick={handleStartSwipe}
+            className="inline-flex min-h-[48px] w-full max-w-xs items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold shadow-[0_12px_32px_rgba(217,27,76,0.34)] transition hover:opacity-90 active:scale-[0.98]"
+            style={{
+              backgroundColor: 'var(--jam)',
+              color: 'var(--jam-ink)',
+            }}
+          >
+            <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+            <span>Start swiping</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={onGoToPost}
-          className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-hover)]"
-        >
-          <Video className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
-          <span>Build profile &amp; clips</span>
-        </button>
+          <button
+            type="button"
+            onClick={onGoToPost}
+            className="inline-flex min-h-[44px] w-full max-w-xs items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-hover)]"
+          >
+            <Video className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+            <span>Build profile &amp; clips</span>
+          </button>
+        </div>
+
+        <div className="hidden flex-wrap items-center justify-center gap-2.5 px-4 md:flex">
+          <button
+            type="button"
+            onClick={onBrowseAll}
+            className="inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold shadow-sm transition hover:opacity-90"
+            style={{
+              backgroundColor: 'var(--jam)',
+              color: 'var(--jam-ink)',
+            }}
+          >
+            <span>Browse musicians</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoToPost}
+            className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--surface-hover)]"
+          >
+            <Video className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+            <span>Build profile &amp; clips</span>
+          </button>
+        </div>
       </div>
     </section>
   );

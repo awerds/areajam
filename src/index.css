@@ -1315,3 +1315,27 @@ dialog.areajam-dialog::backdrop {
   max-block-size: 8.5rem;
   resize: none;
 }
+
+.swipe-chip-strip {
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 0.5rem;
+  overscroll-behavior-x: contain;
+}
+
+.tinder-orb {
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out, opacity 140ms ease-out;
+}
+
+.tinder-orb:hover:not(:disabled) {
+  transform: scale(1.06);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+}
+
+.tinder-orb:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.tinder-orb:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
