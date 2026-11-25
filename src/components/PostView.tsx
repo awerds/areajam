@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
+  Download,
   ExternalLink,
   Instagram,
   Link2,
@@ -13,6 +14,7 @@ import {
   MapPin,
   Plus,
   ShieldBan,
+  ShieldCheck,
   Sparkles,
   Star,
   Trash2,
@@ -63,6 +65,8 @@ interface PostViewProps {
   onDeleteListing: (listingId: string) => Promise<void>;
   onPreviewListing: (listing: Listing) => void;
   onUnblockUser: (blockedUid: string) => Promise<void>;
+  onExportData?: () => void;
+  onOpenDeleteAccount?: () => void;
 }
 
 type WizardStep = 1 | 2 | 3;
@@ -114,6 +118,8 @@ export function PostView({
   onDeleteListing,
   onPreviewListing,
   onUnblockUser,
+  onExportData,
+  onOpenDeleteAccount,
 }: PostViewProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -170,6 +176,8 @@ export function PostView({
 
   const normalizedHandle = sanitizeInstagramHandle(instagramInput);
   const ytConfigured = isYouTubeImportConfigured();
+
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const missingDetails = useMemo(() => {
     const missing: string[] = [];
@@ -465,6 +473,11 @@ export function PostView({
       return;
     }
 
+    if (!termsAccepted) {
+      setFormError('Confirm that you are 18 or older and agree to the Terms of Service and Privacy Policy before publishing.');
+      return;
+    }
+
     const cleanTitle = title.trim();
     const cleanSubtitle = subtitle.trim();
     const cleanNeighborhood = neighborhood.trim();
@@ -553,6 +566,7 @@ export function PostView({
       setYtChannel(null);
       setYtAutofillNotice(null);
       setYtQuery('');
+      setTermsAccepted(false);
       setWizardStep(1);
     } catch (err) {
       setFormError(
@@ -1591,6 +1605,40 @@ export function PostView({
                   </button>
                 </div>
 
+                <label
+                  htmlFor="publish-terms-consent"
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5 text-xs leading-relaxed text-[var(--muted)]"
+                >
+                  <input
+                    id="publish-terms-consent"
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                  />
+                  <span>
+                    I am 18 or older, have permission to share these links, and agree to the{' '}
+                    <a
+                      href="./terms/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-[var(--ink)] underline underline-offset-2"
+                    >
+                      Terms of Service
+                    </a>{' '}
+                    and{' '}
+                    <a
+                      href="./privacy/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-[var(--ink)] underline underline-offset-2"
+                    >
+                      Privacy Policy
+                    </a>{' '}
+                    (zero tolerance for harassment or spam).
+                  </span>
+                </label>
+
                 <div className="flex flex-col gap-3 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
                   <button
                     type="button"
@@ -1787,6 +1835,76 @@ export function PostView({
           </ul>
         </section>
       )}
+
+      {/* Account, privacy, data export & legal resources */}
+      <section className="panel space-y-4 rounded-3xl p-5 sm:p-7">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+              <h2 className="font-display text-base font-bold">Account, data &amp; legal</h2>
+            </div>
+            <p className="text-xs text-[var(--muted)]">
+              Moderation reports are reviewed within 24 hours. Blocking immediately stops invites and chat messages.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          <a
+            href="./privacy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+          >
+            <ExternalLink className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
+            <span>Privacy Policy</span>
+          </a>
+          <a
+            href="./terms/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+          >
+            <ExternalLink className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
+            <span>Terms of Service</span>
+          </a>
+          <a
+            href="./support/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+          >
+            <ExternalLink className="h-3.5 w-3.5 text-[var(--muted)]" aria-hidden="true" />
+            <span>Safety &amp; Support</span>
+          </a>
+        </div>
+
+        {user && (onExportData || onOpenDeleteAccount) && (
+          <div className="flex flex-wrap items-center gap-2.5 border-t border-[var(--border)] pt-4">
+            {onExportData && (
+              <button
+                type="button"
+                onClick={onExportData}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Download my data (JSON)</span>
+              </button>
+            )}
+            {onOpenDeleteAccount && (
+              <button
+                type="button"
+                onClick={onOpenDeleteAccount}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--err)] bg-[var(--err-bg)] px-3.5 py-2.5 text-xs font-bold text-[var(--err)] transition hover:opacity-90"
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Delete account</span>
+              </button>
+            )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

@@ -137,6 +137,88 @@ export async function signInWithProvider(
   return previewUser;
 }
 
+export async function ensureRecentAuthIfNeeded(providerHint?: 'google' | 'apple'): Promise<void> {
+  const cfg = readFirebaseConfig();
+  if (!cfg) return;
+  const app = await getFirebaseAppInstance();
+  const { getAuth, GoogleAuthProvider, OAuthProvider, reauthenticateWithPopup } = await import(
+    'firebase/auth'
+  );
+  const fbUser = getAuth(app).currentUser;
+  if (!fbUser) return;
+
+  const lastSignInMs = fbUser.metadata.lastSignInTime
+    ? Date.parse(fbUser.metadata.lastSignInTime)
+    : 0;
+  if (lastSignInMs && Date.now() - lastSignInMs < 240_000) {
+    return;
+  }
+
+  const resolvedProvider: 'google' | 'apple' =
+    providerHint ??
+    (fbUser.providerData[0]?.providerId?.includes('apple') ? 'apple' : 'google');
+  const authProvider =
+    resolvedProvider === 'google'
+      ? new GoogleAuthProvider()
+      : (() => {
+          const p = new OAuthProvider('apple.com');
+          p.addScope('email');
+          p.addScope('name');
+          return p;
+        })();
+
+  await reauthenticateWithPopup(fbUser, authProvider);
+}
+
+export async function deleteCurrentAuthUser(providerHint?: 'google' | 'apple'): Promise<void> {
+  const cfg = readFirebaseConfig();
+  if (cfg) {
+    const app = await getFirebaseAppInstance();
+    const {
+      deleteUser,
+      getAuth,
+      GoogleAuthProvider,
+      OAuthProvider,
+      reauthenticateWithPopup,
+    } = await import('firebase/auth');
+    const fbUser = getAuth(app).currentUser;
+    if (fbUser) {
+      try {
+        await deleteUser(fbUser);
+      } catch (err) {
+        const code =
+          err && typeof err === 'object' && 'code' in err && typeof err.code === 'string'
+            ? err.code
+            : '';
+        if (code !== 'auth/requires-recent-login') {
+          throw err;
+        }
+        const resolvedProvider: 'google' | 'apple' =
+          providerHint ??
+          (fbUser.providerData[0]?.providerId?.includes('apple') ? 'apple' : 'google');
+        const authProvider =
+          resolvedProvider === 'google'
+            ? new GoogleAuthProvider()
+            : (() => {
+                const p = new OAuthProvider('apple.com');
+                p.addScope('email');
+                p.addScope('name');
+                return p;
+              })();
+        await reauthenticateWithPopup(fbUser, authProvider);
+        await deleteUser(fbUser);
+      }
+    }
+  }
+
+  try {
+    window.localStorage.removeItem(LOCAL_AUTH_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+  setCurrentUser(null);
+}
+
 export async function signOutUser(): Promise<void> {
   const cfg = readFirebaseConfig();
   if (cfg) {

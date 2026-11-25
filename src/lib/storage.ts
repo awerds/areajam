@@ -262,6 +262,15 @@ export function saveState(state: AppState, uid?: string | null): void {
   }
 }
 
+export function clearStoredUserState(uid?: string | null): void {
+  try {
+    window.localStorage.removeItem(getStorageKeyForUid(uid));
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function resetPassedSwipes(state: AppState, listingIdsToKeepPassedClear: Set<string>): AppState {
   const nextSwiped: Record<string, 'like' | 'pass'> = {};
   for (const [id, decision] of Object.entries(state.swiped)) {

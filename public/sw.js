@@ -1,4 +1,4 @@
-const CACHE_NAME = 'areajam-shell-v47';
+const CACHE_NAME = 'areajam-shell-v48';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -33,16 +33,19 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
+    const isStaticLegalPage = /^\/(privacy|terms|support)(\/|$)/.test(url.pathname);
     event.respondWith(
       fetch(request)
         .then((response) => {
           if (response.ok) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', clone));
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(isStaticLegalPage ? request : './index.html', clone));
           }
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(isStaticLegalPage ? request : './index.html'))
     );
     return;
   }

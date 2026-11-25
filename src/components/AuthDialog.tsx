@@ -72,7 +72,7 @@ export function AuthDialog({ open, reason, onClose, onAuthenticated }: AuthDialo
       title="Sign in to create your profile"
       subtitle={
         reason ||
-        'Browsing players and watching clips is free with no account. Sign in to post your flyer, record intro clips, or message matches.'
+        'Browsing players and watching clips is free with no account. Sign in to publish your live profile, link clips, send jam invites, or message matches.'
       }
     >
       <div className="space-y-4">
@@ -170,6 +170,28 @@ export function AuthDialog({ open, reason, onClose, onAuthenticated }: AuthDialo
             </span>
           </button>
         </div>
+
+        <p className="text-center text-[11px] leading-relaxed text-[var(--muted)]">
+          By continuing, you confirm you are 18 or older and agree to our{' '}
+          <a
+            href="./terms/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[var(--ink)] underline underline-offset-2"
+          >
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a
+            href="./privacy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[var(--ink)] underline underline-offset-2"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
       </div>
     </NativeDialog>
   );

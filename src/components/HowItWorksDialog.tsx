@@ -125,6 +125,33 @@ export function HowItWorksDialog({
             <span>Create profile</span>
           </button>
         </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-[var(--border)] pt-3 text-xs font-semibold text-[var(--muted)]">
+          <a
+            href="./privacy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 transition hover:text-[var(--ink)]"
+          >
+            Privacy Policy
+          </a>
+          <a
+            href="./terms/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 transition hover:text-[var(--ink)]"
+          >
+            Terms of Service
+          </a>
+          <a
+            href="./support/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 transition hover:text-[var(--ink)]"
+          >
+            Safety &amp; Support
+          </a>
+        </div>
       </div>
     </NativeDialog>
   );

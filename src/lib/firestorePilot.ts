@@ -794,3 +794,71 @@ export async function submitSafetyReport(params: {
     createdAt: Math.floor(Date.now()),
   });
 }
+
+export async function deleteAccountFirestoreData(uid: string): Promise<void> {
+  const db = await getFirestoreDb();
+  const {
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    query,
+    updateDoc,
+    where,
+  } = await import('firebase/firestore');
+
+  // 1. Delete all owned profiles and their wallNotes subcollections.
+  const profilesSnap = await getDocs(query(collection(db, 'profiles'), where('ownerUid', '==', uid)));
+  for (const profileDoc of profilesSnap.docs) {
+    try {
+      const notesSnap = await getDocs(collection(db, 'profiles', profileDoc.id, 'wallNotes'));
+      await Promise.allSettled(
+        notesSnap.docs.map((noteDoc) =>
+          deleteDoc(doc(db, 'profiles', profileDoc.id, 'wallNotes', noteDoc.id))
+        )
+      );
+    } catch {
+      // Proceed to deleting the parent profile even if subcollection read hits a transient error.
+    }
+    await deleteDoc(doc(db, 'profiles', profileDoc.id));
+  }
+
+  // 2. Delete all user block list entries under users/{uid}/blocks.
+  try {
+    const blocksSnap = await getDocs(collection(db, 'users', uid, 'blocks'));
+    await Promise.allSettled(
+      blocksSnap.docs.map((blockDoc) => deleteDoc(doc(db, 'users', uid, 'blocks', blockDoc.id)))
+    );
+  } catch {
+    // Ignore if none exist.
+  }
+
+  // 3. Cancel/decline any still-pending jamInvites involving this account cleanly per rules.
+  try {
+    const invitesSnap = await getDocs(
+      query(collection(db, 'jamInvites'), where('participants', 'array-contains', uid))
+    );
+    const now = Math.floor(Date.now());
+    await Promise.allSettled(
+      invitesSnap.docs.map((invDoc) => {
+        const data = invDoc.data();
+        if (data.status !== 'pending') return Promise.resolve();
+        if (data.fromUid === uid) {
+          return updateDoc(doc(db, 'jamInvites', invDoc.id), {
+            status: 'cancelled',
+            updatedAt: now,
+          });
+        }
+        if (data.toUid === uid) {
+          return updateDoc(doc(db, 'jamInvites', invDoc.id), {
+            status: 'declined',
+            updatedAt: now,
+          });
+        }
+        return Promise.resolve();
+      })
+    );
+  } catch {
+    // Continue account deletion even if no invites exist or partial update fails.
+  }
+}

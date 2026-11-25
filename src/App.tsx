@@ -18,6 +18,7 @@ import {
 import { AuthDialog } from './components/AuthDialog';
 import { AreaJamLogo, AreaJamMark, BrandContourBackdrop } from './components/BrandLogo';
 import { BrowseGrid } from './components/BrowseGrid';
+import { DeleteAccountDialog } from './components/DeleteAccountDialog';
 import { DetailDialog } from './components/DetailDialog';
 import { HowItWorksDialog } from './components/HowItWorksDialog';
 import { InstrumentIconSprite } from './components/InstrumentIcons';
@@ -36,6 +37,7 @@ import {
   blockUser,
   buildThreadFromInvite,
   cancelJamInvite,
+  deleteAccountFirestoreData,
   deleteProfileWallNote,
   deleteSharedProfile,
   ensureThreadForAcceptedInvite,
@@ -53,11 +55,17 @@ import {
   unblockUser,
 } from './lib/firestorePilot';
 import { stopCardPreview } from './lib/audioPreview';
-import { signOutUser, subscribeAuth } from './lib/auth';
+import {
+  deleteCurrentAuthUser,
+  ensureRecentAuthIfNeeded,
+  signOutUser,
+  subscribeAuth,
+} from './lib/auth';
 import { subscribeColorScheme, toggleColorScheme } from './lib/colorScheme';
 import { detectLocationByIp, estimateRoughDistanceMiles } from './lib/location';
 import { runFilterTransition } from './lib/viewTransition';
 import {
+  clearStoredUserState,
   loadState,
   parseUrlState,
   resetPassedSwipes,
@@ -146,6 +154,7 @@ export function App() {
   const [regionModalOpen, setRegionModalOpen] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [authReason, setAuthReason] = useState<string | undefined>(undefined);
   const [pendingInviteTarget, setPendingInviteTarget] = useState<Listing | null>(null);
   const [pendingSafetyTarget, setPendingSafetyTarget] = useState<SafetyTarget | null>(null);
@@ -1034,6 +1043,65 @@ export function App() {
     setAuthModalOpen(true);
   };
 
+  const handleExportUserData = () => {
+    if (!user) return;
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      account: {
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        provider: user.provider,
+      },
+      publishedProfiles: ownedUserListings,
+      jamInvites: invites,
+      threads,
+      blockedUsers: blocks,
+      localPreferences: {
+        regionId: state.regionId,
+        samplesEnabled: state.samplesEnabled,
+        includeNearbyRegions: state.includeNearbyRegions,
+        locationConsent: state.locationConsent,
+        detectedCityLabel: state.detectedCityLabel,
+        customRegions: state.customRegions,
+      },
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'areajam-account-data.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast('Downloaded areajam-account-data.json.');
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!user) return;
+    const targetUid = user.uid;
+    const targetProvider = user.provider;
+    const isDemo = Boolean(user.isDemoPreview);
+
+    if (!isDemo) {
+      await ensureRecentAuthIfNeeded(targetProvider);
+      await deleteAccountFirestoreData(targetUid);
+    }
+
+    await deleteCurrentAuthUser(targetProvider);
+    clearStoredUserState(targetUid);
+    setRemoteProfiles((prev) => prev.filter((item) => item.ownerUid !== targetUid));
+    setInvites([]);
+    setThreads([]);
+    setBlocks([]);
+    setSelectedThreadId(null);
+    setActiveProfileId(null);
+    setDeleteAccountOpen(false);
+    setScopedState({ scopeUid: null, data: { ...loadState(null), mode: 'jam' } });
+    showToast('Your account and published profiles have been permanently deleted.');
+  };
+
   const handleShareProfileUrl = (listing?: Listing | null) => {
     const copiedToast = listing?.isSample
       ? 'Copied sample demo profile link.'
@@ -1707,6 +1775,8 @@ export function App() {
                 }}
                 onPreviewListing={handleOpenProfile}
                 onUnblockUser={handleUnblockUser}
+                onExportData={handleExportUserData}
+                onOpenDeleteAccount={() => setDeleteAccountOpen(true)}
               />
             )}
           </>
@@ -1878,6 +1948,14 @@ export function App() {
         onClose={() => setSafetyTarget(null)}
         onConfirmBlock={handleConfirmBlock}
         onSubmitReport={handleSubmitReport}
+      />
+
+      <DeleteAccountDialog
+        open={deleteAccountOpen}
+        displayName={user?.displayName}
+        profileCount={ownedUserListings.length}
+        onClose={() => setDeleteAccountOpen(false)}
+        onConfirmDelete={handleConfirmDeleteAccount}
       />
     </div>
   );
