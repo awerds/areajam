@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, Check, ChevronDown, MapPin, Plus, Search } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, MapPin, Navigation, Plus, Search } from 'lucide-react';
 import { ALL_US_STATE_REGIONS, STARTER_REGIONS } from '../data/regions';
 import { attachFormValidation } from '../lib/formValidation';
 import type { Listing, Region } from '../types';
@@ -11,6 +11,10 @@ interface RegionDialogProps {
   currentRegionId: string;
   includeNearbyRegions: boolean;
   listings: Listing[];
+  ipDetecting?: boolean;
+  onDetectLocation?: () => void;
+  samplesEnabled?: boolean;
+  onToggleSamples?: () => void;
   onClose: () => void;
   onSelectRegion: (regionId: string) => void;
   onToggleNearby: (next: boolean) => void;
@@ -23,6 +27,10 @@ export function RegionDialog({
   currentRegionId,
   includeNearbyRegions,
   listings,
+  ipDetecting = false,
+  onDetectLocation,
+  samplesEnabled = true,
+  onToggleSamples,
   onClose,
   onSelectRegion,
   onToggleNearby,
@@ -137,6 +145,18 @@ export function RegionDialog({
           />
         </div>
 
+        {onDetectLocation && (
+          <button
+            type="button"
+            disabled={ipDetecting}
+            onClick={onDetectLocation}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-2.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] disabled:opacity-60"
+          >
+            <Navigation className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
+            <span>{ipDetecting ? 'Detecting your city...' : 'Use my current city'}</span>
+          </button>
+        )}
+
         <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-sm">
           <div>
             <span className="block font-semibold text-[var(--ink)]">
@@ -153,6 +173,25 @@ export function RegionDialog({
             className="h-5 w-5 shrink-0"
           />
         </label>
+
+        {onToggleSamples && (
+          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-sm">
+            <div>
+              <span className="block font-semibold text-[var(--ink)]">
+                Show sample preview profiles
+              </span>
+              <span className="block text-xs text-[var(--muted)]">
+                Include demo musicians alongside live local boards
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={samplesEnabled}
+              onChange={onToggleSamples}
+              className="h-5 w-5 shrink-0"
+            />
+          </label>
+        )}
 
         {featuredRegions.length > 0 && (
           <div className="space-y-2">

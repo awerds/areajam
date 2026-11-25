@@ -81,7 +81,13 @@ export function BrowseGrid({
               {filtered.length}
             </span>
           </h2>
-          <p className="text-sm text-[var(--muted)]">
+          <p
+            className={
+              showingNearestFallback
+                ? 'hidden text-sm text-[var(--muted)] md:block'
+                : 'text-sm text-[var(--muted)]'
+            }
+          >
             {showingNearestFallback ? (
               <>
                 No players in {region.city} yet. Listings are sorted by estimated distance.{' '}

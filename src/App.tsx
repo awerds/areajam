@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
 import {
   ChevronDown,
   Flame,
@@ -141,15 +140,7 @@ export function App() {
   const [discoverStage, setDiscoverStage] = useState<'carousel' | 'swipe'>('carousel');
   const [focusedDeckId, setFocusedDeckId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [mobileSearchOpen, setMobileSearchOpen] = useState<boolean>(false);
-  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (mobileSearchOpen) {
-      mobileSearchInputRef.current?.focus();
-    }
-  }, [mobileSearchOpen]);
   const [ipDetecting, setIpDetecting] = useState<boolean>(false);
 
   const [regionModalOpen, setRegionModalOpen] = useState(false);
@@ -459,6 +450,27 @@ export function App() {
     });
   };
 
+  const handleSelectPlayerType = (nextValue: string) => {
+    if (nextValue === '__multi__') return;
+    runFilterTransition(() => {
+      setState((prev) => ({
+        ...prev,
+        [prev.mode === 'jam' ? 'lookingForJam' : 'lookingForGigs']: nextValue
+          ? [nextValue]
+          : [],
+      }));
+    });
+    if (activeProfileId || (activeTab !== 'discover' && activeTab !== 'browse')) {
+      stopCardPreview();
+      setActiveProfileId(null);
+      setActiveTab('discover');
+      setDiscoverStage('swipe');
+    }
+  };
+
+  const mobilePlayerSelectValue =
+    activePrefs.length === 0 ? '' : activePrefs.length === 1 ? activePrefs[0] : '__multi__';
+
   const handleSelectChipFilter = (filter: string) => {
     runFilterTransition(() => {
       setChipFilter(filter);
@@ -488,6 +500,7 @@ export function App() {
           ? [...prev.customRegions, result.region]
           : prev.customRegions,
     }));
+    setRegionModalOpen(false);
     showToast(`Local board set to ${result.detectedLabel}`);
   };
 
@@ -1035,16 +1048,6 @@ export function App() {
     }
   };
 
-  const hasMobileIpBar = !activeProfileId && state.locationConsent === 'unknown';
-  const mobileDeckOffset =
-    hasMobileIpBar && showingDeckNearestFallback
-      ? '19.75rem'
-      : hasMobileIpBar
-        ? '16.5rem'
-        : showingDeckNearestFallback
-          ? '16.5rem'
-          : '13.25rem';
-
   const isDiscoverViewportLock =
     !activeProfile &&
     !(activeProfileId && (deepLinkLoading || resolvedProfileId !== activeProfileId)) &&
@@ -1070,19 +1073,16 @@ export function App() {
 
       {/* Full-width edge-to-edge sticky header */}
       <header className="safe-top sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-xl">
-        <div className="toolbar mx-auto flex w-full max-w-[1440px] flex-nowrap items-center justify-between gap-2 px-3 pb-2 md:px-4 md:pb-2.5 lg:px-6 xl:px-10">
+        <div className="toolbar mx-auto flex w-full max-w-[1440px] flex-nowrap items-center justify-between gap-1.5 px-2.5 pb-2 md:gap-2 md:px-4 md:pb-2.5 lg:px-6 xl:px-10">
           <div className="flex shrink-0 items-center gap-2 md:gap-2.5 lg:gap-4">
             <button
               type="button"
               onClick={() => handleTabChange('discover')}
               aria-label="AreaJam home"
-              className="flex shrink-0 items-center gap-2 text-left sm:gap-2.5"
+              className="flex shrink-0 items-center justify-center gap-2 text-left sm:gap-2.5"
             >
               <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-1 shadow-sm lg:hidden">
                 <AreaJamMark className="h-full w-full" />
-              </span>
-              <span className="font-display text-[15px] font-bold leading-none tracking-tight text-[var(--ink)] md:hidden">
-                AreaJam
               </span>
 
               <span className="hidden items-center lg:inline-flex">
@@ -1134,12 +1134,56 @@ export function App() {
             </nav>
           </div>
 
+          {/* Mobile single integrated Location + Player Type selector */}
+          <div className="flex min-w-0 flex-1 max-w-[21rem] items-center overflow-hidden rounded-full border border-[var(--border)] bg-[var(--pill-bg)] shadow-xs md:hidden">
+            <button
+              type="button"
+              onClick={() => setRegionModalOpen(true)}
+              aria-label={`Change local region, currently ${currentRegion.label}`}
+              className="flex min-w-0 flex-[0.95_1_0%] items-center justify-center gap-1 rounded-l-full px-2 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:px-2.5"
+            >
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
+              <span className="min-w-0 truncate">{currentRegion.city}</span>
+              <ChevronDown className="h-3 w-3 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+            </button>
+
+            <span aria-hidden="true" className="h-4 w-px shrink-0 bg-[var(--border-strong)]" />
+
+            <div className="relative flex min-w-0 flex-[1.05_1_0%] items-center">
+              <label htmlFor="mobile-player-type" className="visually-hidden">
+                Filter by player type
+              </label>
+              <select
+                id="mobile-player-type"
+                name="player-type"
+                value={mobilePlayerSelectValue}
+                data-active={activePrefs.length > 0 ? 'true' : undefined}
+                onChange={(e) => handleSelectPlayerType(e.target.value)}
+                className="header-role-select"
+              >
+                <option value="">All players</option>
+                {activePrefs.length > 1 && (
+                  <option value="__multi__">{activePrefs.length} types</option>
+                )}
+                {prefChoices.map((pref) => (
+                  <option key={pref} value={pref}>
+                    {pref}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                className="header-role-fallback-icon pointer-events-none absolute right-2 h-3 w-3 text-[var(--muted)]"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+
           <div className="flex shrink-0 items-center gap-1.5 lg:gap-2">
             <button
               type="button"
               onClick={() => setRegionModalOpen(true)}
               aria-label={`Change local region, currently ${currentRegion.label}`}
-              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] lg:gap-1.5 lg:px-3"
+              className="hidden shrink-0 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] md:inline-flex lg:gap-1.5 lg:px-3"
             >
               <MapPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
               <span className="max-w-[6.75rem] truncate lg:max-w-none">
@@ -1158,7 +1202,7 @@ export function App() {
               aria-label="Show sample profiles"
               title="Turn sample preview profiles on or off"
               onClick={handleToggleSamples}
-              className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:inline-flex lg:gap-2 lg:px-2.5"
+              className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:inline-flex lg:gap-2 lg:px-2.5"
             >
               <span>Samples</span>
               <span
@@ -1208,7 +1252,7 @@ export function App() {
                 type="button"
                 onClick={() => handleTabChange('post')}
                 aria-label="Open your profile and studio"
-                className="hidden shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] sm:inline-flex lg:px-3"
+                className="hidden shrink-0 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold transition hover:bg-[var(--surface-hover)] md:inline-flex lg:px-3"
               >
                 <UserCheck className="h-3.5 w-3.5 text-[var(--ok)]" aria-hidden="true" />
                 <span className="max-w-[5.5rem] truncate lg:max-w-[7rem]">{user.displayName}</span>
@@ -1217,7 +1261,7 @@ export function App() {
               <button
                 type="button"
                 onClick={() => openAuthPrompt()}
-                className="hidden shrink-0 whitespace-nowrap rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 sm:inline-flex lg:px-3.5"
+                className="hidden shrink-0 whitespace-nowrap rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-bold text-[var(--bg)] transition hover:opacity-90 md:inline-flex lg:px-3.5"
               >
                 Sign in
               </button>
@@ -1226,13 +1270,9 @@ export function App() {
         </div>
       </header>
 
-      {/* Opt-in IP Geolocation consent bar */}
+      {/* Opt-in IP Geolocation consent bar (desktop/tablet only; mobile uses RegionDialog) */}
       {!activeProfileId && state.locationConsent === 'unknown' && (
-        <div
-          className={`relative z-10 border-b border-[var(--border)] bg-[var(--surface-subtle)] ${
-            isDiscoverViewportLock && discoverStage === 'carousel' ? 'hidden md:block' : ''
-          }`}
-        >
+        <div className="relative z-10 hidden border-b border-[var(--border)] bg-[var(--surface-subtle)] md:block">
           <div className="mx-auto flex w-full max-w-[1440px] flex-nowrap items-center justify-between gap-2 px-3 py-1 text-xs md:gap-3 md:px-6 md:py-1.5 xl:px-10">
             <div className="flex min-w-0 items-center gap-1.5 text-[var(--ink)] md:gap-2">
               <Navigation className="h-3.5 w-3.5 shrink-0 text-[var(--accent-text)] md:h-4 md:w-4" aria-hidden="true" />
@@ -1291,7 +1331,6 @@ export function App() {
         </main>
       ) : (
         <main
-          style={{ '--mobile-deck-offset': mobileDeckOffset } as CSSProperties}
           className={`relative z-10 mx-auto w-full max-w-[1440px] flex-1 px-2.5 pt-1.5 md:px-6 md:pt-4 xl:px-10 ${
             isMobileSwipeLock ? 'flex min-h-0 flex-col md:block' : ''
           }`}
@@ -1336,146 +1375,7 @@ export function App() {
         ) : (
           <>
             {activeTab === 'discover' && (
-              <div className="flex min-h-0 flex-1 flex-col gap-2 md:grid md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
-                {/* Mobile single-row bar: search toggle, swipeable instrument pills, pinned Samples switch */}
-                {mobileSearchOpen ? (
-                  <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 md:hidden">
-                    <div className="relative min-w-0">
-                      <label htmlFor="mobile-discover-search" className="visually-hidden">
-                        Search players, gear, genres, or neighborhoods
-                      </label>
-                      <Search
-                        className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted)]"
-                        aria-hidden="true"
-                      />
-                      <input
-                        ref={mobileSearchInputRef}
-                        id="mobile-discover-search"
-                        type="search"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search name, gear, genre..."
-                        className="w-full rounded-full border border-[var(--accent)] bg-[var(--pill-bg)] py-1.5 pl-9 pr-3 text-xs text-[var(--ink)] placeholder:text-[var(--placeholder-ink)] focus:outline-none"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setMobileSearchOpen(false)}
-                      aria-label="Close search bar"
-                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--muted)] transition hover:text-[var(--ink)]"
-                    >
-                      <X className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[auto_minmax(0,1fr)] md:hidden">
-                    <button
-                      type="button"
-                      onClick={() => setMobileSearchOpen(true)}
-                      aria-label="Search players, gear, genre, or neighborhood"
-                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition"
-                      style={
-                        searchQuery.trim().length > 0
-                          ? {
-                              backgroundColor: 'var(--accent)',
-                              color: 'var(--accent-ink)',
-                              borderColor: 'var(--accent)',
-                            }
-                          : {
-                              backgroundColor: 'var(--pill-bg)',
-                              color: 'var(--ink)',
-                              borderColor: 'var(--border)',
-                            }
-                      }
-                    >
-                      <Search className="h-4 w-4" aria-hidden="true" />
-                    </button>
-
-                    <div className="swipe-chip-strip no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
-                      {searchQuery.trim().length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchQuery('')}
-                          aria-label={`Clear search "${searchQuery.trim()}"`}
-                          style={{ scrollSnapAlign: 'start' }}
-                          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--accent)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-ink)]"
-                        >
-                          <span className="max-w-[7rem] truncate">{searchQuery.trim()}</span>
-                          <X className="h-3 w-3 shrink-0" aria-hidden="true" />
-                        </button>
-                      )}
-
-                      {(activePrefs.length > 0 || chipFilter !== 'All') && (
-                        <button
-                          type="button"
-                          onClick={clearAllFilters}
-                          style={{ scrollSnapAlign: 'start' }}
-                          className="shrink-0 rounded-full border border-[var(--accent-text)] bg-[var(--pill-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-text)]"
-                        >
-                          Clear
-                        </button>
-                      )}
-
-                      {prefChoices.map((pref) => {
-                        const selected = activePrefs.includes(pref);
-                        return (
-                          <button
-                            key={pref}
-                            type="button"
-                            aria-pressed={selected}
-                            onClick={() => togglePreference(pref)}
-                            className="filter-chip-btn shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
-                            style={
-                              selected
-                                ? {
-                                    scrollSnapAlign: 'start',
-                                    backgroundColor: 'var(--accent)',
-                                    color: 'var(--accent-ink)',
-                                    borderColor: 'var(--accent)',
-                                  }
-                                : {
-                                    scrollSnapAlign: 'start',
-                                    backgroundColor: 'var(--pill-bg)',
-                                    color: 'var(--muted)',
-                                    borderColor: 'var(--border)',
-                                  }
-                            }
-                          >
-                            {pref}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={samplesEnabled}
-                      aria-label="Show sample profiles"
-                      onClick={handleToggleSamples}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1 text-[11px] font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] sm:hidden"
-                    >
-                      <span>Samples</span>
-                      <span
-                        aria-hidden="true"
-                        className="relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full p-0.5 transition-colors"
-                        style={{
-                          backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
-                        }}
-                      >
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full shadow-xs transition-transform ${
-                            samplesEnabled ? 'translate-x-2.5' : 'translate-x-0'
-                          }`}
-                          style={{
-                            backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
-                          }}
-                        />
-                      </span>
-                    </button>
-                  </div>
-                )}
-
+              <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
                 {/* Desktop & Tablet Left Column: Original Hero + Unified Filter Grid + CTAs */}
                 <div className="hidden space-y-5 md:col-span-6 md:block lg:col-span-7">
                   <div className="space-y-2.5">
@@ -1652,7 +1552,7 @@ export function App() {
 
             {activeTab === 'browse' && (
               <div className="space-y-6">
-                <div className="glass-surface space-y-3 rounded-3xl p-4">
+                <div className="glass-surface hidden space-y-3 rounded-3xl p-4 md:block">
                   <div className="flex flex-wrap items-center justify-between gap-2.5">
                     <p className="text-xs font-semibold text-[var(--muted)]">
                       {state.mode === 'jam'
@@ -1899,6 +1799,10 @@ export function App() {
         currentRegionId={state.regionId}
         includeNearbyRegions={state.includeNearbyRegions}
         listings={allListings}
+        ipDetecting={ipDetecting}
+        onDetectLocation={() => void handleAllowIpLocation()}
+        samplesEnabled={samplesEnabled}
+        onToggleSamples={handleToggleSamples}
         onClose={() => setRegionModalOpen(false)}
         onSelectRegion={(regionId) => setState((prev) => ({ ...prev, regionId }))}
         onToggleNearby={(next) => setState((prev) => ({ ...prev, includeNearbyRegions: next }))}

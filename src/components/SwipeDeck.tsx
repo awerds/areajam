@@ -444,7 +444,7 @@ export function SwipeDeck({
   return (
     <div className="mx-auto flex w-full min-h-0 flex-1 flex-col items-center md:flex-none md:max-w-[24rem]">
       {showingNearestFallback && (
-        <div className="mb-2.5 flex w-full shrink-0 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md">
+        <div className="mb-2.5 hidden w-full shrink-0 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-3.5 py-2 text-xs backdrop-blur-md md:flex">
           <span className="flex min-w-0 items-start gap-2 font-medium leading-snug text-[var(--ink)]">
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
             <span>
