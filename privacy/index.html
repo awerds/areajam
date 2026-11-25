@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Privacy Policy — AreaJam</title>
+    <meta
+      name="description"
+      content="AreaJam Privacy Policy explaining how authentication, Cloud Firestore profiles, optional IP city lookup, and account deletion work."
+    />
+    <link rel="icon" href="../favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="../icon.svg" />
+    <link rel="stylesheet" href="../legal.css" />
+  </head>
+  <body>
+    <div class="legal-shell">
+      <header class="legal-header">
+        <a href="https://areajam.com/" class="brand-link">AreaJam</a>
+        <nav class="legal-nav" aria-label="Legal navigation">
+          <a href="../privacy/" aria-current="page">Privacy Policy</a>
+          <a href="../terms/">Terms of Service</a>
+          <a href="../support/">Support &amp; Safety</a>
+          <a href="https://areajam.com/">Back to app</a>
+        </nav>
+      </header>
+
+      <main>
+        <h1>Privacy Policy</h1>
+        <p class="effective-date">Effective Date: November 25, 2026 &mdash; Applies to areajam.com</p>
+
+        <div class="callout">
+          <strong>Summary:</strong> Browse local players with zero account or ad trackers. We never publish your sign-in email address, never request GPS location, use IP-to-city matching only with your click consent, and let you export your data or permanently delete your account inside the app at any time.
+        </div>
+
+        <h2>1. Who We Are</h2>
+        <p>
+          AreaJam (<strong>areajam.com</strong>) is a regional music discovery and collaboration platform helping local musicians find players to jam with. Contact us regarding privacy or data requests at
+          <a href="mailto:privacy@areajam.com">privacy@areajam.com</a>.
+        </p>
+
+        <h2>2. Information We Collect</h2>
+        <ul>
+          <li>
+            <strong>Authentication Account Data:</strong> When you choose <em>Continue with Google</em> or <em>Continue with Apple</em>, Google Firebase Authentication provides your unique account ID (UID), display name, email address, and optional profile photo URL. Your sign-in email is kept private and is <strong>never written to public musician profile documents</strong>.
+          </li>
+          <li>
+            <strong>Public Profile &amp; Community Content:</strong> When you create and publish a musician listing in <em>Profile &amp; studio</em>, the fields you submit—such as stage title, instruments, city board, neighborhood name, genres, bio, availability, Gear Locker entries, linked YouTube/Instagram/TikTok/Vimeo/SoundCloud clip URLs, optional social handle, and public Wall Notes—become publicly visible to anyone browsing AreaJam so musicians can discover you.
+          </li>
+          <li>
+            <strong>Jam Invites &amp; Direct Messages:</strong> When you send or accept a jam invite, Cloud Firestore stores your participant IDs, display names, invite note, and 1-on-1 thread messages strictly between the two participants. Messages are gated by participant rules and mutual block checks.
+          </li>
+          <li>
+            <strong>Safety &amp; Moderation Data:</strong> If you block or report another user, AreaJam stores your private block list (under your UID) and write-only safety reports (target user, reason, optional note) to enforce blocks and review abuse.
+          </li>
+          <li>
+            <strong>Browser Storage (localStorage &amp; Service Worker Cache):</strong> Without tracking pixels or third-party ad cookies, your browser locally stores your UI preferences (selected city board, theme preference, filters, passed-card history, optional sample visibility, and city-detection choice) and offline shell assets.
+          </li>
+        </ul>
+
+        <h2>3. Location Data (No GPS)</h2>
+        <p>
+          AreaJam does <strong>not</strong> access browser or device GPS hardware and does not track precise coordinates. Only if you click <em>Allow</em> or <em>Use my current city</em>, your browser performs a coarse IP-to-city lookup via third-party lookup APIs (<a href="https://ipwho.is/" rel="noopener noreferrer" target="_blank">ipwho.is</a> or fallback <a href="https://ipapi.co/" rel="noopener noreferrer" target="_blank">ipapi.co</a> with <code>no-referrer</code>) solely to select the closest metro city board locally in your browser.
+        </p>
+
+        <h2>4. Third-Party Services &amp; Embedded Media</h2>
+        <ul>
+          <li><strong>Google Firebase (Auth &amp; Cloud Firestore):</strong> Stores authentication sessions, public profiles, wall notes, invites, messages, blocks, and safety reports under strict Firestore Security Rules.</li>
+          <li><strong>Linked Media Embeds &amp; YouTube Data:</strong> Profiles may link external clips from YouTube, Instagram, TikTok, Vimeo, or SoundCloud. Playing embedded media connects directly to those providers under their respective privacy policies.</li>
+          <li><strong>GitHub Pages Hosting:</strong> Serves static site files over HTTPS; GitHub may log standard web server request metadata for security and reliability.</li>
+        </ul>
+
+        <h2>5. Your Rights, Export &amp; Account Deletion</h2>
+        <p>You can exercise your privacy rights directly in the app or by emailing <a href="mailto:privacy@areajam.com">privacy@areajam.com</a> (answered within 30 days):</p>
+        <ul>
+          <li><strong>Export Your Data:</strong> Signed-in users can click <em>Profile &amp; studio &rarr; Account, data &amp; legal &rarr; Download my data (JSON)</em> to download a portable copy of your account summary, published profiles, invites, threads, blocks, and preferences.</li>
+          <li><strong>Delete Your Account:</strong> Signed-in users can permanently delete their account directly via <em>Profile &amp; studio &rarr; Account, data &amp; legal &rarr; Delete account</em>. After re-authentication if required, AreaJam deletes your published profiles, their wall notes, your block list, cancels pending invites you sent, clears local device preferences, and deletes your Firebase Auth user record.</li>
+          <li><strong>California &amp; EEA/UK Users:</strong> AreaJam does not sell or share personal information for cross-context behavioral advertising. You may request access, correction, or deletion under applicable GDPR, UK GDPR, or CCPA/CPRA rights.</li>
+        </ul>
+
+        <h2>6. Children &amp; Minimum Age (18+)</h2>
+        <p>
+          AreaJam is intended strictly for adults aged <strong>18 and older</strong> who are organizing real-world rehearsals and musical collaborations. We do not knowingly collect personal information from anyone under 18. If you believe a minor has created an account or profile, contact <a href="mailto:privacy@areajam.com">privacy@areajam.com</a> for prompt removal.
+        </p>
+
+        <h2>7. Policy Updates</h2>
+        <p>
+          We may update this Privacy Policy as features evolve (including future native iOS builds). Material changes update the Effective Date above.
+        </p>
+      </main>
+
+      <footer class="legal-footer">
+        <span>AreaJam &mdash; areajam.com</span>
+        <span>Questions? <a href="mailto:privacy@areajam.com">privacy@areajam.com</a></span>
+      </footer>
+    </div>
+  </body>
+</html>
