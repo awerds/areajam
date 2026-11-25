@@ -132,7 +132,7 @@ export function SwipeDeck({
               gsap.fromTo(
                 nextCardRef.current,
                 { scale: 0.88, y: 34, opacity: 0 },
-                { scale: 0.95, y: 12, opacity: 0.72, duration: 0.36, delay: 0.05, ease: 'power3.out' }
+                { scale: 0.95, y: 16, opacity: 0.72, duration: 0.36, delay: 0.05, ease: 'power3.out' }
               );
             }
           } else {
@@ -272,7 +272,7 @@ export function SwipeDeck({
         const progress = Math.min(1, Math.abs(dx) / 220);
         gsap.set(nextCardRef.current, {
           scale: 0.95 + progress * 0.05,
-          y: 12 - progress * 12,
+          y: 16 - progress * 16,
           opacity: 0.72 + progress * 0.28,
         });
       }
@@ -330,7 +330,7 @@ export function SwipeDeck({
       if (nextCardRef.current) {
         gsap.to(nextCardRef.current, {
           scale: 0.95,
-          y: 12,
+          y: 16,
           opacity: 0.72,
           duration: 0.32,
           ease: 'power2.out',
@@ -467,7 +467,7 @@ export function SwipeDeck({
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 flex flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[#10131d] shadow-[0_24px_60px_var(--glass-shadow)] md:rounded-[2rem]"
             style={{
-              transform: 'translate3d(0, 12px, 0) scale(0.95)',
+              transform: 'translate3d(0, 16px, 0) scale(0.95)',
               opacity: 0.72,
             }}
           >
@@ -728,7 +728,7 @@ export function SwipeDeck({
       </div>
 
       {/* Tinder 5-orb circular action bar (always visible on mobile & desktop) */}
-      <div className="mt-3 flex shrink-0 items-center justify-center gap-3 sm:gap-4 md:mt-2.5">
+      <div className="mt-4 flex shrink-0 items-center justify-center gap-3 sm:gap-4 md:mt-2.5">
         <button
           type="button"
           onClick={onUndo}

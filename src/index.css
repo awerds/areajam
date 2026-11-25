@@ -929,11 +929,11 @@ html {
     radial-gradient(60% 45% at 50% 96%, var(--orb-sec-a), transparent 72%);
 }
 
-.panoramic-ribbon-clip-desktop {
+@utility panoramic-ribbon-clip-desktop {
   clip-path: url(#areajam-hero-arc-desktop);
 }
 
-.panoramic-ribbon-clip-mobile {
+@utility panoramic-ribbon-clip-mobile {
   clip-path: url(#areajam-hero-arc-mobile);
 }
 
@@ -992,7 +992,7 @@ html {
   perspective: 1200px;
 }
 
-.reel-aspect {
+@utility reel-aspect {
   aspect-ratio: 9 / 16;
 }
 

@@ -99,7 +99,7 @@ export function PanoramicHero({
   return (
     <section
       aria-label="Featured local musicians carousel"
-      className="hero-ambient-stage relative flex flex-1 flex-col justify-center overflow-x-clip py-4 md:py-6"
+      className="hero-ambient-stage relative flex flex-1 flex-col justify-center overflow-x-clip py-2.5 sm:py-4 md:py-6"
     >
       {/* Inline SVG arc clip definitions (kept 0x0 in layout, not display:none) */}
       <svg className="pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
@@ -242,7 +242,7 @@ export function PanoramicHero({
       </div>
 
       {/* Primary CTAs */}
-      <div ref={ctaRef} className="mt-4 sm:mt-5 md:mt-6">
+      <div ref={ctaRef} className="mt-3 sm:mt-5 md:mt-6">
         <div className="flex flex-col items-center gap-2.5 px-5 md:hidden">
           <button
             type="button"
