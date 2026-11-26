@@ -7,11 +7,14 @@ import {
   ChevronDown,
   Download,
   ExternalLink,
+  Globe,
+  GraduationCap,
   Instagram,
   Link2,
   Loader2,
   LogOut,
   MapPin,
+  Mic2,
   Plus,
   ShieldBan,
   ShieldCheck,
@@ -159,6 +162,12 @@ export function PostView({
   const [themeId, setThemeId] = useState<ProfileThemeId>('stage-coral');
   const [moodStatus, setMoodStatus] = useState('');
   const [soundsLikeInput, setSoundsLikeInput] = useState('');
+  const [offersLessons, setOffersLessons] = useState(false);
+  const [offersSession, setOffersSession] = useState(false);
+  const [remoteFriendly, setRemoteFriendly] = useState(false);
+  const [lessonRate, setLessonRate] = useState('');
+  const [sessionRate, setSessionRate] = useState('');
+  const [serviceNote, setServiceNote] = useState('');
 
   // Form / Publish / Studio status
   const [formError, setFormError] = useState<string | null>(null);
@@ -232,6 +241,13 @@ export function PostView({
       gearOrBackline: gearOrBackline.trim() || 'Shared in jam thread',
       gearLocker,
       availability: availability.trim() || 'Weeknights & Sunday afternoons',
+      offersLessons: offersLessons || undefined,
+      offersSession: offersSession || undefined,
+      remoteFriendly: remoteFriendly || undefined,
+      lessonRate: offersLessons ? lessonRate.trim().slice(0, 32) || undefined : undefined,
+      sessionRate: offersSession ? sessionRate.trim().slice(0, 32) || undefined : undefined,
+      serviceNote:
+        offersLessons || offersSession ? serviceNote.trim().slice(0, 180) || undefined : undefined,
       instagramHandle: normalizedHandle,
       sampleLink: previewClips.find((c) => c.embedUrl)?.embedUrl,
       visualSeed: 17,
@@ -258,12 +274,18 @@ export function PostView({
     gearOrBackline,
     genres,
     instruments,
+    lessonRate,
     moodStatus,
     neighborhood,
     normalizedHandle,
+    offersLessons,
+    offersSession,
     region,
+    remoteFriendly,
     roleCategory,
     seekingOrOffer,
+    serviceNote,
+    sessionRate,
     soundsLikeInput,
     subtitle,
     themeId,
@@ -521,6 +543,13 @@ export function PostView({
       gearOrBackline: gearOrBackline.trim() || 'Shared in jam thread',
       gearLocker,
       availability: availability.trim() || 'Weeknights & Sunday afternoons',
+      offersLessons: offersLessons || undefined,
+      offersSession: offersSession || undefined,
+      remoteFriendly: remoteFriendly || undefined,
+      lessonRate: offersLessons ? lessonRate.trim().slice(0, 32) || undefined : undefined,
+      sessionRate: offersSession ? sessionRate.trim().slice(0, 32) || undefined : undefined,
+      serviceNote:
+        offersLessons || offersSession ? serviceNote.trim().slice(0, 180) || undefined : undefined,
       instagramHandle: normalizedHandle,
       sampleLink:
         firstLinked ??
@@ -557,6 +586,12 @@ export function PostView({
       setFeaturedClipId(undefined);
       setMoodStatus('');
       setSoundsLikeInput('');
+      setOffersLessons(false);
+      setOffersSession(false);
+      setRemoteFriendly(false);
+      setLessonRate('');
+      setSessionRate('');
+      setServiceNote('');
       setYtChannel(null);
       setYtAutofillNotice(null);
       setYtQuery('');
@@ -1318,6 +1353,143 @@ export function PostView({
                 className="field-control resize-none"
               />
               <p id="post-bio-error" className="field-error" />
+            </div>
+
+            <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-xs font-bold text-[var(--ink)]">
+                    Offer lessons, session work, or remote collabs (optional, free)
+                  </h3>
+                  <p className="text-[11px] text-[var(--muted)]">
+                    Adds badges to your musician card so players can find you in Find a Session Player and Find a Teacher.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  aria-pressed={offersSession}
+                  onClick={() => setOffersSession((v) => !v)}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
+                  style={
+                    offersSession
+                      ? {
+                          backgroundColor: 'rgba(245, 158, 11, 0.16)',
+                          borderColor: 'rgba(245, 158, 11, 0.55)',
+                          color: 'var(--ink)',
+                        }
+                      : {
+                          backgroundColor: 'var(--pill-bg)',
+                          borderColor: 'var(--border)',
+                          color: 'var(--muted)',
+                        }
+                  }
+                >
+                  <Mic2 className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
+                  <span>Session Player</span>
+                </button>
+
+                <button
+                  type="button"
+                  aria-pressed={offersLessons}
+                  onClick={() => setOffersLessons((v) => !v)}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
+                  style={
+                    offersLessons
+                      ? {
+                          backgroundColor: 'rgba(16, 185, 129, 0.16)',
+                          borderColor: 'rgba(16, 185, 129, 0.55)',
+                          color: 'var(--ink)',
+                        }
+                      : {
+                          backgroundColor: 'var(--pill-bg)',
+                          borderColor: 'var(--border)',
+                          color: 'var(--muted)',
+                        }
+                  }
+                >
+                  <GraduationCap className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+                  <span>Teacher</span>
+                </button>
+
+                <button
+                  type="button"
+                  aria-pressed={remoteFriendly}
+                  onClick={() => setRemoteFriendly((v) => !v)}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
+                  style={
+                    remoteFriendly
+                      ? {
+                          backgroundColor: 'rgba(14, 165, 233, 0.16)',
+                          borderColor: 'rgba(14, 165, 233, 0.55)',
+                          color: 'var(--ink)',
+                        }
+                      : {
+                          backgroundColor: 'var(--pill-bg)',
+                          borderColor: 'var(--border)',
+                          color: 'var(--muted)',
+                        }
+                  }
+                >
+                  <Globe className="h-3.5 w-3.5 text-sky-500" aria-hidden="true" />
+                  <span>Remote-friendly</span>
+                </button>
+              </div>
+
+              {(offersSession || offersLessons) && (
+                <div className="grid gap-3 pt-1 sm:grid-cols-2">
+                  {offersSession && (
+                    <div>
+                      <label htmlFor="post-session-rate" className="mb-1 block text-xs font-semibold">
+                        Session rate (optional)
+                      </label>
+                      <input
+                        id="post-session-rate"
+                        type="text"
+                        maxLength={32}
+                        value={sessionRate}
+                        onChange={(e) => setSessionRate(e.target.value)}
+                        placeholder="e.g. $85/track or $75/hr"
+                        className="field-control"
+                      />
+                    </div>
+                  )}
+
+                  {offersLessons && (
+                    <div>
+                      <label htmlFor="post-lesson-rate" className="mb-1 block text-xs font-semibold">
+                        Lesson rate (optional)
+                      </label>
+                      <input
+                        id="post-lesson-rate"
+                        type="text"
+                        maxLength={32}
+                        value={lessonRate}
+                        onChange={(e) => setLessonRate(e.target.value)}
+                        placeholder="e.g. $65/hr"
+                        className="field-control"
+                      />
+                    </div>
+                  )}
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="post-service-note" className="mb-1 block text-xs font-semibold">
+                      Service details (optional)
+                    </label>
+                    <input
+                      id="post-service-note"
+                      type="text"
+                      maxLength={180}
+                      value={serviceNote}
+                      onChange={(e) => setServiceNote(e.target.value)}
+                      placeholder="e.g. Multi-mic drum stems in 48h, or beginner-to-advanced guitar lessons on Zoom"
+                      className="field-control"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">

@@ -26,6 +26,12 @@ rules_version = '2';
 //   - gearOrBackline: string (required, <= 400)
 //   - gearLocker: list<map> (required, 0..20 items)
 //   - availability: string (required, <= 80)
+//   - offersLessons: bool (optional)
+//   - offersSession: bool (optional)
+//   - remoteFriendly: bool (optional)
+//   - lessonRate: string (optional, <= 32)
+//   - sessionRate: string (optional, <= 32)
+//   - serviceNote: string (optional, <= 180)
 //   - instagramHandle: string (optional, <= 32)
 //   - sampleLink: string (optional, <= 200)
 //   - clips: list<map> (required, 1..4 items)
@@ -127,6 +133,10 @@ service cloud.firestore {
 
     function isOptionalString(data, field, maxLen) {
       return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isOptionalBool(data, field) {
+      return !(field in data) || data[field] is bool;
     }
 
     function isValidStringList(arr, minCount, maxCount, minItemLen, maxItemLen) {
@@ -247,9 +257,10 @@ service cloud.firestore {
         'id', 'ownerUid', 'ownerName', 'side', 'roleCategory', 'instruments',
         'regionId', 'regionLabel', 'regionState', 'neighborhood', 'title',
         'subtitle', 'seekingOrOffer', 'genres', 'tags', 'bio', 'gearOrBackline',
-        'gearLocker', 'availability', 'instagramHandle', 'sampleLink', 'clips',
-        'featuredClipId', 'profileStyle', 'visualSeed', 'isPublished',
-        'createdAt', 'updatedAt'
+        'gearLocker', 'availability', 'offersLessons', 'offersSession',
+        'remoteFriendly', 'lessonRate', 'sessionRate', 'serviceNote',
+        'instagramHandle', 'sampleLink', 'clips', 'featuredClipId',
+        'profileStyle', 'visualSeed', 'isPublished', 'createdAt', 'updatedAt'
       ];
       let requiredKeys = [
         'id', 'ownerUid', 'ownerName', 'side', 'roleCategory', 'instruments',
@@ -279,6 +290,12 @@ service cloud.firestore {
              isBoundedString(data.gearOrBackline, 0, 400) &&
              isValidGearLocker(data.gearLocker) &&
              isBoundedString(data.availability, 0, 80) &&
+             isOptionalBool(data, 'offersLessons') &&
+             isOptionalBool(data, 'offersSession') &&
+             isOptionalBool(data, 'remoteFriendly') &&
+             isOptionalString(data, 'lessonRate', 32) &&
+             isOptionalString(data, 'sessionRate', 32) &&
+             isOptionalString(data, 'serviceNote', 180) &&
              isOptionalString(data, 'instagramHandle', 32) &&
              isOptionalString(data, 'sampleLink', 200) &&
              isValidClips(data.clips) &&

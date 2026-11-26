@@ -2,6 +2,8 @@ export type AppMode = 'jam' | 'gigs';
 
 export type NavTab = 'discover' | 'browse' | 'matches' | 'post';
 
+export type DiscoveryRole = 'musician' | 'session' | 'teacher';
+
 export type InboxFolder = 'inbox' | 'requests' | 'sent';
 
 export type GigSubtype = 'band-for-hire' | 'open-gig';
@@ -121,6 +123,12 @@ export interface Listing {
   gearLocker: GearItem[];
   availability: string;
   payOrSplit?: string;
+  offersLessons?: boolean;
+  offersSession?: boolean;
+  remoteFriendly?: boolean;
+  lessonRate?: string;
+  sessionRate?: string;
+  serviceNote?: string;
   instagramHandle?: string;
   sampleLink?: string;
   visualSeed: number;
@@ -193,6 +201,7 @@ export interface AppState {
   regionId: string;
   mode: AppMode;
   includeNearbyRegions: boolean;
+  includeRemoteFriendly: boolean;
   locationConsent: LocationConsent;
   detectedCityLabel?: string;
   lookingForJam: string[];

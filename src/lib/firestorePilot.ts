@@ -104,6 +104,12 @@ function normalizeRemoteProfile(id: string, data: Record<string, unknown>): List
     gearOrBackline: typeof data.gearOrBackline === 'string' ? data.gearOrBackline : '',
     gearLocker: rawGear,
     availability: typeof data.availability === 'string' ? data.availability : 'Flexible',
+    offersLessons: data.offersLessons === true ? true : undefined,
+    offersSession: data.offersSession === true ? true : undefined,
+    remoteFriendly: data.remoteFriendly === true ? true : undefined,
+    lessonRate: typeof data.lessonRate === 'string' && data.lessonRate.trim() ? data.lessonRate.trim() : undefined,
+    sessionRate: typeof data.sessionRate === 'string' && data.sessionRate.trim() ? data.sessionRate.trim() : undefined,
+    serviceNote: typeof data.serviceNote === 'string' && data.serviceNote.trim() ? data.serviceNote.trim() : undefined,
     instagramHandle:
       typeof data.instagramHandle === 'string' ? data.instagramHandle : undefined,
     sampleLink: typeof data.sampleLink === 'string' ? data.sampleLink : undefined,
@@ -187,6 +193,19 @@ function serializeProfileDoc(listing: Listing, user: AuthUser, region?: Region):
 
   const featuredClipId = listing.featuredClipId?.trim().slice(0, 80);
   if (featuredClipId) docData.featuredClipId = featuredClipId;
+
+  if (listing.offersLessons) docData.offersLessons = true;
+  if (listing.offersSession) docData.offersSession = true;
+  if (listing.remoteFriendly) docData.remoteFriendly = true;
+
+  const lessonRate = listing.lessonRate?.trim().slice(0, 32);
+  if (lessonRate) docData.lessonRate = lessonRate;
+
+  const sessionRate = listing.sessionRate?.trim().slice(0, 32);
+  if (sessionRate) docData.sessionRate = sessionRate;
+
+  const serviceNote = listing.serviceNote?.trim().slice(0, 180);
+  if (serviceNote) docData.serviceNote = serviceNote;
 
   return docData;
 }

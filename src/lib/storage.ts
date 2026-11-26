@@ -57,6 +57,7 @@ export function getDefaultState(): AppState {
     regionId: PILOT_REGION_ID,
     mode: 'jam',
     includeNearbyRegions: false,
+    includeRemoteFriendly: false,
     locationConsent: 'unknown',
     detectedCityLabel: undefined,
     lookingForJam: [],
@@ -173,6 +174,7 @@ function buildStateFromParsed(
     regionId: resolvedRegionId,
     mode: 'jam',
     includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
+    includeRemoteFriendly: Boolean(parsed.includeRemoteFriendly),
     locationConsent: consent,
     detectedCityLabel:
       typeof parsed.detectedCityLabel === 'string' ? parsed.detectedCityLabel : undefined,

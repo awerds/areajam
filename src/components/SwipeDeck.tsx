@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { Flame, Info, MapPin, Maximize2, MessageCircle, RotateCcw, Ticket, X } from 'lucide-react';
-import type { AppMode, InboxFolder, JamInvite, Listing, Region, SwipeDecision } from '../types';
+import { Flame, Globe, GraduationCap, Info, MapPin, Maximize2, MessageCircle, Mic2, RotateCcw, Ticket, X } from 'lucide-react';
+import type { AppMode, DiscoveryRole, InboxFolder, JamInvite, Listing, Region, SwipeDecision } from '../types';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import { AreaJamMark } from './BrandLogo';
@@ -11,10 +11,12 @@ import { InstrumentBadgeRow } from './InstrumentIcons';
 interface SwipeDeckProps {
   cards: Listing[];
   mode: AppMode;
+  discoveryRole?: DiscoveryRole;
   region: Region;
   allRegions: Region[];
   canUndo: boolean;
   includeNearbyRegions: boolean;
+  includeRemoteFriendly?: boolean;
   showingNearestFallback?: boolean;
   filterKey?: string;
   soundEnabled: boolean;
@@ -28,6 +30,7 @@ interface SwipeDeckProps {
   onInvite: (listing: Listing) => void;
   onOpenInvites: (threadId?: string, folder?: InboxFolder) => void;
   onEnableNearby: () => void;
+  onToggleRemoteFriendly?: () => void;
   onResetPassed: () => void;
   onGoToPost: () => void;
 }
@@ -35,10 +38,12 @@ interface SwipeDeckProps {
 export function SwipeDeck({
   cards,
   mode,
+  discoveryRole = 'musician',
   region,
   allRegions,
   canUndo,
   includeNearbyRegions,
+  includeRemoteFriendly = false,
   showingNearestFallback = false,
   filterKey = '',
   soundEnabled,
@@ -52,6 +57,7 @@ export function SwipeDeck({
   onInvite,
   onOpenInvites,
   onEnableNearby,
+  onToggleRemoteFriendly,
   onResetPassed,
   onGoToPost,
 }: SwipeDeckProps) {
@@ -369,6 +375,23 @@ export function SwipeDeck({
           >
             Create live profile in {region.city}
           </button>
+          {!includeRemoteFriendly && onToggleRemoteFriendly && (
+            <button
+              type="button"
+              onClick={onToggleRemoteFriendly}
+              className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-[var(--jam)] bg-[var(--jam-soft)] px-4 py-3 text-sm font-semibold text-[var(--jam-text)] transition hover:opacity-90"
+            >
+              <Globe className="h-4 w-4" aria-hidden="true" />
+              <span>
+                Include remote-friendly{' '}
+                {discoveryRole === 'session'
+                  ? 'session players'
+                  : discoveryRole === 'teacher'
+                    ? 'teachers'
+                    : 'musicians'}
+              </span>
+            </button>
+          )}
           {!includeNearbyRegions && (
             <button
               type="button"
@@ -537,13 +560,30 @@ export function SwipeDeck({
                 <div className="dark-stage absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5">
                   <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-white/85">
                     <span className="truncate">{topLocationLabel}</span>
-                    {topRoughDistanceCompact && (
+                    {topCard.regionId !== region.id && topCard.remoteFriendly && includeRemoteFriendly ? (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-300/35 bg-black/60 px-2 py-0.5 text-[10px] font-bold text-sky-300">
+                        <Globe className="h-2.5 w-2.5" aria-hidden="true" />
+                        <span>Remote</span>
+                      </span>
+                    ) : topRoughDistanceCompact ? (
                       <span
                         title={topRoughDistanceVerbose ?? undefined}
                         aria-label={topRoughDistanceVerbose ?? topRoughDistanceCompact}
                         className="shrink-0 rounded-full border border-white/25 bg-black/50 px-2 py-0.5 text-[10px] font-bold text-[#ff85a6]"
                       >
                         {topRoughDistanceCompact}
+                      </span>
+                    ) : null}
+                    {topCard.offersSession && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-300/35 bg-black/60 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+                        <Mic2 className="h-2.5 w-2.5" aria-hidden="true" />
+                        <span>Session</span>
+                      </span>
+                    )}
+                    {topCard.offersLessons && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300/35 bg-black/60 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                        <GraduationCap className="h-2.5 w-2.5" aria-hidden="true" />
+                        <span>Teacher</span>
                       </span>
                     )}
                   </div>

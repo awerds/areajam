@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDown,
   Flame,
+  Globe,
   HelpCircle,
   LayoutGrid,
   MapPin,
@@ -76,6 +77,7 @@ import type {
   AppState,
   AuthUser,
   BlockedUser,
+  DiscoveryRole,
   InboxFolder,
   JamInvite,
   Listing,
@@ -141,6 +143,7 @@ export function App() {
   const [liveWallNotes, setLiveWallNotes] = useState<WallComment[]>([]);
 
   const [activeTab, setActiveTab] = useState<NavTab>('discover');
+  const [discoveryRole, setDiscoveryRole] = useState<DiscoveryRole>('musician');
   const [activeProfileId, setActiveProfileId] = useState<string | null>(
     () => parseUrlState().profileId ?? null
   );
@@ -508,9 +511,19 @@ export function App() {
     [allListings, state.mode]
   );
 
+  const rolePool = useMemo(() => {
+    if (discoveryRole === 'session') {
+      return sidePool.filter((l) => Boolean(l.offersSession));
+    }
+    if (discoveryRole === 'teacher') {
+      return sidePool.filter((l) => Boolean(l.offersLessons));
+    }
+    return sidePool;
+  }, [sidePool, discoveryRole]);
+
   const localUnfiltered = useMemo(
     () =>
-      sidePool
+      rolePool
         .filter((l) => l.regionId === state.regionId)
         .sort((a, b) => {
           const aHasVideo = a.clips.some((c) => c.kind === 'video' && Boolean(c.embedUrl));
@@ -518,7 +531,7 @@ export function App() {
           if (aHasVideo !== bHasVideo) return aHasVideo ? -1 : 1;
           return b.createdAt - a.createdAt;
         }),
-    [sidePool, state.regionId]
+    [rolePool, state.regionId]
   );
 
   const otherUnfiltered = useMemo(() => {
@@ -533,7 +546,7 @@ export function App() {
       return distanceCache.get(regionId) ?? null;
     };
 
-    return sidePool
+    return rolePool
       .filter((l) => l.regionId !== state.regionId)
       .sort((a, b) => {
         const distA = getDist(a.regionId);
@@ -543,11 +556,13 @@ export function App() {
         if (distA === null && distB !== null) return 1;
         return b.createdAt - a.createdAt;
       });
-  }, [sidePool, state.regionId, currentRegion, regionById]);
+  }, [rolePool, state.regionId, currentRegion, regionById]);
 
   const availableFilters = useMemo(() => {
     const modeListings =
-      localUnfiltered.length === 0 || state.includeNearbyRegions ? sidePool : localUnfiltered;
+      localUnfiltered.length === 0 || state.includeNearbyRegions || state.includeRemoteFriendly
+        ? rolePool
+        : localUnfiltered;
     const counts = new Map<string, number>();
     for (const item of modeListings) {
       for (const genre of item.genres) {
@@ -559,7 +574,7 @@ export function App() {
       .map(([name]) => name)
       .slice(0, 6);
     return ['All', ...sorted];
-  }, [localUnfiltered, sidePool, state.includeNearbyRegions]);
+  }, [localUnfiltered, rolePool, state.includeNearbyRegions, state.includeRemoteFriendly]);
 
   useEffect(() => {
     if (!availableFilters.includes(chipFilter)) {
@@ -578,7 +593,7 @@ export function App() {
     });
   };
 
-  const { localFiltered, otherFiltered, showingNearestFallback } = useMemo(() => {
+  const { localFiltered, otherFiltered, remoteOtherFiltered, showingNearestFallback } = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     const matchesCurrentFilters = (item: Listing) => {
       if (!matchesPreferences(item, activePrefs)) return false;
@@ -587,48 +602,76 @@ export function App() {
       }
       if (!q) return true;
       const gearText = item.gearLocker.map((g) => `${g.name} ${g.notes ?? ''}`).join(' ');
-      return `${item.title} ${item.subtitle} ${item.neighborhood} ${item.roleCategory} ${item.genres.join(' ')} ${item.tags.join(' ')} ${item.seekingOrOffer} ${gearText}`
+      return `${item.title} ${item.subtitle} ${item.neighborhood} ${item.roleCategory} ${item.genres.join(' ')} ${item.tags.join(' ')} ${item.seekingOrOffer} ${item.serviceNote ?? ''} ${gearText}`
         .toLowerCase()
         .includes(q);
     };
     const nextLocal = localUnfiltered.filter(matchesCurrentFilters);
     const nextOther = otherUnfiltered.filter(matchesCurrentFilters);
+    const nextRemoteOther = nextOther.filter((item) => Boolean(item.remoteFriendly));
+    const useRemoteOnly = state.includeRemoteFriendly && nextLocal.length === 0 && nextRemoteOther.length > 0;
     return {
       localFiltered: nextLocal,
       otherFiltered: nextOther,
-      showingNearestFallback: nextLocal.length === 0 && nextOther.length > 0,
+      remoteOtherFiltered: nextRemoteOther,
+      showingNearestFallback: !useRemoteOnly && nextLocal.length === 0 && nextOther.length > 0,
     };
-  }, [localUnfiltered, otherUnfiltered, activePrefs, chipFilter, searchQuery]);
+  }, [localUnfiltered, otherUnfiltered, activePrefs, chipFilter, searchQuery, state.includeRemoteFriendly]);
 
   const regionalPool = useMemo(() => {
+    if (localFiltered.length > 0) {
+      if (state.includeRemoteFriendly) {
+        return [...localFiltered, ...remoteOtherFiltered];
+      }
+      return state.includeNearbyRegions ? [...localFiltered, ...otherFiltered] : localFiltered;
+    }
+    if (state.includeRemoteFriendly && remoteOtherFiltered.length > 0) {
+      return remoteOtherFiltered;
+    }
     if (showingNearestFallback) return otherFiltered;
-    return state.includeNearbyRegions ? [...localFiltered, ...otherFiltered] : localFiltered;
-  }, [showingNearestFallback, state.includeNearbyRegions, localFiltered, otherFiltered]);
+    return localFiltered;
+  }, [
+    showingNearestFallback,
+    state.includeNearbyRegions,
+    state.includeRemoteFriendly,
+    localFiltered,
+    otherFiltered,
+    remoteOtherFiltered,
+  ]);
 
   const { deckCards, showingDeckNearestFallback } = useMemo(() => {
     const isSwipeable = (l: Listing) => (!user || l.ownerUid !== user.uid) && !state.swiped[l.id];
     const eligibleLocal = localFiltered.filter(isSwipeable);
     const eligibleOther = otherFiltered.filter(isSwipeable);
+    const eligibleRemoteOther = remoteOtherFiltered.filter(isSwipeable);
     const localOnlySelf =
       !showingNearestFallback &&
       eligibleLocal.length === 0 &&
       eligibleOther.length > 0 &&
       localFiltered.every((l) => user && l.ownerUid === user.uid);
-    const useNearestDeck = showingNearestFallback || localOnlySelf;
+    const useRemoteOnly =
+      state.includeRemoteFriendly && eligibleLocal.length === 0 && eligibleRemoteOther.length > 0;
+    const useNearestDeck = !useRemoteOnly && (showingNearestFallback || localOnlySelf);
 
     return {
-      deckCards: useNearestDeck
-        ? eligibleOther
-        : state.includeNearbyRegions
-          ? [...eligibleLocal, ...eligibleOther]
-          : eligibleLocal,
+      deckCards: useRemoteOnly
+        ? eligibleRemoteOther
+        : useNearestDeck
+          ? eligibleOther
+          : state.includeRemoteFriendly
+            ? [...eligibleLocal, ...eligibleRemoteOther]
+            : state.includeNearbyRegions
+              ? [...eligibleLocal, ...eligibleOther]
+              : eligibleLocal,
       showingDeckNearestFallback: useNearestDeck,
     };
   }, [
     localFiltered,
     otherFiltered,
+    remoteOtherFiltered,
     showingNearestFallback,
     state.includeNearbyRegions,
+    state.includeRemoteFriendly,
     state.swiped,
     user,
   ]);
@@ -650,6 +693,27 @@ export function App() {
     if (nextTab !== 'matches') {
       setSelectedThreadId(null);
     }
+  };
+
+  const handleSelectDiscoveryRole = (role: DiscoveryRole, openInBrowse = true) => {
+    stopCardPreview();
+    setActiveProfileId(null);
+    setSelectedThreadId(null);
+    runFilterTransition(() => {
+      setDiscoveryRole(role);
+      if (openInBrowse) {
+        setActiveTab('browse');
+      }
+    });
+  };
+
+  const toggleRemoteFriendly = () => {
+    runFilterTransition(() => {
+      setState((prev) => ({
+        ...prev,
+        includeRemoteFriendly: !prev.includeRemoteFriendly,
+      }));
+    });
   };
 
   const handleSelectCarouselListing = (listing: Listing) => {
@@ -1102,26 +1166,41 @@ export function App() {
             <nav aria-label="Primary" className="hidden shrink-0 items-center gap-0.5 md:flex lg:gap-1">
               {(
                 [
-                  { id: 'discover', compactLabel: 'Discover', label: 'Discover' },
-                  { id: 'browse', compactLabel: 'Browse', label: 'Browse players' },
-                  { id: 'matches', compactLabel: 'Messages', label: 'Messages' },
-                  { id: 'post', compactLabel: 'Studio', label: 'Profile & studio' },
+                  { kind: 'role', role: 'musician' as DiscoveryRole, compactLabel: 'Musicians', label: 'Find a Musician' },
+                  { kind: 'role', role: 'session' as DiscoveryRole, compactLabel: 'Sessions', label: 'Find a Session Player' },
+                  { kind: 'role', role: 'teacher' as DiscoveryRole, compactLabel: 'Teachers', label: 'Find a Teacher' },
+                  { kind: 'tab', id: 'matches' as NavTab, compactLabel: 'Messages', label: 'Messages' },
+                  { kind: 'tab', id: 'post' as NavTab, compactLabel: 'Studio', label: 'Profile & studio' },
                 ] as const
               ).map((item) => {
+                const isRoleActive =
+                  item.kind === 'role' &&
+                  !activeProfileId &&
+                  (activeTab === 'browse' || (activeTab === 'discover' && discoverStage === 'swipe')) &&
+                  discoveryRole === item.role;
+                const isTabActive =
+                  item.kind === 'tab' && !activeProfileId && activeTab === item.id;
+                const isActive = isRoleActive || isTabActive;
                 const msgCount =
-                  item.id === 'matches'
+                  item.kind === 'tab' && item.id === 'matches'
                     ? incomingPendingCount > 0
                       ? incomingPendingCount
                       : effectiveThreads.length
                     : 0;
-                const msgHasRequests = item.id === 'matches' && incomingPendingCount > 0;
+                const msgHasRequests = item.kind === 'tab' && item.id === 'matches' && incomingPendingCount > 0;
+                const key = item.kind === 'role' ? `role-${item.role}` : item.id;
+
                 return (
                   <button
-                    key={item.id}
+                    key={key}
                     type="button"
-                    aria-current={!activeProfileId && activeTab === item.id ? 'page' : undefined}
-                    onClick={() => handleTabChange(item.id)}
-                    className="nav-pill-btn inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)] lg:px-3.5 lg:py-2"
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() =>
+                      item.kind === 'role'
+                        ? handleSelectDiscoveryRole(item.role, true)
+                        : handleTabChange(item.id)
+                    }
+                    className="nav-pill-btn inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--ink)] lg:px-3 lg:py-2"
                   >
                     <span className="xl:hidden">{item.compactLabel}</span>
                     <span className="hidden xl:inline">{item.label}</span>
@@ -1356,6 +1435,63 @@ export function App() {
           <>
             {activeTab === 'discover' && (
               <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-12 md:items-start md:gap-6 lg:gap-10">
+                {/* Mobile Discovery Role & Remote Strip */}
+                <div className="mb-2 flex shrink-0 items-center justify-between gap-1.5 md:hidden">
+                  <div
+                    role="group"
+                    aria-label="Discovery category"
+                    className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] p-0.5"
+                  >
+                    {(
+                      [
+                        { role: 'musician' as DiscoveryRole, label: 'Musicians' },
+                        { role: 'session' as DiscoveryRole, label: 'Session' },
+                        { role: 'teacher' as DiscoveryRole, label: 'Teachers' },
+                      ] as const
+                    ).map((opt) => {
+                      const active = discoveryRole === opt.role;
+                      return (
+                        <button
+                          key={opt.role}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => handleSelectDiscoveryRole(opt.role, false)}
+                          className="flex-1 truncate rounded-full px-2 py-1 text-[11px] font-bold transition"
+                          style={
+                            active
+                              ? { backgroundColor: 'var(--accent)', color: 'var(--accent-ink)' }
+                              : { color: 'var(--muted)' }
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    aria-pressed={state.includeRemoteFriendly}
+                    onClick={toggleRemoteFriendly}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition"
+                    style={
+                      state.includeRemoteFriendly
+                        ? {
+                            backgroundColor: 'var(--jam-soft)',
+                            borderColor: 'var(--jam)',
+                            color: 'var(--jam-text)',
+                          }
+                        : {
+                            backgroundColor: 'var(--pill-bg)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--muted)',
+                          }
+                    }
+                  >
+                    <Globe className="h-3 w-3 shrink-0" aria-hidden="true" />
+                    <span>Remote</span>
+                  </button>
+                </div>
+
                 {/* Desktop & Tablet Left Column: Original Hero + Unified Filter Grid + CTAs */}
                 <div className="hidden space-y-5 md:col-span-6 md:block lg:col-span-7">
                   <div className="space-y-2.5">
@@ -1470,6 +1606,30 @@ export function App() {
                         );
                       })}
                     </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                      <button
+                        type="button"
+                        aria-pressed={state.includeRemoteFriendly}
+                        onClick={toggleRemoteFriendly}
+                        className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition"
+                        style={
+                          state.includeRemoteFriendly
+                            ? {
+                                backgroundColor: 'var(--jam-soft)',
+                                borderColor: 'var(--jam)',
+                                color: 'var(--jam-text)',
+                              }
+                            : {
+                                backgroundColor: 'var(--pill-bg)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--muted)',
+                              }
+                        }
+                      >
+                        <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span>Include remote-friendly (after locals)</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
@@ -1502,12 +1662,14 @@ export function App() {
                   <SwipeDeck
                     cards={orderedDeckCards}
                     mode={state.mode}
+                    discoveryRole={discoveryRole}
                     region={currentRegion}
                     allRegions={allRegions}
                     canUndo={canUndo}
                     includeNearbyRegions={state.includeNearbyRegions}
+                    includeRemoteFriendly={state.includeRemoteFriendly}
                     showingNearestFallback={showingDeckNearestFallback}
-                    filterKey={`${activePrefs.join('|')}::${chipFilter}`}
+                    filterKey={`${discoveryRole}::${state.includeRemoteFriendly ? 'remote' : 'local'}::${activePrefs.join('|')}::${chipFilter}`}
                     soundEnabled={soundEnabled}
                     currentUserUid={user?.uid}
                     inviteByTargetUid={inviteByTargetUid}
@@ -1521,6 +1683,7 @@ export function App() {
                     onEnableNearby={() =>
                       setState((prev) => ({ ...prev, includeNearbyRegions: true }))
                     }
+                    onToggleRemoteFriendly={toggleRemoteFriendly}
                     onResetPassed={handleResetPassed}
                     onGoToPost={() => handleTabChange('post')}
                   />
@@ -1530,6 +1693,63 @@ export function App() {
 
             {activeTab === 'browse' && (
               <div className="space-y-4">
+                {/* Mobile Discovery Role & Remote Strip */}
+                <div className="flex items-center justify-between gap-1.5 md:hidden">
+                  <div
+                    role="group"
+                    aria-label="Discovery category"
+                    className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] p-0.5"
+                  >
+                    {(
+                      [
+                        { role: 'musician' as DiscoveryRole, label: 'Musicians' },
+                        { role: 'session' as DiscoveryRole, label: 'Session' },
+                        { role: 'teacher' as DiscoveryRole, label: 'Teachers' },
+                      ] as const
+                    ).map((opt) => {
+                      const active = discoveryRole === opt.role;
+                      return (
+                        <button
+                          key={opt.role}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => handleSelectDiscoveryRole(opt.role, true)}
+                          className="flex-1 truncate rounded-full px-2 py-1.5 text-xs font-bold transition"
+                          style={
+                            active
+                              ? { backgroundColor: 'var(--accent)', color: 'var(--accent-ink)' }
+                              : { color: 'var(--muted)' }
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    aria-pressed={state.includeRemoteFriendly}
+                    onClick={toggleRemoteFriendly}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-2 text-xs font-semibold transition"
+                    style={
+                      state.includeRemoteFriendly
+                        ? {
+                            backgroundColor: 'var(--jam-soft)',
+                            borderColor: 'var(--jam)',
+                            color: 'var(--jam-text)',
+                          }
+                        : {
+                            backgroundColor: 'var(--pill-bg)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--muted)',
+                          }
+                    }
+                  >
+                    <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span>Remote</span>
+                  </button>
+                </div>
+
                 <div
                   role="region"
                   aria-label={
@@ -1574,6 +1794,30 @@ export function App() {
                   </div>
 
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      aria-pressed={state.includeRemoteFriendly}
+                      onClick={toggleRemoteFriendly}
+                      title="Include remote-friendly players from other cities after local results"
+                      className="inline-flex min-h-7 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold leading-none transition [@media(pointer:coarse)]:min-h-11"
+                      style={
+                        state.includeRemoteFriendly
+                          ? {
+                              backgroundColor: 'var(--jam-soft)',
+                              borderColor: 'var(--jam)',
+                              color: 'var(--jam-text)',
+                            }
+                          : {
+                              backgroundColor: 'var(--pill-bg)',
+                              borderColor: 'var(--border)',
+                              color: 'var(--muted)',
+                            }
+                      }
+                    >
+                      <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <span>Include remote-friendly</span>
+                    </button>
+
                     <div>
                       <label htmlFor="browse-genre" className="visually-hidden">
                         Filter by genre
@@ -1611,6 +1855,9 @@ export function App() {
                 <BrowseGrid
                   listings={regionalPool}
                   mode={state.mode}
+                  discoveryRole={discoveryRole}
+                  includeRemoteFriendly={state.includeRemoteFriendly}
+                  onToggleRemoteFriendly={toggleRemoteFriendly}
                   region={currentRegion}
                   allRegions={allRegions}
                   swiped={state.swiped}

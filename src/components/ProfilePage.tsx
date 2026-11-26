@@ -5,9 +5,12 @@ import {
   ExternalLink,
   Flag,
   Flame,
+  Globe,
+  GraduationCap,
   Instagram,
   MapPin,
   MessageCircle,
+  Mic2,
   Palette,
   Play,
   Plus,
@@ -573,6 +576,33 @@ export function ProfilePage({
                       <span>@{listing.instagramHandle}</span>
                     </a>
                   )}
+                  {listing.offersSession && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full border border-amber-500/35 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold"
+                      style={{ color: 'light-dark(#b45309, #fcd34d)' }}
+                    >
+                      <Mic2 className="h-3 w-3 shrink-0" aria-hidden="true" />
+                      <span>Session Player</span>
+                    </span>
+                  )}
+                  {listing.offersLessons && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold"
+                      style={{ color: 'light-dark(#047857, #6ee7b7)' }}
+                    >
+                      <GraduationCap className="h-3 w-3 shrink-0" aria-hidden="true" />
+                      <span>Teacher</span>
+                    </span>
+                  )}
+                  {listing.remoteFriendly && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full border border-sky-500/35 bg-sky-500/15 px-2.5 py-0.5 text-xs font-semibold"
+                      style={{ color: 'light-dark(#0369a1, #7dd3fc)' }}
+                    >
+                      <Globe className="h-3 w-3 shrink-0" aria-hidden="true" />
+                      <span>Remote-friendly</span>
+                    </span>
+                  )}
                   {listing.payOrSplit && (
                     <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)]">
                       {listing.payOrSplit}
@@ -751,6 +781,75 @@ export function ProfilePage({
               )}
             </div>
           </section>
+
+          {(listing.offersLessons || listing.offersSession) && (
+            <section
+              className="space-y-3 rounded-3xl border p-5 md:p-6"
+              style={{
+                backgroundColor: 'var(--pt-surface)',
+                borderColor: 'var(--pt-border)',
+              }}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-display text-lg font-bold text-[var(--ink)]">
+                  Lessons &amp; session work
+                </h2>
+                {listing.remoteFriendly && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border border-sky-500/35 bg-sky-500/15 px-2.5 py-0.5 text-xs font-semibold"
+                    style={{ color: 'light-dark(#0369a1, #7dd3fc)' }}
+                  >
+                    <Globe className="h-3 w-3" aria-hidden="true" />
+                    <span>Available remotely</span>
+                  </span>
+                )}
+              </div>
+
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {listing.offersSession && (
+                  <div
+                    className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5"
+                    style={{
+                      backgroundColor: 'var(--pt-surface-inner)',
+                      borderColor: 'var(--pt-border-subtle)',
+                    }}
+                  >
+                    <span className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--ink)]">
+                      <Mic2 className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                      <span>Session tracking</span>
+                    </span>
+                    <span className="text-xs font-bold text-[var(--muted)]">
+                      {listing.sessionRate || 'Ask for rate'}
+                    </span>
+                  </div>
+                )}
+
+                {listing.offersLessons && (
+                  <div
+                    className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5"
+                    style={{
+                      backgroundColor: 'var(--pt-surface-inner)',
+                      borderColor: 'var(--pt-border-subtle)',
+                    }}
+                  >
+                    <span className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--ink)]">
+                      <GraduationCap className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                      <span>Private lessons</span>
+                    </span>
+                    <span className="text-xs font-bold text-[var(--muted)]">
+                      {listing.lessonRate || 'Ask for rate'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {listing.serviceNote && (
+                <p className="max-w-[68ch] text-xs leading-relaxed text-[var(--muted)] sm:text-sm">
+                  {listing.serviceNote}
+                </p>
+              )}
+            </section>
+          )}
 
           {/* The Gear Locker */}
           <section
