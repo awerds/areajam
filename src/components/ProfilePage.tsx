@@ -108,6 +108,12 @@ export function ProfilePage({
   const [soundsLikeDraft, setSoundsLikeDraft] = useState(
     (listing.profileStyle?.soundsLike ?? []).join(', ')
   );
+  const [offersSessionDraft, setOffersSessionDraft] = useState(Boolean(listing.offersSession));
+  const [offersLessonsDraft, setOffersLessonsDraft] = useState(Boolean(listing.offersLessons));
+  const [remoteFriendlyDraft, setRemoteFriendlyDraft] = useState(Boolean(listing.remoteFriendly));
+  const [sessionRateDraft, setSessionRateDraft] = useState(listing.sessionRate ?? '');
+  const [lessonRateDraft, setLessonRateDraft] = useState(listing.lessonRate ?? '');
+  const [serviceNoteDraft, setServiceNoteDraft] = useState(listing.serviceNote ?? '');
 
   const [newGearCategory, setNewGearCategory] = useState<GearCategory>('Instruments');
   const [newGearName, setNewGearName] = useState('');
@@ -148,6 +154,19 @@ export function ProfilePage({
 
     onUpdateListing({
       ...listing,
+      offersSession: offersSessionDraft || undefined,
+      offersLessons: offersLessonsDraft || undefined,
+      remoteFriendly: remoteFriendlyDraft || undefined,
+      sessionRate: offersSessionDraft
+        ? sessionRateDraft.trim().slice(0, 32) || undefined
+        : undefined,
+      lessonRate: offersLessonsDraft
+        ? lessonRateDraft.trim().slice(0, 32) || undefined
+        : undefined,
+      serviceNote:
+        offersSessionDraft || offersLessonsDraft
+          ? serviceNoteDraft.trim().slice(0, 180) || undefined
+          : undefined,
       profileStyle: {
         ...listing.profileStyle,
         moodStatus: moodDraft.trim() || undefined,
@@ -365,13 +384,148 @@ export function ProfilePage({
               />
             </div>
 
+            <div className="space-y-3 rounded-2xl border border-[var(--pt-border-subtle)] bg-[var(--pt-surface-inner)] p-4 md:col-span-2">
+              <div>
+                <p className="text-xs font-bold text-[var(--ink)]">
+                  Session work, lessons &amp; pricing (optional, free)
+                </p>
+                <p className="text-[11px] text-[var(--muted)]">
+                  Enable badges and optional pricing to appear in Find a Session Player and Find a Teacher.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  aria-pressed={offersSessionDraft}
+                  onClick={() => setOffersSessionDraft((v) => !v)}
+                  className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition"
+                  style={
+                    offersSessionDraft
+                      ? {
+                          backgroundColor: 'rgba(245, 158, 11, 0.16)',
+                          borderColor: 'rgba(245, 158, 11, 0.55)',
+                          color: 'light-dark(#b45309, #fcd34d)',
+                        }
+                      : {
+                          backgroundColor: 'var(--pt-pill-bg)',
+                          borderColor: 'var(--pt-border-subtle)',
+                          color: 'var(--muted)',
+                        }
+                  }
+                >
+                  <Mic2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Session Player</span>
+                </button>
+
+                <button
+                  type="button"
+                  aria-pressed={offersLessonsDraft}
+                  onClick={() => setOffersLessonsDraft((v) => !v)}
+                  className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition"
+                  style={
+                    offersLessonsDraft
+                      ? {
+                          backgroundColor: 'rgba(16, 185, 129, 0.16)',
+                          borderColor: 'rgba(16, 185, 129, 0.55)',
+                          color: 'light-dark(#047857, #6ee7b7)',
+                        }
+                      : {
+                          backgroundColor: 'var(--pt-pill-bg)',
+                          borderColor: 'var(--pt-border-subtle)',
+                          color: 'var(--muted)',
+                        }
+                  }
+                >
+                  <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Teacher</span>
+                </button>
+
+                <button
+                  type="button"
+                  aria-pressed={remoteFriendlyDraft}
+                  onClick={() => setRemoteFriendlyDraft((v) => !v)}
+                  className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition"
+                  style={
+                    remoteFriendlyDraft
+                      ? {
+                          backgroundColor: 'rgba(14, 165, 233, 0.16)',
+                          borderColor: 'rgba(14, 165, 233, 0.55)',
+                          color: 'light-dark(#0369a1, #7dd3fc)',
+                        }
+                      : {
+                          backgroundColor: 'var(--pt-pill-bg)',
+                          borderColor: 'var(--pt-border-subtle)',
+                          color: 'var(--muted)',
+                        }
+                  }
+                >
+                  <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Remote-friendly</span>
+                </button>
+              </div>
+
+              {(offersSessionDraft || offersLessonsDraft) && (
+                <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
+                  {offersSessionDraft && (
+                    <div>
+                      <label htmlFor="page-session-rate" className="mb-1 block text-xs font-semibold">
+                        Session pricing (optional)
+                      </label>
+                      <input
+                        id="page-session-rate"
+                        type="text"
+                        maxLength={32}
+                        value={sessionRateDraft}
+                        onChange={(e) => setSessionRateDraft(e.target.value)}
+                        placeholder="e.g. $85/track or $75/hr"
+                        className="field-control"
+                      />
+                    </div>
+                  )}
+
+                  {offersLessonsDraft && (
+                    <div>
+                      <label htmlFor="page-lesson-rate" className="mb-1 block text-xs font-semibold">
+                        Lesson pricing (optional)
+                      </label>
+                      <input
+                        id="page-lesson-rate"
+                        type="text"
+                        maxLength={32}
+                        value={lessonRateDraft}
+                        onChange={(e) => setLessonRateDraft(e.target.value)}
+                        placeholder="e.g. $65/hr"
+                        className="field-control"
+                      />
+                    </div>
+                  )}
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="page-service-note" className="mb-1 block text-xs font-semibold">
+                      Service details (optional)
+                    </label>
+                    <input
+                      id="page-service-note"
+                      type="text"
+                      maxLength={180}
+                      value={serviceNoteDraft}
+                      onChange={(e) => setServiceNoteDraft(e.target.value)}
+                      placeholder="e.g. Remote multi-mic drum stems in 48h, or 1-on-1 guitar lessons"
+                      className="field-control"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="md:col-span-2">
               <button
                 type="submit"
                 className="rounded-xl px-5 py-2.5 text-xs font-bold"
                 style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
-                Save page style
+                Save page updates
               </button>
             </div>
           </form>
@@ -582,7 +736,9 @@ export function ProfilePage({
                       style={{ color: 'light-dark(#b45309, #fcd34d)' }}
                     >
                       <Mic2 className="h-3 w-3 shrink-0" aria-hidden="true" />
-                      <span>Session Player</span>
+                      <span>
+                        {listing.sessionRate ? `Session · ${listing.sessionRate}` : 'Session Player'}
+                      </span>
                     </span>
                   )}
                   {listing.offersLessons && (
@@ -591,7 +747,9 @@ export function ProfilePage({
                       style={{ color: 'light-dark(#047857, #6ee7b7)' }}
                     >
                       <GraduationCap className="h-3 w-3 shrink-0" aria-hidden="true" />
-                      <span>Teacher</span>
+                      <span>
+                        {listing.lessonRate ? `Teacher · ${listing.lessonRate}` : 'Teacher'}
+                      </span>
                     </span>
                   )}
                   {listing.remoteFriendly && (

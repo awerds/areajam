@@ -577,13 +577,17 @@ export function SwipeDeck({
                     {topCard.offersSession && (
                       <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-300/35 bg-black/60 px-2 py-0.5 text-[10px] font-bold text-amber-300">
                         <Mic2 className="h-2.5 w-2.5" aria-hidden="true" />
-                        <span>Session</span>
+                        <span>
+                          {topCard.sessionRate ? `Session · ${topCard.sessionRate}` : 'Session'}
+                        </span>
                       </span>
                     )}
                     {topCard.offersLessons && (
                       <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-300/35 bg-black/60 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
                         <GraduationCap className="h-2.5 w-2.5" aria-hidden="true" />
-                        <span>Teacher</span>
+                        <span>
+                          {topCard.lessonRate ? `Teacher · ${topCard.lessonRate}` : 'Teacher'}
+                        </span>
                       </span>
                     )}
                   </div>

@@ -1687,6 +1687,48 @@ export function PostView({
 
                     <InstrumentBadgeRow instruments={previewListing.instruments} compact max={4} />
 
+                    {(previewListing.offersSession ||
+                      previewListing.offersLessons ||
+                      previewListing.remoteFriendly) && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {previewListing.offersSession && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full border border-amber-500/35 bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold"
+                            style={{ color: 'light-dark(#b45309, #fcd34d)' }}
+                          >
+                            <Mic2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                            <span>
+                              {previewListing.sessionRate
+                                ? `Session · ${previewListing.sessionRate}`
+                                : 'Session Player'}
+                            </span>
+                          </span>
+                        )}
+                        {previewListing.offersLessons && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold"
+                            style={{ color: 'light-dark(#047857, #6ee7b7)' }}
+                          >
+                            <GraduationCap className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                            <span>
+                              {previewListing.lessonRate
+                                ? `Teacher · ${previewListing.lessonRate}`
+                                : 'Teacher'}
+                            </span>
+                          </span>
+                        )}
+                        {previewListing.remoteFriendly && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full border border-sky-500/35 bg-sky-500/15 px-2 py-0.5 text-[10px] font-bold"
+                            style={{ color: 'light-dark(#0369a1, #7dd3fc)' }}
+                          >
+                            <Globe className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                            <span>Remote</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     <div>
                       <h3 className="font-display text-lg font-bold leading-tight text-[var(--ink)]">
                         {previewListing.title}

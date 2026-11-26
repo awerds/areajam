@@ -224,12 +224,6 @@ export function BrowseGrid({
                 ? `${itemRegion.city}${itemRegion.state ? `, ${itemRegion.state}` : ''}`
                 : item.neighborhood || itemRegion?.city || item.regionId;
             const isRemoteNonLocal = item.regionId !== region.id && Boolean(item.remoteFriendly);
-            const rateLabel =
-              discoveryRole === 'session'
-                ? item.sessionRate
-                : discoveryRole === 'teacher'
-                  ? item.lessonRate
-                  : undefined;
             const profileHref = `?area=${encodeURIComponent(item.regionId)}&mode=${item.side}&profile=${encodeURIComponent(item.id)}`;
 
             return (
@@ -246,17 +240,21 @@ export function BrowseGrid({
                   <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact showTopBadges={false} />
 
                   {(item.offersSession || item.offersLessons) && (
-                    <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-wrap gap-1">
+                    <div className="pointer-events-none absolute left-2.5 right-2.5 top-2.5 flex flex-wrap gap-1 pr-14">
                       {item.offersSession && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/35 bg-black/70 px-2 py-0.5 text-[10px] font-bold text-amber-300 backdrop-blur-md">
-                          <Mic2 className="h-2.5 w-2.5" aria-hidden="true" />
-                          <span>Session</span>
+                        <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-amber-300/35 bg-black/75 px-2 py-0.5 text-[10px] font-bold text-amber-300 backdrop-blur-md">
+                          <Mic2 className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          <span className="truncate">
+                            {item.sessionRate ? `Session · ${item.sessionRate}` : 'Session'}
+                          </span>
                         </span>
                       )}
                       {item.offersLessons && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/35 bg-black/70 px-2 py-0.5 text-[10px] font-bold text-emerald-300 backdrop-blur-md">
-                          <GraduationCap className="h-2.5 w-2.5" aria-hidden="true" />
-                          <span>Teacher</span>
+                        <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-emerald-300/35 bg-black/75 px-2 py-0.5 text-[10px] font-bold text-emerald-300 backdrop-blur-md">
+                          <GraduationCap className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          <span className="truncate">
+                            {item.lessonRate ? `Teacher · ${item.lessonRate}` : 'Teacher'}
+                          </span>
                         </span>
                       )}
                     </div>
@@ -322,7 +320,6 @@ export function BrowseGrid({
 
                     <p className="truncate text-xs font-medium text-[var(--muted)]">
                       {locationLabel}
-                      {rateLabel ? ` · ${rateLabel}` : ''}
                     </p>
 
                     <InstrumentBadgeRow instruments={item.instruments} compact max={2} />
