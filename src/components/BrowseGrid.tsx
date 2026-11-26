@@ -187,12 +187,6 @@ export function BrowseGrid({
                 <div className="relative">
                   <CardArtwork listing={item} areaCode={itemRegion?.areaCode} compact showTopBadges={false} />
 
-                  {item.isSample && (
-                    <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-full border border-white/20 bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
-                      Fictional sample
-                    </span>
-                  )}
-
                   {roughDistance && (
                     <span
                       title={roughDistanceTitle ?? undefined}
@@ -248,7 +242,7 @@ export function BrowseGrid({
                     <InstrumentBadgeRow instruments={item.instruments} compact max={2} />
                   </div>
 
-                  {action.kind !== 'sample' && action.kind !== 'self' && (
+                  {action.kind !== 'unavailable' && action.kind !== 'self' && (
                     <div className="flex items-center gap-2 border-t border-[var(--border)] pt-2.5">
                       {action.kind === 'invite' ? (
                         <button

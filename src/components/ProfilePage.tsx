@@ -88,9 +88,7 @@ export function ProfilePage({
   onShareUrl,
 }: ProfilePageProps) {
   const theme = PROFILE_THEMES[listing.profileStyle?.themeId || 'stage-coral'];
-  const canCustomize = Boolean(
-    !listing.isSample && user && listing.ownerUid === user.uid
-  );
+  const canCustomize = Boolean(user && listing.ownerUid === user.uid);
   const actionState = getProfileActionState(listing, user?.uid, inviteByTargetUid);
 
   const orderedClips = (() => {
@@ -244,7 +242,7 @@ export function ProfilePage({
               </button>
             )}
 
-            {!listing.isSample && listing.ownerUid && user?.uid !== listing.ownerUid && (
+            {listing.ownerUid && user?.uid !== listing.ownerUid && (
               <>
                 <button
                   type="button"
@@ -330,7 +328,7 @@ export function ProfilePage({
                 ) : null;
               })()}
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                {listing.isSample ? 'Fictional sample' : 'Live profile (Firestore)'}
+                Live profile (Firestore)
               </span>
               {listing.instagramHandle && (
                 <a
@@ -421,10 +419,6 @@ export function ProfilePage({
                 <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
                 <span>Invite to jam</span>
               </button>
-            ) : actionState.kind === 'sample' ? (
-              <span className="rounded-2xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-4 py-2.5 text-xs font-semibold text-[var(--muted)]">
-                Fictional sample — Jam invites unlock on live musician profiles
-              </span>
             ) : null}
           </div>
         </div>
@@ -967,9 +961,7 @@ export function ProfilePage({
             <div>
               <h2 className="font-display text-xl font-bold text-[var(--ink)]">Scene wall</h2>
               <p className="text-xs text-[var(--muted)]">
-                {listing.isSample
-                  ? `Preview wall notes for ${listing.title} are stored locally for demo only.`
-                  : `Public scene wall for ${listing.title} backed by Cloud Firestore.`}
+                {`Public scene wall for ${listing.title} backed by Cloud Firestore.`}
               </p>
             </div>
 
@@ -992,8 +984,7 @@ export function ProfilePage({
                         (listing.ownerUid && listing.ownerUid === user.uid))
                   );
                   const canReport = Boolean(
-                    !listing.isSample &&
-                      user &&
+                    user &&
                       comment.authorUid &&
                       comment.authorUid !== user.uid
                   );

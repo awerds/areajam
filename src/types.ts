@@ -129,9 +129,6 @@ export interface Listing {
   clips: MediaClip[];
   featuredClipId?: string;
   profileStyle: ProfileStyle;
-  autoMatch: boolean;
-  autoReply: string;
-  isSample?: boolean;
   isPublished?: boolean;
   isUserCreated?: boolean;
   ownerUid?: string;
@@ -187,32 +184,14 @@ export interface BlockedUser {
 
 export type ReportReason = 'spam' | 'harassment' | 'impersonation' | 'inappropriate' | 'other';
 
-export interface ChatMessage {
-  id: string;
-  sender: 'me' | 'them';
-  text: string;
-  sentAt: number;
-  isSimulated?: boolean;
-}
-
-export interface MatchRecord {
-  id: string;
-  listingId: string;
-  side: AppMode;
-  matchedAt: number;
-  messages: ChatMessage[];
-}
-
 export interface SwipeHistoryItem {
   listingId: string;
   decision: SwipeDecision;
-  createdMatchId?: string;
 }
 
 export interface AppState {
   regionId: string;
   mode: AppMode;
-  samplesEnabled: boolean;
   includeNearbyRegions: boolean;
   locationConsent: LocationConsent;
   detectedCityLabel?: string;
@@ -222,6 +201,4 @@ export interface AppState {
   userListings: Listing[];
   swiped: Record<string, SwipeDecision>;
   history: SwipeHistoryItem[];
-  matches: MatchRecord[];
-  wallComments: Record<string, WallComment[]>;
 }

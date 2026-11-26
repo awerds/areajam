@@ -4,58 +4,6 @@ Local music discovery and musician matching PWA combining regional city boards, 
 
 **[Read the full User Manual (`docs/USER_GUIDE.md`)](docs/USER_GUIDE.md)** for a complete feature walkthrough, keyboard shortcuts, FAQ, and mobile gestures.
 
-![AreaJam desktop landing carousel](docs/screenshots/desktop-landing-dark.png)
-
-## Visual Tour
-
-### Mobile Experience (`390×844` — Single Top Bar & Full-Height Swipe)
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="docs/screenshots/mobile-landing-dark.png" width="195" alt="Mobile landing carousel" /><br />
-      <sub><strong>Landing Carousel</strong></sub>
-    </td>
-    <td align="center">
-      <img src="docs/screenshots/mobile-swipe-dark.png" width="195" alt="Mobile swipe deck Dark mode" /><br />
-      <sub><strong>Swipe Deck (Dark)</strong></sub>
-    </td>
-    <td align="center">
-      <img src="docs/screenshots/mobile-filter-dropdown-dark.png" width="195" alt="Mobile integrated player-type dropdown" /><br />
-      <sub><strong>Integrated Filter</strong></sub>
-    </td>
-    <td align="center">
-      <img src="docs/screenshots/mobile-swipe-light.png" width="195" alt="Mobile swipe deck Light mode" /><br />
-      <sub><strong>Swipe Deck (Light)</strong></sub>
-    </td>
-  </tr>
-</table>
-
-### Desktop Experience (`1440×900` — Swipe Stage, Directory, Artist Profile & Studio)
-
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/desktop-swipe-light.png" alt="Desktop swipe stage in Light mode" /><br />
-      <sub><strong>Discover Swipe Stage &amp; Multi-Filter Grid</strong></sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/desktop-browse-light.png" alt="Browse local musicians open directory" /><br />
-      <sub><strong>Open Musician Directory</strong></sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/desktop-profile-dark.png" alt="Artist Profile page with Gear Locker and media showcase" /><br />
-      <sub><strong>Artist Profile Page &amp; Gear Locker</strong></sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/desktop-studio-dark.png" alt="3-step Profile and Studio wizard with live preview" /><br />
-      <sub><strong>3-Step Profile &amp; Studio Builder</strong></sub>
-    </td>
-  </tr>
-</table>
-
 ## Core Features
 
 - **Landing Carousel & Swipe Discovery:** Slowly scrolling concave carousel of nearby players that falls away straight into a Tinder-style stacked swipe deck with drag gestures, GSAP physics, and 5 circular action orbs (Undo, Pass, Quick Info, Jam Invite, Full Profile).

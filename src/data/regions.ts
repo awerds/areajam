@@ -1,6 +1,6 @@
 import type { Region } from '../types';
 
-export const PILOT_REGION_ID = 'nashville';
+export const PILOT_REGION_ID = 'la';
 
 export const STARTER_REGIONS: Region[] = [
   { id: 'nashville', city: 'Nashville', state: 'TN', areaCode: '615', label: 'Nashville (615)', lat: 36.1627, lng: -86.7816 },

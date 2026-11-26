@@ -56,7 +56,6 @@ export function getDefaultState(): AppState {
   return {
     regionId: PILOT_REGION_ID,
     mode: 'jam',
-    samplesEnabled: true,
     includeNearbyRegions: false,
     locationConsent: 'unknown',
     detectedCityLabel: undefined,
@@ -66,8 +65,6 @@ export function getDefaultState(): AppState {
     userListings: [],
     swiped: {},
     history: [],
-    matches: [],
-    wallComments: {},
   };
 }
 
@@ -175,7 +172,6 @@ function buildStateFromParsed(
   return {
     regionId: resolvedRegionId,
     mode: 'jam',
-    samplesEnabled: parsed.samplesEnabled !== false,
     includeNearbyRegions: Boolean(parsed.includeNearbyRegions),
     locationConsent: consent,
     detectedCityLabel:
@@ -190,11 +186,6 @@ function buildStateFromParsed(
     userListings: ownedListings,
     swiped: parsed.swiped && typeof parsed.swiped === 'object' ? parsed.swiped : {},
     history: Array.isArray(parsed.history) ? parsed.history : [],
-    matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-    wallComments:
-      parsed.wallComments && typeof parsed.wallComments === 'object'
-        ? parsed.wallComments
-        : {},
   };
 }
 

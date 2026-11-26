@@ -500,7 +500,7 @@ export function ClipPlayer({
                   />
                 )}
                 <span className="truncate">
-                  {hasPortraitOnly ? 'Fictional sample portrait' : activeClip?.title || 'Intro reel'}
+                  {hasPortraitOnly ? 'Artist portrait' : activeClip?.title || 'Intro reel'}
                 </span>
                 {!hasPortraitOnly && activeClip?.embedProvider && activeClip.embedProvider !== 'direct' && (
                   <span className="text-[10px] text-white/75">

@@ -91,7 +91,7 @@ function formatMessageTime(ms: number): string {
 function resolveParticipantMeta(listings: Listing[], profileId?: string, uid?: string) {
   const listing =
     listings.find((item) => item.id === profileId) ??
-    (uid ? listings.find((item) => item.ownerUid === uid && !item.isSample) : undefined);
+    (uid ? listings.find((item) => item.ownerUid === uid) : undefined);
 
   if (!listing) {
     return {

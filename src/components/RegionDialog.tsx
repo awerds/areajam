@@ -13,8 +13,6 @@ interface RegionDialogProps {
   listings: Listing[];
   ipDetecting?: boolean;
   onDetectLocation?: () => void;
-  samplesEnabled?: boolean;
-  onToggleSamples?: () => void;
   onClose: () => void;
   onSelectRegion: (regionId: string) => void;
   onToggleNearby: (next: boolean) => void;
@@ -29,8 +27,6 @@ export function RegionDialog({
   listings,
   ipDetecting = false,
   onDetectLocation,
-  samplesEnabled = true,
-  onToggleSamples,
   onClose,
   onSelectRegion,
   onToggleNearby,
@@ -49,9 +45,7 @@ export function RegionDialog({
   }, [open, formNode]);
 
   const countLiveFor = (regionId: string) =>
-    listings.filter((l) => l.regionId === regionId && l.side === 'jam' && !l.isSample).length;
-  const countSampleFor = (regionId: string) =>
-    listings.filter((l) => l.regionId === regionId && l.side === 'jam' && l.isSample).length;
+    listings.filter((l) => l.regionId === regionId && l.side === 'jam').length;
 
   const q = search.trim().toLowerCase();
   const matchesQuery = (r: Region) =>
@@ -84,7 +78,6 @@ export function RegionDialog({
   const renderTile = (region: Region) => {
     const active = region.id === currentRegionId;
     const liveCount = countLiveFor(region.id);
-    const sampleCount = countSampleFor(region.id);
     return (
       <button
         key={region.id}
@@ -108,9 +101,7 @@ export function RegionDialog({
             )}
           </div>
           <p className="mt-0.5 text-xs text-[var(--muted)]">
-            {sampleCount > 0
-              ? `Area ${region.areaCode || 'local'}, ${liveCount} live, ${sampleCount} samples`
-              : `Area ${region.areaCode || 'local'}, ${liveCount} ${liveCount === 1 ? 'player' : 'players'}`}
+            {`Area ${region.areaCode || 'local'}, ${liveCount} ${liveCount === 1 ? 'player' : 'players'}`}
           </p>
         </div>
         {active && <Check className="h-4 w-4 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />}
@@ -173,25 +164,6 @@ export function RegionDialog({
             className="h-5 w-5 shrink-0"
           />
         </label>
-
-        {onToggleSamples && (
-          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-sm">
-            <div>
-              <span className="block font-semibold text-[var(--ink)]">
-                Show sample preview profiles
-              </span>
-              <span className="block text-xs text-[var(--muted)]">
-                Include demo musicians alongside live local boards
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={samplesEnabled}
-              onChange={onToggleSamples}
-              className="h-5 w-5 shrink-0"
-            />
-          </label>
-        )}
 
         {featuredRegions.length > 0 && (
           <div className="space-y-2">

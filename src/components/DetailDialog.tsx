@@ -69,7 +69,7 @@ export function DetailDialog({
       title={listing ? listing.title : 'Listing details'}
       subtitle={
         listing
-          ? `${listing.isSample ? 'Fictional sample profile' : 'Live profile'} — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}${verboseDistance ? ` (${verboseDistance})` : ''}`
+          ? `Live profile — ${listing.neighborhood}, ${region ? `${region.city} (${region.areaCode})` : listing.regionId}${verboseDistance ? ` (${verboseDistance})` : ''}`
           : undefined
       }
     >
@@ -193,7 +193,7 @@ export function DetailDialog({
             </button>
           )}
 
-          {!listing.isSample && action && action.kind !== 'self' && (
+          {action && action.kind !== 'self' && action.kind !== 'unavailable' && (
             <div className="grid grid-cols-2 gap-3 pt-1">
               {onSwipe && (
                 <button
@@ -245,12 +245,6 @@ export function DetailDialog({
                   </button>
                 )
               )}
-            </div>
-          )}
-
-          {listing.isSample && onSwipe && (
-            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-3 text-xs text-[var(--muted)]">
-              Sample preview profile for demonstration only. Sign in and browse live musician cards to send a real Jam invite.
             </div>
           )}
         </div>

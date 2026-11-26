@@ -1,0 +1,72 @@
+{
+  "title": "AreaJam Full Desktop Walkthrough",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "ctaUrl": "areajam.com",
+  "ctaTagline": "Find your tribe. Match with musicians today.",
+  "scenes": [
+    {
+      "id": "landing",
+      "badge": "Discover Nearby Players",
+      "headline": "Find your tribe. Match with musicians today.",
+      "subline": "Browse free with zero download",
+      "media": "screenshots/desktop-landing-dark.png",
+      "mediaType": "desktop",
+      "motion": "zoom-in",
+      "narration": "Welcome to AreaJam, a free web app built to help local musicians find players to jam with without wading through silent classifieds."
+    },
+    {
+      "id": "swipe",
+      "badge": "Desktop Swipe Stage",
+      "headline": "Filter instruments, genres & keywords fast",
+      "subline": "Play clips directly on the deck",
+      "media": "screenshots/desktop-swipe-light.png",
+      "mediaType": "desktop",
+      "motion": "tilt-left",
+      "narration": "Filter players by instrument, genre, or keyword, listen to linked clips right on the swipe card, and use arrow keys or touch gestures to match."
+    },
+    {
+      "id": "browse",
+      "badge": "Open Local Directory",
+      "headline": "Switch cities or start a board in your town",
+      "subline": "50 US states plus custom cities",
+      "media": "screenshots/desktop-browse-light.png",
+      "mediaType": "desktop",
+      "motion": "zoom-out",
+      "narration": "Prefer a full grid view? Open Browse Players to inspect everyone in your metro, or create a fresh board for your own hometown."
+    },
+    {
+      "id": "profile",
+      "badge": "Shareable Artist Page",
+      "headline": "Gear lockers, wall notes & jam requests",
+      "subline": "Everything you need to vet the vibe",
+      "media": "screenshots/desktop-profile-synth-full.png",
+      "clipAudio": "generated/clips/dialtone-dottie.wav",
+      "mediaType": "desktop-scroll",
+      "scrollEndPct": 45,
+      "motion": "tilt-right",
+      "narration": "Every musician gets a customizable page with their rig breakdown, linked performance reels, rehearsal availability, and direct match chat."
+    },
+    {
+      "id": "studio",
+      "badge": "3-Step Studio",
+      "headline": "Pull videos straight from your YouTube handle",
+      "subline": "Publish live with Google Sign-In",
+      "media": "screenshots/desktop-studio-dark.png",
+      "mediaType": "desktop",
+      "motion": "zoom-in",
+      "narration": "In Profile and Studio, enter your YouTube handle to import your videos, list your gear, preview your card, and go live in about a minute."
+    },
+    {
+      "id": "cta",
+      "badge": "areajam.com",
+      "headline": "Find your tribe. Match with musicians today.",
+      "subline": "Free on desktop & mobile",
+      "media": "",
+      "mediaType": "endcard",
+      "motion": "pulse",
+      "narration": "Visit areajam dot com in any browser and drop your city and instrument in the comments so nearby players can find you."
+    }
+  ]
+}

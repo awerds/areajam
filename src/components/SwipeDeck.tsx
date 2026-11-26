@@ -16,7 +16,6 @@ interface SwipeDeckProps {
   canUndo: boolean;
   includeNearbyRegions: boolean;
   showingNearestFallback?: boolean;
-  showSampleCards?: boolean;
   filterKey?: string;
   soundEnabled: boolean;
   currentUserUid?: string;
@@ -29,7 +28,6 @@ interface SwipeDeckProps {
   onInvite: (listing: Listing) => void;
   onOpenInvites: (threadId?: string, folder?: InboxFolder) => void;
   onEnableNearby: () => void;
-  onToggleSampleCards?: () => void;
   onResetPassed: () => void;
   onGoToPost: () => void;
 }
@@ -42,7 +40,6 @@ export function SwipeDeck({
   canUndo,
   includeNearbyRegions,
   showingNearestFallback = false,
-  showSampleCards = true,
   filterKey = '',
   soundEnabled,
   currentUserUid,
@@ -55,7 +52,6 @@ export function SwipeDeck({
   onInvite,
   onOpenInvites,
   onEnableNearby,
-  onToggleSampleCards,
   onResetPassed,
   onGoToPost,
 }: SwipeDeckProps) {
@@ -167,7 +163,7 @@ export function SwipeDeck({
     if (!topCard || flyDir) return;
     const el = cardRef.current;
 
-    if (decision === 'like' && !topCard.isSample) {
+    if (decision === 'like') {
       if (el) {
         gsap.to(el, {
           x: 0,
@@ -206,9 +202,9 @@ export function SwipeDeck({
     }
 
     gsap.to(el, {
-      x: decision === 'like' ? 460 : -460,
+      x: -460,
       y: 28,
-      rotation: decision === 'like' ? 16 : -16,
+      rotation: -16,
       opacity: 0,
       duration: 0.24,
       ease: 'power2.in',
@@ -382,15 +378,6 @@ export function SwipeDeck({
               Show players across US cities
             </button>
           )}
-          {showSampleCards === false && onToggleSampleCards && (
-            <button
-              type="button"
-              onClick={onToggleSampleCards}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--pill-bg)] px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
-            >
-              Show sample profiles
-            </button>
-          )}
           {canUndo && (
             <button
               type="button"
@@ -559,11 +546,6 @@ export function SwipeDeck({
                         {topRoughDistanceCompact}
                       </span>
                     )}
-                    {topCard.isSample && (
-                      <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/90">
-                        Fictional sample
-                      </span>
-                    )}
                   </div>
 
                   <button
@@ -588,7 +570,7 @@ export function SwipeDeck({
                     </div>
 
                     <div className="flex shrink-0 items-center gap-1.5">
-                      {!topCard.isSample && topAction.kind !== 'self' && (
+                      {topAction.kind !== 'self' && topAction.kind !== 'unavailable' && (
                         <button
                           type="button"
                           onClick={() => {
@@ -675,7 +657,7 @@ export function SwipeDeck({
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1.5">
-                  {!topCard.isSample && topAction.kind !== 'self' && (
+                  {topAction.kind !== 'self' && topAction.kind !== 'unavailable' && (
                     <button
                       type="button"
                       onClick={() => {

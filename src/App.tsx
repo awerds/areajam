@@ -31,7 +31,7 @@ import { ProfilePage } from './components/ProfilePage';
 import { RegionDialog } from './components/RegionDialog';
 import { SwipeDeck } from './components/SwipeDeck';
 import { DEFAULT_ALL_REGIONS, JAM_PREFERENCES } from './data/regions';
-import { SAMPLE_PROFILES } from './data/sampleProfiles';
+import { LA_PROFILES } from './data/laProfiles';
 import {
   addProfileWallNote,
   blockUser,
@@ -356,32 +356,17 @@ export function App() {
     [visibleRemoteProfiles, user]
   );
 
-  const samplesEnabled = state.samplesEnabled;
-
-  const handleToggleSamples = () => {
-    const next = !state.samplesEnabled;
-    setState((prev) => ({ ...prev, samplesEnabled: next }));
-    showToast(
-      next
-        ? 'Sample profiles turned on.'
-        : 'Sample profiles turned off — showing live musicians only.'
-    );
-  };
-
   const allListings = useMemo<Listing[]>(
-    () => [
-      ...visibleRemoteProfiles,
-      ...(samplesEnabled ? SAMPLE_PROFILES : []),
-    ],
-    [visibleRemoteProfiles, samplesEnabled]
+    () => [...visibleRemoteProfiles, ...LA_PROFILES],
+    [visibleRemoteProfiles]
   );
 
   const activeProfile = useMemo<Listing | null>(() => {
     if (!activeProfileId) return null;
     const fromVisible = visibleRemoteProfiles.find((l) => l.id === activeProfileId);
     if (fromVisible) return fromVisible;
-    const fromSample = SAMPLE_PROFILES.find((l) => l.id === activeProfileId);
-    if (fromSample) return fromSample;
+    const fromLa = LA_PROFILES.find((l) => l.id === activeProfileId);
+    if (fromLa) return fromLa;
     if (deepLinkProfile && deepLinkProfile.id === activeProfileId) {
       if (deepLinkProfile.ownerUid && blockedUidSet.has(deepLinkProfile.ownerUid)) return null;
       return deepLinkProfile;
@@ -398,7 +383,7 @@ export function App() {
     }
     const alreadyLoaded =
       remoteProfiles.some((l) => l.id === activeProfileId) ||
-      SAMPLE_PROFILES.some((l) => l.id === activeProfileId);
+      LA_PROFILES.some((l) => l.id === activeProfileId);
     if (alreadyLoaded) {
       setDeepLinkLoading(false);
       setResolvedProfileId(activeProfileId);
@@ -436,12 +421,12 @@ export function App() {
   }, [activeProfileId, activeProfile, deepLinkLoading, resolvedProfileId]);
 
   useEffect(() => {
-    if (!activeProfile || activeProfile.isSample) {
+    if (!activeProfile) {
       setLiveWallNotes([]);
       return;
     }
     return subscribeProfileWallNotes(activeProfile.id, setLiveWallNotes, () => { });
-  }, [activeProfile?.id, activeProfile?.isSample]);
+  }, [activeProfile?.id]);
 
   const activePrefs = state.lookingForJam;
   const prefChoices = JAM_PREFERENCES;
@@ -528,9 +513,6 @@ export function App() {
       sidePool
         .filter((l) => l.regionId === state.regionId)
         .sort((a, b) => {
-          const aSample = Boolean(a.isSample);
-          const bSample = Boolean(b.isSample);
-          if (aSample !== bSample) return aSample ? 1 : -1;
           const aHasVideo = a.clips.some((c) => c.kind === 'video' && Boolean(c.embedUrl));
           const bHasVideo = b.clips.some((c) => c.kind === 'video' && Boolean(c.embedUrl));
           if (aHasVideo !== bHasVideo) return aHasVideo ? -1 : 1;
@@ -559,9 +541,6 @@ export function App() {
         if (distA !== null && distB !== null && distA !== distB) return distA - distB;
         if (distA !== null && distB === null) return -1;
         if (distA === null && distB !== null) return 1;
-        const aSample = Boolean(a.isSample);
-        const bSample = Boolean(b.isSample);
-        if (aSample !== bSample) return aSample ? 1 : -1;
         return b.createdAt - a.createdAt;
       });
   }, [sidePool, state.regionId, currentRegion, regionById]);
@@ -704,7 +683,7 @@ export function App() {
     stopCardPreview();
     setFocusedDeckId(null);
 
-    if (decision === 'like' && !listing.isSample) {
+    if (decision === 'like') {
       handleRequestInvite(listing);
       return;
     }
@@ -717,12 +696,6 @@ export function App() {
         history: [...prev.history, { listingId: listing.id, decision }],
       };
     });
-
-    if (decision === 'like' && listing.isSample) {
-      showToast(
-        `${listing.title} is a sample demo card — turn to Live profiles to send real Jam invites.`
-      );
-    }
   };
 
   const handleUndo = () => {
@@ -741,15 +714,10 @@ export function App() {
       const nextSwiped = { ...prev.swiped };
       delete nextSwiped[entry.listingId];
 
-      const nextMatches = entry.createdMatchId
-        ? prev.matches.filter((m) => m.id !== entry.createdMatchId)
-        : prev.matches;
-
       return {
         ...prev,
         swiped: nextSwiped,
         history: prev.history.filter((_, i) => i !== targetIndex),
-        matches: nextMatches,
       };
     });
   };
@@ -843,8 +811,8 @@ export function App() {
   };
 
   const handleRequestInvite = (listing: Listing) => {
-    if (listing.isSample || !listing.ownerUid) {
-      showToast('Sample preview cards cannot receive Jam invites. Browse or post live players.');
+    if (!listing.ownerUid) {
+      showToast('This profile is not accepting Jam invites right now.');
       return;
     }
     if (!user) {
@@ -976,32 +944,8 @@ export function App() {
   };
 
   const deliverWallComment = async (listingId: string, text: string, author: AuthUser) => {
-    const targetListing = allListings.find((l) => l.id === listingId) ?? activeProfile;
-    if (targetListing && !targetListing.isSample) {
-      await addProfileWallNote(listingId, author, text);
-      showToast('Posted public note to Firestore scene wall.');
-      return;
-    }
-    setState((prev) => {
-      const existing = prev.wallComments[listingId] ?? [];
-      return {
-        ...prev,
-        wallComments: {
-          ...prev.wallComments,
-          [listingId]: [
-            ...existing,
-            {
-              id: `wall-${Date.now()}`,
-              authorName: author.displayName,
-              authorUid: author.uid,
-              text,
-              createdAt: Date.now(),
-            },
-          ],
-        },
-      };
-    });
-    showToast('Saved local preview note on sample wall.');
+    await addProfileWallNote(listingId, author, text);
+    showToast('Posted public note to Firestore scene wall.');
   };
 
   const handleAddWallComment = (listingId: string, text: string) => {
@@ -1059,7 +1003,6 @@ export function App() {
       blockedUsers: blocks,
       localPreferences: {
         regionId: state.regionId,
-        samplesEnabled: state.samplesEnabled,
         includeNearbyRegions: state.includeNearbyRegions,
         locationConsent: state.locationConsent,
         detectedCityLabel: state.detectedCityLabel,
@@ -1102,10 +1045,8 @@ export function App() {
     showToast('Your account and published profiles have been permanently deleted.');
   };
 
-  const handleShareProfileUrl = (listing?: Listing | null) => {
-    const copiedToast = listing?.isSample
-      ? 'Copied sample demo profile link.'
-      : 'Copied live profile share link.';
+  const handleShareProfileUrl = () => {
+    const copiedToast = 'Copied live profile share link.';
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(window.location.href).then(
         () => showToast(copiedToast),
@@ -1265,33 +1206,6 @@ export function App() {
 
             <button
               type="button"
-              role="switch"
-              aria-checked={samplesEnabled}
-              aria-label="Show sample profiles"
-              title="Turn sample preview profiles on or off"
-              onClick={handleToggleSamples}
-              className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--pill-bg)] px-2 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)] md:inline-flex lg:gap-2 lg:px-2.5"
-            >
-              <span>Samples</span>
-              <span
-                aria-hidden="true"
-                className="relative inline-flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors"
-                style={{
-                  backgroundColor: samplesEnabled ? 'var(--jam)' : 'var(--border-strong)',
-                }}
-              >
-                <span
-                  className={`h-3 w-3 rounded-full shadow-xs transition-transform ${samplesEnabled ? 'translate-x-3' : 'translate-x-0'
-                    }`}
-                  style={{
-                    backgroundColor: samplesEnabled ? 'var(--jam-ink)' : 'var(--surface-solid)',
-                  }}
-                />
-              </span>
-            </button>
-
-            <button
-              type="button"
               onClick={handleToggleColorScheme}
               title="Switch light or dark theme"
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--pill-bg)] text-[var(--ink)] transition hover:bg-[var(--surface-hover)] lg:h-10 lg:w-10"
@@ -1414,9 +1328,7 @@ export function App() {
             user={user}
             inviteByTargetUid={inviteByTargetUid}
             soundEnabled={soundEnabled}
-            wallComments={
-              activeProfile.isSample ? (state.wallComments[activeProfile.id] ?? []) : liveWallNotes
-            }
+            wallComments={liveWallNotes}
             onToggleSound={() => setSoundEnabled((s) => !s)}
             onBack={() => setActiveProfileId(null)}
             onInvite={handleRequestInvite}
@@ -1425,8 +1337,8 @@ export function App() {
             onOpenProfile={handleOpenProfile}
             onUpdateListing={handleUpdateUserListing}
             onAddWallComment={handleAddWallComment}
-            onDeleteWallComment={activeProfile.isSample ? undefined : handleDeleteWallComment}
-            onShareUrl={() => handleShareProfileUrl(activeProfile)}
+            onDeleteWallComment={handleDeleteWallComment}
+            onShareUrl={handleShareProfileUrl}
           />
         ) : activeProfileId && (deepLinkLoading || resolvedProfileId !== activeProfileId) ? (
           <section className="mx-auto max-w-xl py-8 md:py-12">
@@ -1595,7 +1507,6 @@ export function App() {
                     canUndo={canUndo}
                     includeNearbyRegions={state.includeNearbyRegions}
                     showingNearestFallback={showingDeckNearestFallback}
-                    showSampleCards={samplesEnabled}
                     filterKey={`${activePrefs.join('|')}::${chipFilter}`}
                     soundEnabled={soundEnabled}
                     currentUserUid={user?.uid}
@@ -1610,7 +1521,6 @@ export function App() {
                     onEnableNearby={() =>
                       setState((prev) => ({ ...prev, includeNearbyRegions: true }))
                     }
-                    onToggleSampleCards={handleToggleSamples}
                     onResetPassed={handleResetPassed}
                     onGoToPost={() => handleTabChange('post')}
                   />
@@ -1619,48 +1529,21 @@ export function App() {
             )}
 
             {activeTab === 'browse' && (
-              <div className="space-y-6">
-                <div className="glass-surface hidden space-y-3 rounded-3xl p-4 md:block">
-                  <div className="flex flex-wrap items-center justify-between gap-2.5">
-                    <p className="text-xs font-semibold text-[var(--muted)]">
-                      {state.mode === 'jam'
-                        ? 'Filter by players you want to match with'
-                        : 'Filter by gig or band type'}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <div>
-                        <label htmlFor="browse-genre" className="visually-hidden">
-                          Filter by genre
-                        </label>
-                        <select
-                          id="browse-genre"
-                          aria-label="Filter by genre"
-                          value={chipFilter}
-                          onChange={(e) => handleSelectChipFilter(e.target.value)}
-                          className="field-control w-40 py-1.5 text-xs font-semibold"
-                        >
-                          <option value="All">All genres</option>
-                          {availableFilters
-                            .filter((f) => f !== 'All')
-                            .map((genre) => (
-                              <option key={genre} value={genre}>
-                                {genre}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-                      {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
-                        <button
-                          type="button"
-                          onClick={clearAllFilters}
-                          className="text-xs font-semibold text-[var(--accent-text)] hover:underline"
-                        >
-                          Clear filters
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="space-y-4">
+                <div
+                  role="region"
+                  aria-label={
+                    state.mode === 'jam'
+                      ? 'Filter by players you want to match with'
+                      : 'Filter by gig or band type'
+                  }
+                  className="glass-surface hidden rounded-2xl px-3 py-2 md:flex md:flex-wrap md:items-center md:justify-between md:gap-2"
+                >
+                  <div
+                    role="group"
+                    aria-label={state.mode === 'jam' ? 'Player type' : 'Gig or band type'}
+                    className="flex flex-wrap items-center gap-1.5"
+                  >
                     {prefChoices.map((pref) => {
                       const selected = activePrefs.includes(pref);
                       return (
@@ -1669,25 +1552,59 @@ export function App() {
                           type="button"
                           aria-pressed={selected}
                           onClick={() => togglePreference(pref)}
-                          className="filter-chip-btn inline-flex w-full items-center justify-center whitespace-nowrap rounded-xl border px-2 py-2 text-center text-xs font-semibold"
+                          className="filter-chip-btn inline-flex min-h-7 items-center justify-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold leading-none [@media(pointer:coarse)]:min-h-11"
                           style={
                             selected
                               ? {
-                                backgroundColor: 'var(--accent)',
-                                color: 'var(--accent-ink)',
-                                borderColor: 'var(--accent)',
-                              }
+                                  backgroundColor: 'var(--accent)',
+                                  color: 'var(--accent-ink)',
+                                  borderColor: 'var(--accent)',
+                                }
                               : {
-                                backgroundColor: 'var(--pill-bg)',
-                                color: 'var(--muted)',
-                                borderColor: 'var(--border)',
-                              }
+                                  backgroundColor: 'var(--pill-bg)',
+                                  color: 'var(--muted)',
+                                  borderColor: 'var(--border)',
+                                }
                           }
                         >
                           {pref}
                         </button>
                       );
                     })}
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <div>
+                      <label htmlFor="browse-genre" className="visually-hidden">
+                        Filter by genre
+                      </label>
+                      <select
+                        id="browse-genre"
+                        aria-label="Filter by genre"
+                        value={chipFilter}
+                        onChange={(e) => handleSelectChipFilter(e.target.value)}
+                        className="field-control min-h-7 w-36 rounded-full px-3 py-1 text-xs font-semibold leading-tight [@media(pointer:coarse)]:min-h-11"
+                      >
+                        <option value="All">All genres</option>
+                        {availableFilters
+                          .filter((f) => f !== 'All')
+                          .map((genre) => (
+                            <option key={genre} value={genre}>
+                              {genre}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    {(activePrefs.length > 0 || chipFilter !== 'All' || searchQuery.trim().length > 0) && (
+                      <button
+                        type="button"
+                        aria-label="Clear all filters"
+                        onClick={clearAllFilters}
+                        className="inline-flex min-h-7 items-center whitespace-nowrap px-1.5 text-xs font-semibold text-[var(--accent-text)] hover:underline [@media(pointer:coarse)]:min-h-11"
+                      >
+                        Clear
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -1871,8 +1788,6 @@ export function App() {
         listings={allListings}
         ipDetecting={ipDetecting}
         onDetectLocation={() => void handleAllowIpLocation()}
-        samplesEnabled={samplesEnabled}
-        onToggleSamples={handleToggleSamples}
         onClose={() => setRegionModalOpen(false)}
         onSelectRegion={(regionId) => setState((prev) => ({ ...prev, regionId }))}
         onToggleNearby={(next) => setState((prev) => ({ ...prev, includeNearbyRegions: next }))}

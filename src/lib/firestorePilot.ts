@@ -19,7 +19,7 @@ export function pairIdFor(uidA: string, uidB: string): string {
 }
 
 export type ProfileActionState =
-  | { kind: 'sample'; label: string }
+  | { kind: 'unavailable'; label: string }
   | { kind: 'self'; label: string }
   | { kind: 'accepted'; label: string; invite: JamInvite }
   | { kind: 'incoming'; label: string; invite: JamInvite }
@@ -31,8 +31,8 @@ export function getProfileActionState(
   currentUserUid?: string,
   inviteByTargetUid?: Record<string, JamInvite>
 ): ProfileActionState {
-  if (listing.isSample || !listing.ownerUid) {
-    return { kind: 'sample', label: 'Sample preview' };
+  if (!listing.ownerUid) {
+    return { kind: 'unavailable', label: 'Unavailable' };
   }
   if (currentUserUid && listing.ownerUid === currentUserUid) {
     return { kind: 'self', label: 'Your profile' };
@@ -125,9 +125,6 @@ function normalizeRemoteProfile(id: string, data: Record<string, unknown>): List
           ? (rawStyle.bannerPattern as Listing['profileStyle']['bannerPattern'])
           : 'waves',
     },
-    autoMatch: false,
-    autoReply: '',
-    isSample: false,
     isPublished: data.isPublished !== false,
     isUserCreated: true,
     ownerUid: typeof data.ownerUid === 'string' ? data.ownerUid : undefined,

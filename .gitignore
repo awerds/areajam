@@ -26,3 +26,10 @@ dist-ssr
 .idea
 *.swp
 *.swo
+
+# Local Promo Video Studio
+promo-studio/.venv
+promo-studio/node_modules
+promo-studio/out
+promo-studio/public/generated
+promo-studio/public/screenshots

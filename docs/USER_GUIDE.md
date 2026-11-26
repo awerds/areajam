@@ -30,8 +30,6 @@ You can explore AreaJam immediately without signing in:
 3. **Switch themes anytime:** Click the **Sun / Moon** icon button in the top-right header to toggle between Dark and Light mode.
 4. **Need a refresher in-app?** Click the **?** (How AreaJam works) icon button in the top-right header.
 
-![AreaJam desktop landing carousel](screenshots/desktop-landing-dark.png)
-
 ---
 
 ## 2. Picking Your City or Starting a Local Board
@@ -41,8 +39,6 @@ AreaJam organizes players by local metro boards, while still letting you discove
 Open the **City Picker** anytime:
 - **Mobile:** Tap the **left half (City name)** of the integrated capsule in the top bar.
 - **Desktop:** Click the **Location pill** (for example `Nashville, 615`) in the top-right header, or click the city pill above the landing headline.
-
-![AreaJam City and Region Picker modal](screenshots/desktop-region-dialog-dark.png)
 
 Inside **Pick your city or state**, you can:
 
@@ -62,23 +58,6 @@ AreaJam adapts its layout between phones and wider screens while syncing all fil
 
 ### Mobile Single-Bar Layout & Integrated Filter
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="screenshots/mobile-landing-dark.png" width="220" alt="Mobile landing carousel" /><br />
-      <sub><strong>1. Mobile Landing</strong></sub>
-    </td>
-    <td align="center">
-      <img src="screenshots/mobile-swipe-dark.png" width="220" alt="Mobile full-height swipe card" /><br />
-      <sub><strong>2. Tinder Swipe View</strong></sub>
-    </td>
-    <td align="center">
-      <img src="screenshots/mobile-filter-dropdown-dark.png" width="220" alt="Integrated Player Type dropdown" /><br />
-      <sub><strong>3. Integrated Dropdown</strong></sub>
-    </td>
-  </tr>
-</table>
-
 On phones, AreaJam keeps the top chrome to **one compact header bar** so the swipe card fills the screen cleanly:
 - **Left side of the center capsule:** Opens **Pick your city or state**.
 - **Right side of the center capsule:** Opens the **Player Type dropdown** (`All players`, `Drummers`, `Guitarists`, `Bassists`, `Vocalists`, `Keys & Synth`, `Horns & Strings`, `Producers`, or `Songwriters`). Picking a role immediately filters your deck.
@@ -94,8 +73,6 @@ On both mobile and desktop swipe cards, you can drag a card **right to Jam** or 
 | **Quick Info (`i`)** | Opens a compact dialog with bio, availability, genres, and gear summary |
 | **Jam (Flame)** | Likes & opens the **Jam Invite** composer (or opens chat if already matched) |
 | **Expand Profile** | Opens the musician's full Artist Profile page |
-
-![Desktop swipe stage in Light mode](screenshots/desktop-swipe-light.png)
 
 ### Desktop Filters & Keyboard Shortcuts
 
@@ -115,8 +92,6 @@ On wider screens (`>= 768px`), the left column offers combined search (by name, 
 
 Switch to **Browse players** (top nav on desktop, **Browse** tab on the mobile dock) when you want a grid overview instead of one card at a time:
 
-![Browse players open directory](screenshots/desktop-browse-light.png)
-
 - Filter instantly with the search bar (matches titles, subtitles, neighborhoods, genres, seeking notes, and gear locker items).
 - Click any card's media area or title to open its full Artist Profile page, use the card's play control to audition clips in-place, or click **Open clip reels** to return to the swipe deck.
 - Toggle **Samples** in the desktop header (or inside **Pick your city or state** on mobile) to filter between live community listings and demo cards.
@@ -126,8 +101,6 @@ Switch to **Browse players** (top nav on desktop, **Browse** tab on the mobile d
 ## 5. Artist Profile Pages & Gear Lockers
 
 Every live or sample musician has a full **Artist Profile page** (and a direct shareable link via **Share link** or `?p=<profile-id>`):
-
-![Artist Profile page with clip showcase and Gear Locker](screenshots/desktop-profile-dark.png)
 
 Each profile includes:
 - **Media & Clip Showcase:** Play linked YouTube videos/Shorts, Instagram Reels, TikToks, Vimeo, SoundCloud tracks, or direct MP4/MP3 clips. Use the card's top **Tap for sound** control to toggle audio.
@@ -141,8 +114,6 @@ Each profile includes:
 ## 6. Building & Publishing Your Profile (`Profile & studio`)
 
 You can draft your musician profile freely before ever signing in. Open **Profile & studio** (top nav on desktop, **Profile** tab on mobile) to walk through the 3-step builder:
-
-![Profile & studio 3-step builder with live preview](screenshots/desktop-studio-dark.png)
 
 1. **Step 1 — Import clips:**
    - Enter your public **YouTube `@handle`** or channel URL and click **Load videos** to browse your videos and Shorts and auto-fill stage details.
