@@ -63,7 +63,7 @@ function loadRegions() {
 
 function resolveRegion(cityInput, regions) {
   const q = (cityInput || '').trim().toLowerCase();
-  if (!q) return regions.find((r) => r.id === 'nashville') || regions[0];
+  if (!q) return regions.find((r) => r.id === 'la') || regions[0];
 
   const aliases = {
     'new york': 'nyc',
@@ -81,7 +81,7 @@ function resolveRegion(cityInput, regions) {
     regions.find((r) => r.id.toLowerCase() === q) ||
     regions.find((r) => r.city.toLowerCase() === q) ||
     regions.find((r) => r.label.toLowerCase().includes(q)) ||
-    regions.find((r) => r.id === 'nashville') ||
+    regions.find((r) => r.id === 'la') ||
     regions[0]
   );
 }
@@ -102,19 +102,21 @@ function resolveCanonicalRole(roleInput) {
   return '';
 }
 
-function loadSampleProfileIndex() {
-  const src = fs.readFileSync(path.join(repoRoot, 'src', 'data', 'sampleProfiles.ts'), 'utf-8');
-  const blocks = src.split('\n  {\n    "id": "');
+function loadProfileIndex() {
+  const srcPath = path.join(repoRoot, 'src', 'data', 'laProfiles.ts');
   const byTitle = new Map();
+  if (!fs.existsSync(srcPath)) return byTitle;
+  const src = fs.readFileSync(srcPath, 'utf-8');
+  const blocks = src.split('\n  {\n    id: "');
   for (let i = 1; i < blocks.length; i += 1) {
     const b = blocks[i];
     const id = b.split('"')[0];
-    const mTitle = b.match(/"title":\s*"([^"]+)"/);
-    const mUrl = b.match(/"embedUrl":\s*"(https:\/\/awerds\.github\.io\/areajam-media\/side-stage\/clips\/[^"]+\.mp4)"/);
+    const mTitle = b.match(/title:\s*"([^"]+)"/);
     if (mTitle) {
       const title = mTitle[1].trim();
-      const clipUrl = mUrl ? mUrl[1] : '';
-      const clipSlug = clipUrl ? `${id.replace(/^fictional-/, '')}.mp4` : '';
+      const localMp4 = path.join(repoRoot, 'public', 'profiles', 'la', `${id}.mp4`);
+      const clipUrl = fs.existsSync(localMp4) ? localMp4 : '';
+      const clipSlug = clipUrl ? `${id}.mp4` : '';
       byTitle.set(title.toLowerCase(), { id, title, clipUrl, clipSlug });
     }
   }
@@ -389,7 +391,7 @@ async function main() {
   }
 
   fs.mkdirSync(outDir, { recursive: true });
-  const profileIndex = loadSampleProfileIndex();
+  const profileIndex = loadProfileIndex();
   const tmpProfileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'areajam-cdp-'));
   let chromeChild = null;
   let cdp = null;
@@ -568,10 +570,14 @@ async function main() {
           }
           await new Promise((r) => setTimeout(r, 120));
         }
+        window.scrollTo(0, document.documentElement.scrollHeight);
+        await new Promise((r) => setTimeout(r, 550));
+        window.scrollTo(0, 0);
+        await new Promise((r) => setTimeout(r, 300));
         const nav = document.querySelector('nav[aria-label="Mobile navigation"]');
         if (nav) nav.style.display = 'none';
         document.activeElement?.blur?.();
-        return Math.min(2600, Math.max(1500, document.documentElement.scrollHeight || 1800));
+        return Math.min(2650, Math.max(1500, document.documentElement.scrollHeight || 2000));
       `);
       await cdp.capturePng(profilePath, {
         x: 0,

@@ -202,237 +202,102 @@ export function ProfilePage({
     }
   };
 
+  const hasHeaderAction =
+    actionState.kind === 'accepted' ||
+    actionState.kind === 'incoming' ||
+    actionState.kind === 'sent' ||
+    actionState.kind === 'invite';
+
   return (
     <article
-      className={`profile-theme-${theme.id} mx-auto w-full max-w-[1440px] space-y-6 pb-8`}
+      className={`profile-theme-${theme.id} mx-auto w-full max-w-[1220px] space-y-5 pb-20 lg:pb-10`}
     >
-      {/* MySpace-inspired custom-themed hero banner */}
-      <header
-        className="relative overflow-hidden rounded-[2rem] border p-6 shadow-[0_24px_60px_var(--glass-shadow)] md:p-8"
-        style={{
-          backgroundColor: 'var(--pt-bg-to)',
-          backgroundImage:
-            'radial-gradient(circle at 85% 18%, var(--pt-glow), transparent 50%), linear-gradient(135deg, var(--pt-bg-from), var(--pt-bg-to))',
-          borderColor: 'var(--pt-border)',
-        }}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span>Back to {selectedRegion?.city ?? region?.city ?? 'scene'}</span>
-          </button>
+      {/* Slim frameless utility bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Back to {selectedRegion?.city ?? region?.city ?? 'scene'}</span>
+        </button>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {canCustomize && (
-              <button
-                type="button"
-                onClick={() => setCustomizeOpen((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
-              >
-                <Palette
-                  className="h-3.5 w-3.5"
-                  style={{ color: 'var(--pt-accent)' }}
-                  aria-hidden="true"
-                />
-                <span>{customizeOpen ? 'Close editor' : 'Customize page'}</span>
-              </button>
-            )}
-
-            {listing.ownerUid && user?.uid !== listing.ownerUid && (
-              <>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onSafetyAction({
-                      mode: 'report',
-                      targetUid: listing.ownerUid!,
-                      targetName: listing.ownerName || listing.title,
-                      targetType: 'profile',
-                      targetId: listing.id,
-                    })
-                  }
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--muted)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)] hover:text-[var(--ink)]"
-                >
-                  <Flag className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Report</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onSafetyAction({
-                      mode: 'block',
-                      targetUid: listing.ownerUid!,
-                      targetName: listing.ownerName || listing.title,
-                      targetType: 'profile',
-                      targetId: listing.id,
-                    })
-                  }
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3.5 py-2 text-xs font-semibold text-[var(--err)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
-                >
-                  <ShieldBan className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Block</span>
-                </button>
-              </>
-            )}
-
+        <div className="flex flex-wrap items-center gap-1.5">
+          {canCustomize && (
             <button
               type="button"
-              onClick={onShareUrl}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
+              aria-expanded={customizeOpen}
+              aria-controls="profile-customizer-panel"
+              onClick={() => setCustomizeOpen((prev) => !prev)}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
             >
-              <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Share link</span>
+              <Palette
+                className="h-3.5 w-3.5"
+                style={{ color: 'var(--pt-accent)' }}
+                aria-hidden="true"
+              />
+              <span>{customizeOpen ? 'Close editor' : 'Customize page'}</span>
             </button>
-          </div>
+          )}
+
+          {listing.ownerUid && user?.uid !== listing.ownerUid && (
+            <>
+              <button
+                type="button"
+                onClick={() =>
+                  onSafetyAction({
+                    mode: 'report',
+                    targetUid: listing.ownerUid!,
+                    targetName: listing.ownerName || listing.title,
+                    targetType: 'profile',
+                    targetId: listing.id,
+                  })
+                }
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--muted)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)] hover:text-[var(--ink)]"
+              >
+                <Flag className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Report</span>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onSafetyAction({
+                    mode: 'block',
+                    targetUid: listing.ownerUid!,
+                    targetName: listing.ownerName || listing.title,
+                    targetType: 'profile',
+                    targetId: listing.id,
+                  })
+                }
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--err)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
+              >
+                <ShieldBan className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Block</span>
+              </button>
+            </>
+          )}
+
+          <button
+            type="button"
+            onClick={onShareUrl}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-md transition hover:bg-[var(--pt-pill-hover)]"
+          >
+            <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Share link</span>
+          </button>
         </div>
-
-        <div className="mt-6 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-          <div className="space-y-3.5">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span
-                className="rounded-full px-3 py-1 text-xs font-bold"
-                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
-              >
-                {isJam
-                  ? 'Jam player'
-                  : listing.gigSubtype === 'open-gig'
-                    ? 'Open gig slot'
-                    : 'Band for hire'}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-medium text-[var(--ink)]">
-                <MapPin
-                  className="h-3.5 w-3.5"
-                  style={{ color: 'var(--pt-accent)' }}
-                  aria-hidden="true"
-                />
-                {listing.neighborhood}, {region?.label ?? listing.regionLabel ?? listing.regionId}
-              </span>
-              {selectedRegion && listing.regionId !== selectedRegion.id && (() => {
-                const distanceText = formatRoughDistance(
-                  estimateRoughDistanceMiles(selectedRegion, region),
-                  selectedRegion,
-                  region,
-                  'verbose'
-                );
-                return distanceText ? (
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-bold"
-                    style={{ color: 'var(--pt-accent)' }}
-                  >
-                    {distanceText}
-                  </span>
-                ) : null;
-              })()}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--muted)]">
-                Live profile (Firestore)
-              </span>
-              {listing.instagramHandle && (
-                <a
-                  href={`https://www.instagram.com/${listing.instagramHandle}/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)] hover:bg-[var(--pt-pill-hover)]"
-                >
-                  <Instagram className="h-3.5 w-3.5" style={{ color: 'var(--pt-accent)' }} aria-hidden="true" />
-                  <span>@{listing.instagramHandle}</span>
-                </a>
-              )}
-              {listing.payOrSplit && (
-                <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
-                  {listing.payOrSplit}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              {listing.portraitUrl && (
-                <img
-                  src={listing.portraitUrl}
-                  alt={listing.portraitAlt || listing.title}
-                  className="h-16 w-16 shrink-0 rounded-2xl border object-cover object-[50%_20%]"
-                  style={{ borderColor: 'var(--pt-border)' }}
-                />
-              )}
-              <div className="min-w-0">
-                <h1 className="hero-title font-bold text-[var(--ink)]">{listing.title}</h1>
-                <p className="text-base font-medium text-[var(--muted)]">{listing.subtitle}</p>
-              </div>
-            </div>
-
-            <InstrumentBadgeRow instruments={listing.instruments} max={6} />
-
-            {listing.profileStyle?.moodStatus && (
-              <div className="inline-flex max-w-2xl items-center gap-2 rounded-2xl border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-4 py-2 text-sm text-[var(--ink)] backdrop-blur-md">
-                <Sparkles
-                  className="h-4 w-4 shrink-0"
-                  style={{ color: 'var(--pt-accent)' }}
-                  aria-hidden="true"
-                />
-                <span>
-                  <strong className="font-semibold text-[var(--ink)]">Status:</strong>{' '}
-                  {listing.profileStyle.moodStatus}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {actionState.kind === 'accepted' ? (
-              <button
-                type="button"
-                onClick={() => onOpenInvites(actionState.invite.threadId, 'inbox')}
-                className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
-                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                <span>Open messages</span>
-              </button>
-            ) : actionState.kind === 'incoming' ? (
-              <button
-                type="button"
-                onClick={() => onOpenInvites(undefined, 'requests')}
-                className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
-                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
-              >
-                <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                <span>Review request in Messages</span>
-              </button>
-            ) : actionState.kind === 'sent' ? (
-              <button
-                type="button"
-                onClick={() => onOpenInvites(undefined, 'sent')}
-                className="inline-flex items-center gap-2 rounded-2xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-6 py-3.5 text-sm font-bold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
-              >
-                <span>Request sent — view in Sent</span>
-              </button>
-            ) : actionState.kind === 'invite' ? (
-              <button
-                type="button"
-                onClick={() => onInvite(listing)}
-                className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold shadow-lg transition hover:opacity-90"
-                style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
-              >
-                <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                <span>Invite to jam</span>
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </header>
+      </div>
 
       {/* Owner live customizer */}
       {canCustomize && customizeOpen && (
         <section
-          aria-label="Customize your profile page"
-          className="glass-surface space-y-5 rounded-3xl p-6"
+          id="profile-customizer-panel"
+          className="glass-surface space-y-4 rounded-2xl p-5"
           style={{ borderColor: 'var(--pt-border)' }}
         >
           <div>
-            <h2 className="font-display text-xl font-bold text-[var(--ink)]">
+            <h2 className="font-display text-lg font-bold text-[var(--ink)]">
               Customize your artist page
             </h2>
             <p className="text-xs text-[var(--muted)]">
@@ -477,7 +342,7 @@ export function ProfilePage({
                 maxLength={100}
                 value={moodDraft}
                 onChange={(e) => setMoodDraft(e.target.value)}
-                placeholder="e.g. Tracking bass demos in East Austin all week"
+                placeholder="e.g. Tracking bass demos in Silver Lake all week"
                 className="field-control"
               />
             </div>
@@ -492,7 +357,7 @@ export function ProfilePage({
                 maxLength={120}
                 value={soundsLikeDraft}
                 onChange={(e) => setSoundsLikeDraft(e.target.value)}
-                placeholder="e.g. Khruangbin, Radiohead, Thee Oh Sees"
+                placeholder="e.g. Khruangbin, Radiohead, Alvvays"
                 className="field-control"
               />
             </div>
@@ -500,7 +365,7 @@ export function ProfilePage({
             <div className="md:col-span-2">
               <button
                 type="submit"
-                className="rounded-2xl px-5 py-2.5 text-xs font-bold"
+                className="rounded-xl px-5 py-2.5 text-xs font-bold"
                 style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
               >
                 Save page style
@@ -510,11 +375,10 @@ export function ProfilePage({
         </section>
       )}
 
-      {/* Two-column MySpace-inspired layout */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Left column: Featured video stage, playlist, details, and Top 4 local scene */}
-        <div className="space-y-6 lg:col-span-5">
-          {/* Featured Video / Audio Reel Player */}
+      {/* Two-column editorial layout: sticky media stage + flowing profile details */}
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(19rem,21.5rem)_minmax(0,1fr)] lg:gap-6">
+        {/* Left column: Sticky featured video stage + optional multi-clip switcher */}
+        <div className="space-y-4 lg:sticky lg:top-[4.75rem]">
           {(() => {
             const activeStageClip =
               orderedClips.find((c) => c.id === activeClipId) ?? orderedClips[0];
@@ -524,12 +388,12 @@ export function ProfilePage({
               orderedClips.length === 0 && Boolean(listing.portraitUrl);
             return (
               <div
-                className={`relative overflow-hidden rounded-[2rem] border bg-[var(--surface-solid)] shadow-[0_24px_60px_var(--glass-shadow)] ${
+                className={`relative overflow-hidden rounded-[1.75rem] border bg-[var(--surface-solid)] shadow-[0_18px_48px_var(--glass-shadow)] ${
                   stageIsEmbed
-                    ? 'h-[28rem] sm:h-[32rem]'
+                    ? 'h-[28rem] w-full sm:h-[32rem]'
                     : stageIsPortraitOnly
-                      ? 'mx-auto aspect-[4/5] w-full max-w-[23rem]'
-                      : 'mx-auto aspect-[9/16] max-h-[38rem] w-full max-w-[21.5rem]'
+                      ? 'mx-auto aspect-[4/5] w-full max-w-[21.5rem]'
+                      : 'profile-video-stage mx-auto'
                 }`}
                 style={{ borderColor: 'var(--pt-border)' }}
               >
@@ -546,31 +410,29 @@ export function ProfilePage({
             );
           })()}
 
-          {/* MySpace Music Playlist */}
-          {orderedClips.length > 0 && (
+          {orderedClips.length > 1 && (
             <section
-              aria-label="Clips and recordings playlist"
-              className="rounded-3xl border p-5"
+              className="rounded-2xl border p-4"
               style={{
                 backgroundColor: 'var(--pt-surface)',
                 borderColor: 'var(--pt-border)',
               }}
             >
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="font-display text-lg font-bold text-[var(--ink)]">Clips &amp; reels</h2>
-                <span className="text-xs text-[var(--muted)]">
-                  {orderedClips.length} {orderedClips.length === 1 ? 'track' : 'tracks'}
-                </span>
+              <div className="mb-2.5 flex items-center justify-between gap-2">
+                <h2 className="font-display text-base font-bold text-[var(--ink)]">
+                  Clips &amp; reels
+                </h2>
+                <span className="text-xs text-[var(--muted)]">{orderedClips.length} tracks</span>
               </div>
 
-              <ul className="space-y-2">
+              <ul role="list" className="space-y-2">
                 {orderedClips.map((clip, idx) => {
                   const isPlayingNow = clip.id === (activeClipId || orderedClips[0]?.id);
                   const isMain = clip.id === (listing.featuredClipId || orderedClips[0]?.id);
                   return (
                     <li
                       key={clip.id}
-                      className="flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 transition"
+                      className="flex items-center justify-between gap-2 rounded-2xl border px-3 py-2 transition"
                       style={{
                         borderColor: isPlayingNow ? 'var(--pt-accent)' : 'var(--pt-border-subtle)',
                         backgroundColor: isPlayingNow
@@ -581,7 +443,7 @@ export function ProfilePage({
                       <button
                         type="button"
                         onClick={() => setActiveClipId(clip.id)}
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                       >
                         <span
                           className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
@@ -640,127 +502,190 @@ export function ProfilePage({
               </ul>
             </section>
           )}
+        </div>
 
-          {/* Schedule & Press Link */}
-          <section
-            className="space-y-3 rounded-3xl border p-5"
+        {/* Right column: Compact Identity Header, Looking For + Bio + Availability, Gear Locker, Wall */}
+        <div className="min-w-0 space-y-4 sm:space-y-5">
+          {/* Compact Themed Artist Identity Header */}
+          <header
+            className="relative overflow-hidden rounded-3xl border p-5 shadow-[0_16px_44px_var(--glass-shadow)] md:p-6"
             style={{
-              backgroundColor: 'var(--pt-surface)',
+              backgroundColor: 'var(--pt-bg-to)',
+              backgroundImage:
+                'radial-gradient(circle at 88% 15%, var(--pt-glow), transparent 55%), linear-gradient(135deg, var(--pt-bg-from), var(--pt-bg-to))',
               borderColor: 'var(--pt-border)',
             }}
           >
-            <h2 className="font-display text-lg font-bold text-[var(--ink)]">
-              Availability &amp; links
-            </h2>
-            <div className="flex items-start gap-3 text-sm text-[var(--ink)]/90">
-              <Calendar
-                className="mt-0.5 h-4 w-4 shrink-0"
-                style={{ color: 'var(--pt-accent)' }}
-                aria-hidden="true"
-              />
-              <span>{listing.availability}</span>
-            </div>
-            {safeHref && (
-              <a
-                href={safeHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-semibold underline decoration-[var(--pt-border)] underline-offset-4 hover:opacity-85"
-                style={{ color: 'var(--pt-accent)' }}
-              >
-                <span>Open music / press kit ({listing.sampleLink})</span>
-                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            )}
-          </section>
-
-          {/* Local Scene: "Top 4 in City" (MySpace Top Friends homage) */}
-          {localSceneNeighbors.length > 0 && (
-            <section
-              className="rounded-3xl border p-5"
-              style={{
-                backgroundColor: 'var(--pt-surface)',
-                borderColor: 'var(--pt-border)',
-              }}
-            >
-              <div className="mb-3 flex items-center gap-2">
-                <Users
-                  className="h-4 w-4"
-                  style={{ color: 'var(--pt-accent)' }}
-                  aria-hidden="true"
-                />
-                <h2 className="font-display text-lg font-bold text-[var(--ink)]">
-                  Nearby in {region?.city ?? listing.regionId}
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {localSceneNeighbors.map((neighbor) => {
-                  const nRegion = allRegions.find((r) => r.id === neighbor.regionId);
-                  return (
-                    <button
-                      key={neighbor.id}
-                      type="button"
-                      onClick={() => onOpenProfile(neighbor)}
-                      className="flex items-center gap-2.5 rounded-2xl border p-2.5 text-left transition hover:brightness-95"
-                      style={{
-                        backgroundColor: 'var(--pt-surface-inner)',
-                        borderColor: 'var(--pt-border-subtle)',
-                      }}
-                    >
-                      {neighbor.portraitUrl && (
-                        <img
-                          src={neighbor.portraitUrl}
-                          alt={neighbor.portraitAlt || neighbor.title}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-10 w-10 shrink-0 rounded-xl object-cover object-[50%_20%]"
-                        />
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
-                          {neighbor.title}
-                        </p>
-                        <p className="truncate text-xs text-[var(--muted)]">{neighbor.subtitle}</p>
-                        <p
-                          className="mt-1 text-[11px] font-medium"
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-1 space-y-2.5">
+                <div className="balanced-wrap items-center gap-1.5">
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-xs font-bold"
+                    style={{ backgroundColor: 'var(--pt-accent)', color: 'var(--pt-accent-ink)' }}
+                  >
+                    {isJam
+                      ? 'Jam player'
+                      : listing.gigSubtype === 'open-gig'
+                        ? 'Open gig slot'
+                        : 'Band for hire'}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--ink)]">
+                    <MapPin
+                      className="h-3.5 w-3.5 shrink-0"
+                      style={{ color: 'var(--pt-accent)' }}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      {listing.neighborhood},{' '}
+                      {region?.label ?? listing.regionLabel ?? listing.regionId}
+                    </span>
+                  </span>
+                  {selectedRegion &&
+                    listing.regionId !== selectedRegion.id &&
+                    (() => {
+                      const distanceText = formatRoughDistance(
+                        estimateRoughDistanceMiles(selectedRegion, region),
+                        selectedRegion,
+                        region,
+                        'verbose'
+                      );
+                      return distanceText ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-bold"
                           style={{ color: 'var(--pt-accent)' }}
                         >
-                          {neighbor.neighborhood || nRegion?.city}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-        </div>
+                          {distanceText}
+                        </span>
+                      ) : null;
+                    })()}
+                  {listing.instagramHandle && (
+                    <a
+                      href={`https://www.instagram.com/${listing.instagramHandle}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)] hover:bg-[var(--pt-pill-hover)]"
+                    >
+                      <Instagram
+                        className="h-3.5 w-3.5 shrink-0"
+                        style={{ color: 'var(--pt-accent)' }}
+                        aria-hidden="true"
+                      />
+                      <span>@{listing.instagramHandle}</span>
+                    </a>
+                  )}
+                  {listing.payOrSplit && (
+                    <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)]">
+                      {listing.payOrSplit}
+                    </span>
+                  )}
+                </div>
 
-        {/* Right column: Bio, Influences, Music Nerd Gear Locker, and MySpace Comment Wall */}
-        <div className="space-y-6 lg:col-span-7">
-          {/* About & Sounds Like */}
+                <div>
+                  <h1 className="profile-title text-[var(--ink)]">{listing.title}</h1>
+                  <p className="mt-1 text-sm font-medium text-[var(--muted)] sm:text-base">
+                    {listing.subtitle}
+                  </p>
+                </div>
+              </div>
+
+              {hasHeaderAction && (
+                <div className="shrink-0 sm:self-start">
+                  {actionState.kind === 'accepted' ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenInvites(actionState.invite.threadId, 'inbox')}
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-md transition hover:opacity-90"
+                      style={{
+                        backgroundColor: 'var(--pt-accent)',
+                        color: 'var(--pt-accent-ink)',
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                      <span>Open messages</span>
+                    </button>
+                  ) : actionState.kind === 'incoming' ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenInvites(undefined, 'requests')}
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-md transition hover:opacity-90"
+                      style={{
+                        backgroundColor: 'var(--pt-accent)',
+                        color: 'var(--pt-accent-ink)',
+                      }}
+                    >
+                      <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+                      <span>Review request in Messages</span>
+                    </button>
+                  ) : actionState.kind === 'sent' ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenInvites(undefined, 'sent')}
+                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-4 py-2.5 text-sm font-bold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
+                    >
+                      <span>Request sent — view in Sent</span>
+                    </button>
+                  ) : actionState.kind === 'invite' ? (
+                    <button
+                      type="button"
+                      onClick={() => onInvite(listing)}
+                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-md transition hover:opacity-90"
+                      style={{
+                        backgroundColor: 'var(--pt-accent)',
+                        color: 'var(--pt-accent-ink)',
+                      }}
+                    >
+                      <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+                      <span>Invite to jam</span>
+                    </button>
+                  ) : null}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-3.5 space-y-3">
+              <InstrumentBadgeRow instruments={listing.instruments} compact max={6} />
+
+              {listing.profileStyle?.moodStatus && (
+                <div className="flex items-center gap-2 rounded-xl border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-3 py-2 text-xs text-[var(--ink)] backdrop-blur-md sm:text-sm">
+                  <Sparkles
+                    className="h-4 w-4 shrink-0"
+                    style={{ color: 'var(--pt-accent)' }}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <strong className="font-semibold text-[var(--ink)]">Status:</strong>{' '}
+                    {listing.profileStyle.moodStatus}
+                  </span>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* What I'm looking for, Bio, Genres, Influences & Availability */}
           <section
-            className="space-y-4 rounded-3xl border p-6"
+            className="space-y-4 rounded-3xl border p-5 md:p-6"
             style={{
               backgroundColor: 'var(--pt-surface)',
               borderColor: 'var(--pt-border)',
             }}
           >
             <div>
-              <h2 className="font-display text-xl font-bold text-[var(--ink)]">
+              <h2 className="font-display text-sm font-bold tracking-tight text-[var(--muted)]">
                 What I&apos;m looking for
               </h2>
               <p
-                className="mt-1.5 text-lg font-semibold leading-snug"
+                className="mt-1 text-base font-semibold leading-snug sm:text-lg"
                 style={{ color: 'var(--pt-accent)' }}
               >
                 {listing.seekingOrOffer}
               </p>
             </div>
 
-            <p className="text-sm leading-relaxed text-[var(--ink)]/90">{listing.bio}</p>
+            <p className="max-w-[68ch] text-sm leading-relaxed text-[var(--ink)]/90">
+              {listing.bio}
+            </p>
 
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="balanced-wrap gap-1.5">
               {listing.genres.map((g) => (
                 <span
                   key={g}
@@ -777,17 +702,17 @@ export function ProfilePage({
 
             {listing.profileStyle?.soundsLike && listing.profileStyle.soundsLike.length > 0 && (
               <div
-                className="border-t pt-4"
+                className="border-t pt-3.5"
                 style={{ borderColor: 'var(--pt-border-subtle)' }}
               >
-                <p className="mb-2 text-xs font-semibold text-[var(--muted)]">
+                <h3 className="mb-2 text-xs font-semibold text-[var(--muted)]">
                   Sounds like / influences
-                </p>
-                <div className="flex flex-wrap gap-2">
+                </h3>
+                <div className="balanced-wrap gap-1.5">
                   {listing.profileStyle.soundsLike.map((artist) => (
                     <span
                       key={artist}
-                      className="rounded-xl border px-3 py-1.5 text-xs font-medium text-[var(--ink)]"
+                      className="rounded-xl border px-2.5 py-1 text-xs font-medium text-[var(--ink)]"
                       style={{
                         backgroundColor: 'var(--pt-surface-inner)',
                         borderColor: 'var(--pt-border-subtle)',
@@ -799,40 +724,67 @@ export function ProfilePage({
                 </div>
               </div>
             )}
+
+            <div
+              className="flex flex-wrap items-center justify-between gap-3 border-t pt-3.5 text-xs sm:text-sm"
+              style={{ borderColor: 'var(--pt-border-subtle)' }}
+            >
+              <div className="flex items-center gap-2 text-[var(--ink)]/90">
+                <Calendar
+                  className="h-4 w-4 shrink-0"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
+                <span>{listing.availability}</span>
+              </div>
+              {safeHref && (
+                <a
+                  href={safeHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-semibold underline decoration-[var(--pt-border)] underline-offset-4 hover:opacity-85"
+                  style={{ color: 'var(--pt-accent)' }}
+                >
+                  <span>Open music / press kit</span>
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+              )}
+            </div>
           </section>
 
           {/* The Gear Locker */}
           <section
-            className="space-y-4 rounded-3xl border p-6"
+            className="space-y-3.5 rounded-3xl border p-5 md:p-6"
             style={{
               backgroundColor: 'var(--pt-surface)',
               borderColor: 'var(--pt-border)',
             }}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <Speaker
                   className="h-5 w-5"
                   style={{ color: 'var(--pt-accent)' }}
                   aria-hidden="true"
                 />
-                <div>
-                  <h2 className="font-display text-xl font-bold text-[var(--ink)]">
-                    Gear locker &amp; rig
-                  </h2>
-                  <p className="text-xs text-[var(--muted)]">
-                    Exact instruments, amps, pedals, mics, or stage backline
-                  </p>
-                </div>
+                <h2 className="font-display text-lg font-bold text-[var(--ink)]">
+                  Gear locker &amp; rig
+                </h2>
               </div>
+              {listing.gearLocker.length > 0 && (
+                <span className="text-xs font-medium text-[var(--muted)]">
+                  {listing.gearLocker.length}{' '}
+                  {listing.gearLocker.length === 1 ? 'piece' : 'pieces'}
+                </span>
+              )}
             </div>
 
             {groupedGear.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {groupedGear.map((group) => (
                   <div
                     key={group.category}
-                    className="rounded-2xl border p-4"
+                    className="rounded-2xl border p-3.5"
                     style={{
                       backgroundColor: 'var(--pt-surface-inner)',
                       borderColor: 'var(--pt-border-subtle)',
@@ -841,7 +793,7 @@ export function ProfilePage({
                     <h3 className="text-xs font-bold" style={{ color: 'var(--pt-accent)' }}>
                       {group.category}
                     </h3>
-                    <ul className="mt-2.5 space-y-2.5">
+                    <ul role="list" className="mt-2 space-y-2">
                       {group.items.map((item) => (
                         <li key={item.id} className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
@@ -952,17 +904,19 @@ export function ProfilePage({
 
           {/* MySpace-style Comment Wall */}
           <section
-            className="space-y-4 rounded-3xl border p-6"
+            className="space-y-3.5 rounded-3xl border p-5 md:p-6"
             style={{
               backgroundColor: 'var(--pt-surface)',
               borderColor: 'var(--pt-border)',
             }}
           >
-            <div>
-              <h2 className="font-display text-xl font-bold text-[var(--ink)]">Scene wall</h2>
-              <p className="text-xs text-[var(--muted)]">
-                {`Public scene wall for ${listing.title} backed by Cloud Firestore.`}
-              </p>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-display text-lg font-bold text-[var(--ink)]">Scene wall</h2>
+              <span className="text-xs text-[var(--muted)]">
+                {wallComments.length > 0
+                  ? `${wallComments.length} ${wallComments.length === 1 ? 'note' : 'notes'}`
+                  : 'Public notes from local musicians'}
+              </span>
             </div>
 
             {wallComments.length === 0 ? (
@@ -976,7 +930,7 @@ export function ProfilePage({
                 No wall notes yet. Be the first local musician to say hey.
               </p>
             ) : (
-              <ul className="space-y-2.5">
+              <ul role="list" className="space-y-2.5">
                 {wallComments.map((comment) => {
                   const canDelete = Boolean(
                     user &&
@@ -1052,8 +1006,8 @@ export function ProfilePage({
                 onKeyDown={handleWallKeyDown}
                 placeholder={
                   user
-                    ? `Leave a public note on ${listing.title}'s wall...`
-                    : `Write a note (prompts Apple/Google sign-in on post)...`
+                    ? `Write a note for ${listing.title}...`
+                    : 'Write a note (sign in to post)...'
                 }
                 className="field-control resize-none"
               />
@@ -1074,6 +1028,68 @@ export function ProfilePage({
           </section>
         </div>
       </div>
+
+      {/* Full-width Local Scene strip: Nearby in City */}
+      {localSceneNeighbors.length > 0 && (
+        <section
+          className="rounded-3xl border p-5"
+          style={{
+            backgroundColor: 'var(--pt-surface)',
+            borderColor: 'var(--pt-border)',
+          }}
+        >
+          <div className="mb-3 flex items-center gap-2">
+            <Users
+              className="h-4 w-4"
+              style={{ color: 'var(--pt-accent)' }}
+              aria-hidden="true"
+            />
+            <h2 className="font-display text-lg font-bold text-[var(--ink)]">
+              Nearby in {region?.city ?? listing.regionId}
+            </h2>
+          </div>
+          <ul role="list" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+            {localSceneNeighbors.map((neighbor) => {
+              const nRegion = allRegions.find((r) => r.id === neighbor.regionId);
+              return (
+                <li key={neighbor.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpenProfile(neighbor)}
+                    className="flex w-full items-center gap-3 rounded-2xl border p-2.5 text-left transition hover:brightness-95"
+                    style={{
+                      backgroundColor: 'var(--pt-surface-inner)',
+                      borderColor: 'var(--pt-border-subtle)',
+                    }}
+                  >
+                    {neighbor.portraitUrl && (
+                      <img
+                        src={neighbor.portraitUrl}
+                        alt={neighbor.portraitAlt || neighbor.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-11 w-11 shrink-0 rounded-xl object-cover object-[50%_20%]"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
+                        {neighbor.title}
+                      </p>
+                      <p className="truncate text-xs text-[var(--muted)]">{neighbor.subtitle}</p>
+                      <p
+                        className="mt-1 text-[11px] font-medium"
+                        style={{ color: 'var(--pt-accent)' }}
+                      >
+                        {neighbor.neighborhood || nRegion?.city}
+                      </p>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </article>
   );
 }

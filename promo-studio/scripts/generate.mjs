@@ -14,6 +14,7 @@ function parseArgs(argv) {
     city: '',
     role: 'Musicians',
     format: '',
+    url: '',
     tts: 'edge',
     voice: 'en-US-AndrewMultilingualNeural',
     rate: '+6%',
@@ -74,10 +75,10 @@ function buildCityScript(city, role, format, captured = null) {
         media: isLandscape ? 'screenshots/desktop-landing-dark.png' : (c0 ? c0.media : 'screenshots/mobile-swipe-synth-dark.png'),
         chromeMedia: c0 ? c0.media : 'screenshots/mobile-swipe-synth-dark.png',
         secondaryMedia: c1 ? c1.media : 'screenshots/mobile-swipe-drummer-dark.png',
-        primaryVideo: c0 ? (c0.videoRel || '') : 'generated/clips/dialtone-dottie.mp4',
-        secondaryVideo: c1 ? (c1.videoRel || '') : 'generated/clips/hubcap-harvey.mp4',
-        primaryAudio: c0 ? (c0.audioRel || '') : 'generated/clips/dialtone-dottie.wav',
-        secondaryAudio: c1 ? (c1.audioRel || '') : 'generated/clips/hubcap-harvey.wav',
+        primaryVideo: c0 ? (c0.videoRel || '') : 'generated/clips/la-23-noah-kim.mp4',
+        secondaryVideo: c1 ? (c1.videoRel || '') : 'generated/clips/la-07-jordan-hayes.mp4',
+        primaryAudio: c0 ? (c0.audioRel || '') : 'generated/clips/la-23-noah-kim.wav',
+        secondaryAudio: c1 ? (c1.audioRel || '') : 'generated/clips/la-07-jordan-hayes.wav',
         mediaType: isLandscape ? 'desktop' : 'phone-swipe',
         motion: 'zoom-in',
         narration: `Like Tinder for finding ${rolePhrase} in ${city} — meet AreaJam, built around real local clips.`,
@@ -91,12 +92,12 @@ function buildCityScript(city, role, format, captured = null) {
         chromeMedia: c0 ? c0.media : 'screenshots/mobile-swipe-synth-dark.png',
         midMedia: c2 ? c2.media : 'screenshots/mobile-swipe-light.png',
         secondaryMedia: c0 ? c0.media : 'screenshots/mobile-swipe-synth-dark.png',
-        primaryVideo: c1 ? (c1.videoRel || '') : 'generated/clips/hubcap-harvey.mp4',
-        midVideo: c2 ? (c2.videoRel || '') : 'generated/clips/icehouse-inez.mp4',
-        secondaryVideo: c0 ? (c0.videoRel || '') : 'generated/clips/dialtone-dottie.mp4',
-        primaryAudio: c1 ? (c1.audioRel || '') : 'generated/clips/hubcap-harvey.wav',
-        midAudio: c2 ? (c2.audioRel || '') : 'generated/clips/icehouse-inez.wav',
-        secondaryAudio: c0 ? (c0.audioRel || '') : 'generated/clips/dialtone-dottie.wav',
+        primaryVideo: c1 ? (c1.videoRel || '') : 'generated/clips/la-07-jordan-hayes.mp4',
+        midVideo: c2 ? (c2.videoRel || '') : 'generated/clips/la-01-maya-delgado.mp4',
+        secondaryVideo: c0 ? (c0.videoRel || '') : 'generated/clips/la-23-noah-kim.mp4',
+        primaryAudio: c1 ? (c1.audioRel || '') : 'generated/clips/la-07-jordan-hayes.wav',
+        midAudio: c2 ? (c2.audioRel || '') : 'generated/clips/la-01-maya-delgado.wav',
+        secondaryAudio: c0 ? (c0.audioRel || '') : 'generated/clips/la-23-noah-kim.wav',
         mediaType: isLandscape ? 'desktop' : 'phone-swipe',
         motion: 'zoom-in',
         narration: 'Swipe left to pass, swipe right to send a jam invite, and hear linked YouTube or Instagram clips right on the card.',
@@ -119,7 +120,7 @@ function buildCityScript(city, role, format, captured = null) {
         media: isLandscape
           ? 'screenshots/desktop-profile-synth-full.png'
           : (captured?.profileMedia || 'screenshots/mobile-profile-synth-full.png'),
-        clipAudio: captured?.profileClip?.audioRel || c0?.audioRel || 'generated/clips/dialtone-dottie.wav',
+        clipAudio: captured?.profileClip?.audioRel || c0?.audioRel || 'generated/clips/la-23-noah-kim.wav',
         mediaType: isLandscape ? 'desktop-scroll' : 'phone-scroll',
         scrollEndPct: isLandscape ? 45 : 68,
         motion: 'zoom-out',
@@ -161,16 +162,20 @@ function resolvePythonBin() {
 
 const SAMPLE_CLIPS = [
   {
-    filename: 'dialtone-dottie.mp4',
-    url: 'https://awerds.github.io/areajam-media/side-stage/clips/fictional-nashville-14-dialtone-dottie.mp4',
+    filename: 'la-36-darius-cole.mp4',
+    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-36-darius-cole.mp4'),
   },
   {
-    filename: 'hubcap-harvey.mp4',
-    url: 'https://awerds.github.io/areajam-media/side-stage/clips/fictional-la-03-hubcap-harvey.mp4',
+    filename: 'la-32-jaylen-scott.mp4',
+    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-32-jaylen-scott.mp4'),
   },
   {
-    filename: 'icehouse-inez.mp4',
-    url: 'https://awerds.github.io/areajam-media/side-stage/clips/fictional-austin-20-icehouse-inez.mp4',
+    filename: 'la-40-sam-whitaker.mp4',
+    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-40-sam-whitaker.mp4'),
+  },
+  {
+    filename: 'la-23-noah-kim.mp4',
+    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-23-noah-kim.mp4'),
   },
 ];
 
@@ -210,7 +215,7 @@ async function ensureClipAsset(clipsDir, pyBin, filename, url) {
   const dest = path.join(clipsDir, filename);
   if (fs.existsSync(dest) && fs.statSync(dest).size > 10000) {
     console.log(`[media] cached clip -> generated/clips/${filename}`);
-  } else {
+  } else if (/^https?:\/\//i.test(url)) {
     console.log(`[media] downloading clip -> ${filename}`);
     const res = await fetch(url);
     if (!res.ok) {
@@ -219,6 +224,12 @@ async function ensureClipAsset(clipsDir, pyBin, filename, url) {
     const buf = Buffer.from(await res.arrayBuffer());
     fs.writeFileSync(dest, buf);
     console.log(`[media] saved ${(buf.length / (1024 * 1024)).toFixed(2)} MB -> generated/clips/${filename}`);
+  } else if (fs.existsSync(url)) {
+    fs.copyFileSync(url, dest);
+    const mb = (fs.statSync(dest).size / (1024 * 1024)).toFixed(2);
+    console.log(`[media] copied local clip (${mb} MB) -> generated/clips/${filename}`);
+  } else {
+    throw new Error(`Clip source not found: ${url}`);
   }
 
   const wavDest = dest.replace(/\.mp4$/i, '.wav');
@@ -294,6 +305,9 @@ async function main() {
     const captureDir = path.join(generatedDir, 'captures', captureSlug);
     const captureScript = path.join(studioRoot, 'scripts', 'capture_city_assets.mjs');
     const captureArgs = [captureScript, '--city', opts.city, '--role', opts.role, '--out-dir', captureDir];
+    if (opts.url) {
+      captureArgs.push('--url', opts.url);
+    }
     if (opts.fresh === 'true') {
       captureArgs.push('--force');
     }

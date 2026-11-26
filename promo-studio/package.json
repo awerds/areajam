@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "setup:tts": "python3 -m venv .venv && .venv/bin/pip install --upgrade pip edge-tts mutagen",
+    "capture:screens": "node scripts/capture_site_screens.mjs",
     "render": "node scripts/generate.mjs",
-    "render:nashville": "node scripts/generate.mjs --city=Nashville --role=Drummers",
+    "render:la": "node scripts/generate.mjs --city=\"Los Angeles\" --role=Drummers",
     "render:walkthrough": "node scripts/generate.mjs --preset=presets/youtube-walkthrough.json",
     "studio": "npx remotion studio",
     "typecheck": "tsc --noEmit"
