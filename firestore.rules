@@ -32,8 +32,8 @@ rules_version = '2';
 //   - lessonRate: string (optional, <= 32)
 //   - sessionRate: string (optional, <= 32)
 //   - serviceNote: string (optional, <= 180)
-//   - instagramHandle: string (optional, <= 32)
-//   - sampleLink: string (optional, <= 200)
+//   - instagramHandle: string (optional, <= 30, ^[a-zA-Z0-9._]{1,30}$ when non-empty)
+//   - sampleLink: string (optional, <= 200, ^https://[^\s]+$ when non-empty)
 //   - clips: list<map> (required, 1..4 items)
 //   - featuredClipId: string (optional, <= 80)
 //   - profileStyle: map (required; allowed keys: themeId, moodStatus, soundsLike, bannerPattern)
@@ -220,7 +220,8 @@ service cloud.firestore {
              (!('title' in clip) || isBoundedString(clip.title, 1, 100)) &&
              (!('kind' in clip) || (clip.kind is string && clip.kind in ['embed', 'video', 'audio', 'synth-reel'])) &&
              (!('mediaId' in clip) || isBoundedString(clip.mediaId, 0, 128)) &&
-             (!('embedUrl' in clip) || (isBoundedString(clip.embedUrl, 1, 1000) && clip.embedUrl.matches('^https://.*'))) &&
+             (!('embedUrl' in clip) || (isBoundedString(clip.embedUrl, 0, 1000) && (clip.embedUrl == '' || clip.embedUrl.matches('^https://[^\\s]+$')))) &&
+             (!('kind' in clip) || clip.kind != 'embed' || ('embedUrl' in clip && isBoundedString(clip.embedUrl, 1, 1000) && clip.embedUrl.matches('^https://(www\\.youtube-nocookie\\.com|youtube-nocookie\\.com|www\\.youtube\\.com|player\\.vimeo\\.com|www\\.tiktok\\.com|w\\.soundcloud\\.com|www\\.instagram\\.com)/[^\\s]+$'))) &&
              (!('embedProvider' in clip) || (clip.embedProvider is string && clip.embedProvider in ['instagram', 'youtube', 'tiktok', 'vimeo', 'soundcloud', 'direct'])) &&
              (!('durationSec' in clip) || (clip.durationSec is number && clip.durationSec >= 0 && clip.durationSec <= 600)) &&
              (!('clipVariation' in clip) || clip.clipVariation is int) &&
@@ -297,8 +298,10 @@ service cloud.firestore {
              isOptionalString(data, 'lessonRate', 32) &&
              isOptionalString(data, 'sessionRate', 32) &&
              isOptionalString(data, 'serviceNote', 180) &&
-             isOptionalString(data, 'instagramHandle', 32) &&
+             isOptionalString(data, 'instagramHandle', 30) &&
+             (!('instagramHandle' in data) || data.instagramHandle == '' || data.instagramHandle.matches('^[a-zA-Z0-9._]{1,30}$')) &&
              isOptionalString(data, 'sampleLink', 200) &&
+             (!('sampleLink' in data) || data.sampleLink == '' || data.sampleLink.matches('^https://[^\\s]+$')) &&
              isValidClips(data.clips) &&
              isOptionalString(data, 'featuredClipId', 80) &&
              isValidProfileStyle(data.profileStyle) &&

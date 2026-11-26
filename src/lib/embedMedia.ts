@@ -189,3 +189,43 @@ export function parseClipUrl(raw: string): ParsedClipResult {
       'Use an Instagram Reel/Post, YouTube/Shorts, TikTok, Vimeo, SoundCloud, or direct MP4/MP3 HTTPS link.',
   };
 }
+
+const ALLOWED_EMBED_HOSTS = new Set([
+  'www.youtube-nocookie.com',
+  'youtube-nocookie.com',
+  'www.youtube.com',
+  'player.vimeo.com',
+  'www.tiktok.com',
+  'w.soundcloud.com',
+  'www.instagram.com',
+]);
+
+export function sanitizeRenderableEmbedUrl(raw?: string): string | null {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.length > 1000) return null;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'https:' || url.username || url.password) return null;
+    if (!ALLOWED_EMBED_HOSTS.has(url.hostname.toLowerCase())) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+export function sanitizeDirectMediaUrl(raw?: string): string | null {
+  if (!raw || typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.length > 1000) return null;
+  if (trimmed.startsWith('./profiles/') && !trimmed.includes('..')) {
+    return trimmed;
+  }
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'https:' || url.username || url.password) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}

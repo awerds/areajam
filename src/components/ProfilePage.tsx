@@ -31,7 +31,7 @@ import {
   PROFILE_THEME_LIST,
   safeHttpsUrl,
 } from '../data/themes';
-import { embedProviderLabel } from '../lib/embedMedia';
+import { embedProviderLabel, sanitizeInstagramHandle } from '../lib/embedMedia';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
 import type {
@@ -793,21 +793,24 @@ export function ProfilePage({
                         </span>
                       ) : null;
                     })()}
-                  {listing.instagramHandle && (
-                    <a
-                      href={`https://www.instagram.com/${listing.instagramHandle}/`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)] hover:bg-[var(--pt-pill-hover)]"
-                    >
-                      <Instagram
-                        className="h-3.5 w-3.5 shrink-0"
-                        style={{ color: 'var(--pt-accent)' }}
-                        aria-hidden="true"
-                      />
-                      <span>@{listing.instagramHandle}</span>
-                    </a>
-                  )}
+                  {(() => {
+                    const safeIgHandle = sanitizeInstagramHandle(listing.instagramHandle);
+                    return safeIgHandle ? (
+                      <a
+                        href={`https://www.instagram.com/${safeIgHandle}/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--ink)] hover:bg-[var(--pt-pill-hover)]"
+                      >
+                        <Instagram
+                          className="h-3.5 w-3.5 shrink-0"
+                          style={{ color: 'var(--pt-accent)' }}
+                          aria-hidden="true"
+                        />
+                        <span>@{safeIgHandle}</span>
+                      </a>
+                    ) : null;
+                  })()}
                   {listing.offersSession && (
                     <span
                       className="inline-flex items-center gap-1 rounded-full border border-amber-500/35 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold"

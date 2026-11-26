@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExternalLink, Star, Volume2, VolumeX } from 'lucide-react';
 import { startListingLoop, stopCardPreview } from '../lib/audioPreview';
 import { subscribeColorScheme } from '../lib/colorScheme';
-import { embedProviderLabel } from '../lib/embedMedia';
+import {
+  embedProviderLabel,
+  sanitizeDirectMediaUrl,
+  sanitizeRenderableEmbedUrl,
+} from '../lib/embedMedia';
 import { getMediaObjectUrl } from '../lib/mediaStorage';
 import type { Listing, MediaClip } from '../types';
 import { CardArtwork } from './CardArtwork';
@@ -131,8 +135,14 @@ export function ClipPlayer({
   const activeClip = clips[safeIndex];
   const featuredId = listing.featuredClipId || clips[0]?.id;
   const isMainClip = activeClip?.id === featuredId;
-  const isEmbed = activeClip?.kind === 'embed' && Boolean(activeClip.embedUrl);
-  const resolvedDirectUrl = activeClip?.embedUrl || localMediaUrl;
+  const safeEmbedUrl =
+    activeClip?.kind === 'embed' ? sanitizeRenderableEmbedUrl(activeClip.embedUrl) : null;
+  const isEmbed = activeClip?.kind === 'embed' && Boolean(safeEmbedUrl);
+  const safeDirectUrl =
+    activeClip?.kind === 'video' || activeClip?.kind === 'audio'
+      ? sanitizeDirectMediaUrl(activeClip.embedUrl)
+      : null;
+  const resolvedDirectUrl = safeDirectUrl || localMediaUrl;
   const hasRealVideo = activeClip?.kind === 'video' && Boolean(resolvedDirectUrl);
   const hasRealAudio = activeClip?.kind === 'audio' && Boolean(resolvedDirectUrl);
   const hideSingleTitleHud = hideClipTitle && !isEmbed && clips.length <= 1;
@@ -364,7 +374,7 @@ export function ClipPlayer({
     </div>
   );
 
-  if (isEmbed && activeClip?.embedUrl) {
+  if (isEmbed && safeEmbedUrl) {
     return (
       <div className={`card-art-${paletteIdx} flex h-full w-full flex-col overflow-hidden bg-[#10131d]`}>
         <div className="flex shrink-0 flex-col gap-1 border-b border-white/15 bg-[#10131d] px-3.5 pb-2 pt-1.5">
@@ -391,7 +401,7 @@ export function ClipPlayer({
               </span>
 
               <a
-                href={activeClip.embedUrl}
+                href={safeEmbedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
@@ -406,14 +416,15 @@ export function ClipPlayer({
 
         <div className="relative min-h-0 flex-1 overflow-hidden">
           {activeClip.embedProvider === 'instagram' ? (
-            <InstagramEmbedCard permalink={activeClip.embedUrl} title={activeClip.title} />
+            <InstagramEmbedCard permalink={safeEmbedUrl} title={activeClip.title} />
           ) : (
             <iframe
-              key={activeClip.embedUrl}
-              src={activeClip.embedUrl}
+              key={safeEmbedUrl}
+              src={safeEmbedUrl}
               title={activeClip.title}
               loading="lazy"
               referrerPolicy="strict-origin-when-cross-origin"
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="h-full w-full border-0 bg-[#10131d]"
