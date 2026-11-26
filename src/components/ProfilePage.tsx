@@ -21,6 +21,8 @@ import {
   Speaker,
   Star,
   Trash2,
+  UserCheck,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import {
@@ -54,7 +56,10 @@ interface ProfilePageProps {
   allListings: Listing[];
   allRegions: Region[];
   user: AuthUser | null;
+  isFollowing?: boolean;
+  invites?: JamInvite[];
   inviteByTargetUid?: Record<string, JamInvite>;
+  onToggleFollow?: (listing: Listing) => void;
   soundEnabled: boolean;
   wallComments: WallComment[];
   onToggleSound: () => void;
@@ -76,7 +81,10 @@ export function ProfilePage({
   allListings,
   allRegions,
   user,
+  isFollowing = false,
+  invites = [],
   inviteByTargetUid,
+  onToggleFollow,
   soundEnabled,
   wallComments,
   onToggleSound,
@@ -125,6 +133,80 @@ export function ProfilePage({
   const localSceneNeighbors = allListings
     .filter((item) => item.id !== listing.id && item.regionId === listing.regionId)
     .slice(0, 4);
+
+  const followers = (() => {
+    type FollowerPerson = {
+      key: string;
+      name: string;
+      subtitle: string;
+      avatarUrl?: string;
+      targetListing?: Listing;
+      badge?: string;
+    };
+
+    const otherPlayers = allListings.filter((item) => item.id !== listing.id);
+    const sameCityPlayers = otherPlayers.filter((item) => item.regionId === listing.regionId);
+    const pool = sameCityPlayers.length >= 6 ? sameCityPlayers : otherPlayers;
+
+    const usedIds = new Set<string>([listing.id]);
+    const list: FollowerPerson[] = [];
+
+    if (isFollowing) {
+      list.push({
+        key: 'viewer-following',
+        name: user?.displayName || 'You',
+        subtitle: 'Following',
+        avatarUrl: user?.photoURL,
+        badge: 'You',
+      });
+    }
+
+    const acceptedConnections = invites.filter(
+      (inv) =>
+        inv.status === 'accepted' &&
+        (inv.targetProfileId === listing.id ||
+          (listing.ownerUid && inv.toUid === listing.ownerUid))
+    );
+    for (const inv of acceptedConnections) {
+      const memberListing = allListings.find((item) => item.ownerUid === inv.fromUid);
+      if (memberListing) usedIds.add(memberListing.id);
+      const featured = memberListing
+        ? (memberListing.featuredClipId
+            ? memberListing.clips.find((c) => c.id === memberListing.featuredClipId)
+            : undefined) ?? memberListing.clips[0]
+        : undefined;
+      list.push({
+        key: `conn-${inv.id}`,
+        name: inv.fromName,
+        subtitle: memberListing?.subtitle || 'Local musician',
+        avatarUrl: featured?.posterUrl || memberListing?.portraitUrl,
+        targetListing: memberListing,
+      });
+    }
+
+    if (!listing.ownerUid && pool.length > 0) {
+      const start = Math.abs((listing.visualSeed || 11) * 7 + 3) % pool.length;
+      for (let i = 0; i < pool.length && list.length < (isFollowing ? 5 : 4); i += 1) {
+        const candidate = pool[(start + i * 3) % pool.length];
+        if (!usedIds.has(candidate.id)) {
+          usedIds.add(candidate.id);
+          const featured =
+            (candidate.featuredClipId
+              ? candidate.clips.find((c) => c.id === candidate.featuredClipId)
+              : undefined) ?? candidate.clips[0];
+          list.push({
+            key: `follower-${candidate.id}`,
+            name: candidate.title,
+            subtitle: candidate.subtitle,
+            avatarUrl: featured?.posterUrl || candidate.portraitUrl,
+            targetListing: candidate,
+          });
+        }
+      }
+    }
+
+    return list;
+  })();
 
   const safeHref = safeHttpsUrl(listing.sampleLink);
   const isJam = listing.side === 'jam';
@@ -224,11 +306,7 @@ export function ProfilePage({
     }
   };
 
-  const hasHeaderAction =
-    actionState.kind === 'accepted' ||
-    actionState.kind === 'incoming' ||
-    actionState.kind === 'sent' ||
-    actionState.kind === 'invite';
+  const hasHeaderAction = actionState.kind !== 'self';
 
   return (
     <article
@@ -812,18 +890,32 @@ export function ProfilePage({
                     >
                       <span>Request sent — view in Sent</span>
                     </button>
-                  ) : actionState.kind === 'invite' ? (
+                  ) : actionState.kind === 'invite' || actionState.kind === 'unavailable' ? (
                     <button
                       type="button"
                       onClick={() => onInvite(listing)}
-                      className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-md transition hover:opacity-90"
-                      style={{
-                        backgroundColor: 'var(--pt-accent)',
-                        color: 'var(--pt-accent-ink)',
-                      }}
+                      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-md transition ${
+                        isFollowing
+                          ? 'border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] text-[var(--ink)] hover:bg-[var(--pt-pill-hover)]'
+                          : 'hover:opacity-90'
+                      }`}
+                      style={
+                        isFollowing
+                          ? undefined
+                          : {
+                              backgroundColor: 'var(--pt-accent)',
+                              color: 'var(--pt-accent-ink)',
+                            }
+                      }
                     >
-                      <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
-                      <span>Invite to jam</span>
+                      {isFollowing ? (
+                        <UserCheck className="h-4 w-4 text-[var(--ok)]" aria-hidden="true" />
+                      ) : actionState.kind === 'unavailable' ? (
+                        <UserPlus className="h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <Flame className="h-4 w-4 fill-current" aria-hidden="true" />
+                      )}
+                      <span>{isFollowing ? 'Following' : 'Connect'}</span>
                     </button>
                   ) : null}
                 </div>
@@ -1156,6 +1248,132 @@ export function ProfilePage({
                   </button>
                 </div>
               </form>
+            )}
+          </section>
+
+          {/* Followers */}
+          <section
+            className="space-y-3.5 rounded-3xl border p-5 md:p-6"
+            style={{
+              backgroundColor: 'var(--pt-surface)',
+              borderColor: 'var(--pt-border)',
+            }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2">
+                <Users
+                  className="h-5 w-5"
+                  style={{ color: 'var(--pt-accent)' }}
+                  aria-hidden="true"
+                />
+                <h2 className="font-display text-lg font-bold text-[var(--ink)]">
+                  Followers
+                </h2>
+                <span className="rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--muted)]">
+                  {followers.length}
+                </span>
+              </div>
+
+              {actionState.kind !== 'self' && onToggleFollow && (
+                <button
+                  type="button"
+                  onClick={() => onToggleFollow(listing)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pt-border)] bg-[var(--pt-pill-bg)] px-3 py-1 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--pt-pill-hover)]"
+                >
+                  {isFollowing ? (
+                    <UserCheck className="h-3.5 w-3.5 text-[var(--ok)]" aria-hidden="true" />
+                  ) : (
+                    <UserPlus className="h-3.5 w-3.5" style={{ color: 'var(--pt-accent)' }} aria-hidden="true" />
+                  )}
+                  <span>{isFollowing ? 'Following' : 'Follow'}</span>
+                </button>
+              )}
+            </div>
+
+            {followers.length === 0 ? (
+              <p
+                className="rounded-2xl border border-dashed p-4 text-sm text-[var(--muted)]"
+                style={{
+                  backgroundColor: 'var(--pt-surface-inner)',
+                  borderColor: 'var(--pt-border)',
+                }}
+              >
+                No followers yet. Tap Follow above to be the first to follow {listing.title}.
+              </p>
+            ) : (
+              <ul role="list" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {followers.map((person) => {
+                  const initial = (person.name.trim().slice(0, 1) || 'M').toUpperCase();
+                  const content = (
+                    <>
+                      {person.avatarUrl ? (
+                        <img
+                          src={person.avatarUrl}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-9 w-9 shrink-0 rounded-full border border-[var(--pt-border-subtle)] object-cover object-[50%_20%]"
+                        />
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          className="font-display flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                          style={{
+                            backgroundColor: 'var(--pt-accent)',
+                            color: 'var(--pt-accent-ink)',
+                          }}
+                        >
+                          {initial}
+                        </span>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-xs font-bold text-[var(--ink)] sm:text-sm">
+                            {person.name}
+                          </p>
+                          {person.badge && (
+                            <span
+                              className="shrink-0 rounded-full border border-[var(--pt-border-subtle)] bg-[var(--pt-pill-bg)] px-1.5 py-0.5 text-[10px] font-semibold"
+                              style={{ color: 'var(--pt-accent)' }}
+                            >
+                              {person.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="truncate text-xs text-[var(--muted)]">{person.subtitle}</p>
+                      </div>
+                    </>
+                  );
+
+                  return (
+                    <li key={person.key}>
+                      {person.targetListing ? (
+                        <button
+                          type="button"
+                          onClick={() => onOpenProfile(person.targetListing!)}
+                          className="flex w-full items-center gap-2.5 rounded-2xl border p-2.5 text-left transition hover:-translate-y-0.5"
+                          style={{
+                            backgroundColor: 'var(--pt-surface-inner)',
+                            borderColor: 'var(--pt-border-subtle)',
+                          }}
+                        >
+                          {content}
+                        </button>
+                      ) : (
+                        <div
+                          className="flex items-center gap-2.5 rounded-2xl border p-2.5"
+                          style={{
+                            backgroundColor: 'var(--pt-surface-inner)',
+                            borderColor: 'var(--pt-border-subtle)',
+                          }}
+                        >
+                          {content}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </section>
 

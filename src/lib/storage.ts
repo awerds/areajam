@@ -66,6 +66,7 @@ export function getDefaultState(): AppState {
     userListings: [],
     swiped: {},
     history: [],
+    followedIds: [],
   };
 }
 
@@ -188,6 +189,9 @@ function buildStateFromParsed(
     userListings: ownedListings,
     swiped: parsed.swiped && typeof parsed.swiped === 'object' ? parsed.swiped : {},
     history: Array.isArray(parsed.history) ? parsed.history : [],
+    followedIds: Array.isArray(parsed.followedIds)
+      ? parsed.followedIds.filter((x) => typeof x === 'string')
+      : [],
   };
 }
 

@@ -4,7 +4,11 @@ export type NavTab = 'discover' | 'browse' | 'matches' | 'post';
 
 export type DiscoveryRole = 'musician' | 'session' | 'teacher';
 
-export type InboxFolder = 'inbox' | 'requests' | 'sent';
+export type InviteIntent = 'jam' | 'session' | 'lesson';
+
+export type ConnectionContext = 'follow' | InviteIntent;
+
+export type InboxFolder = 'inbox' | 'requests' | 'sent' | 'following';
 
 export type GigSubtype = 'band-for-hire' | 'open-gig';
 
@@ -158,6 +162,7 @@ export interface JamInvite {
   targetProfileTitle: string;
   regionId: string;
   note: string;
+  intent?: InviteIntent;
   status: JamInviteStatus;
   threadId: string;
   createdAt: number;
@@ -210,4 +215,5 @@ export interface AppState {
   userListings: Listing[];
   swiped: Record<string, SwipeDecision>;
   history: SwipeHistoryItem[];
+  followedIds: string[];
 }

@@ -467,9 +467,10 @@ export async function sendJamInvite(params: {
   fromUser: AuthUser;
   targetListing: Listing;
   note: string;
+  intent?: JamInvite['intent'];
   existingInvite?: JamInvite;
 }): Promise<'sent' | 'already-accepted' | 'already-pending' | 'incoming-pending'> {
-  const { fromUser, targetListing, note, existingInvite } = params;
+  const { fromUser, targetListing, note, intent = 'jam', existingInvite } = params;
   const toUid = targetListing.ownerUid;
   if (!toUid || toUid === fromUser.uid) {
     throw new Error('Cannot send a jam invite without a recipient account.');
@@ -501,6 +502,7 @@ export async function sendJamInvite(params: {
     targetProfileTitle: targetListing.title.trim().slice(0, 64),
     regionId: targetListing.regionId,
     note: trimmedNote,
+    intent,
     status: 'pending' as const,
     updatedAt: now,
   };

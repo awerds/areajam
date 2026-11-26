@@ -61,6 +61,7 @@ rules_version = '2';
 //   - targetProfileTitle: string (required, 1..64)
 //   - regionId: string (required, 2..64)
 //   - note: string (required, 1..280)
+//   - intent: string (optional, 'jam' | 'session' | 'lesson')
 //   - status: string (required, 'pending' | 'accepted' | 'declined' | 'cancelled')
 //   - threadId: string (required, immutable, == inviteId)
 //   - createdAt: int (required, immutable)
@@ -328,13 +329,18 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidInvite(data, inviteId) {
-      let keys = [
+      let allowedKeys = [
+        'participants', 'fromUid', 'toUid', 'fromName', 'toName',
+        'targetProfileId', 'targetProfileTitle', 'regionId', 'note',
+        'intent', 'status', 'threadId', 'createdAt', 'updatedAt'
+      ];
+      let requiredKeys = [
         'participants', 'fromUid', 'toUid', 'fromName', 'toName',
         'targetProfileId', 'targetProfileTitle', 'regionId', 'note',
         'status', 'threadId', 'createdAt', 'updatedAt'
       ];
-      return data.keys().hasOnly(keys) &&
-             data.keys().hasAll(keys) &&
+      return data.keys().hasOnly(allowedKeys) &&
+             data.keys().hasAll(requiredKeys) &&
              isSortedPair(data.participants) &&
              data.fromUid is string &&
              data.toUid is string &&
@@ -350,6 +356,7 @@ service cloud.firestore {
              isBoundedString(data.targetProfileTitle, 1, 64) &&
              isBoundedString(data.regionId, 2, 64) &&
              isBoundedString(data.note, 1, 280) &&
+             (!('intent' in data) || (data.intent is string && data.intent in ['jam', 'session', 'lesson'])) &&
              data.status is string &&
              data.status in ['pending', 'accepted', 'declined', 'cancelled'] &&
              data.createdAt is int &&
@@ -365,7 +372,8 @@ service cloud.firestore {
              request.resource.data.targetProfileId == resource.data.targetProfileId &&
              request.resource.data.targetProfileTitle == resource.data.targetProfileTitle &&
              request.resource.data.regionId == resource.data.regionId &&
-             request.resource.data.note == resource.data.note;
+             request.resource.data.note == resource.data.note &&
+             !request.resource.data.diff(resource.data).affectedKeys().hasAny(['intent']);
     }
 
     function isValidInviteTransition() {

@@ -77,8 +77,10 @@ import type {
   AppState,
   AuthUser,
   BlockedUser,
+  ConnectionContext,
   DiscoveryRole,
   InboxFolder,
+  InviteIntent,
   JamInvite,
   Listing,
   NavTab,
@@ -874,53 +876,73 @@ export function App() {
     }
   };
 
+  const handleToggleFollow = (listing: Listing) => {
+    const alreadyFollowing = state.followedIds.includes(listing.id);
+    setState((prev) => ({
+      ...prev,
+      followedIds: alreadyFollowing
+        ? prev.followedIds.filter((id) => id !== listing.id)
+        : [listing.id, ...prev.followedIds],
+      swiped: alreadyFollowing ? prev.swiped : { ...prev.swiped, [listing.id]: 'like' },
+    }));
+    showToast(
+      alreadyFollowing
+        ? `Unfollowed ${listing.title}.`
+        : `Following ${listing.title}. View anytime in Messages → Following.`
+    );
+  };
+
   const handleRequestInvite = (listing: Listing) => {
-    if (!listing.ownerUid) {
-      showToast('This profile is not accepting Jam invites right now.');
-      return;
-    }
-    if (!user) {
-      setPendingInviteTarget(listing);
-      setAuthReason(`Sign in with Google or Apple to invite ${listing.title} to jam.`);
-      setAuthModalOpen(true);
-      return;
-    }
-    if (listing.ownerUid === user.uid) {
+    if (user && listing.ownerUid === user.uid) {
       handleOpenProfile(listing);
       return;
     }
-    const existing = inviteByTargetUid[listing.ownerUid];
-    if (existing?.status === 'accepted') {
-      handleOpenInvites(existing.threadId, 'inbox');
-      return;
-    }
-    if (existing?.status === 'pending') {
-      handleOpenInvites(undefined, existing.toUid === user.uid ? 'requests' : 'sent');
-      return;
+    if (listing.ownerUid) {
+      const existing = inviteByTargetUid[listing.ownerUid];
+      if (existing?.status === 'accepted') {
+        handleOpenInvites(existing.threadId, 'inbox');
+        return;
+      }
+      if (existing?.status === 'pending') {
+        handleOpenInvites(undefined, existing.toUid === user?.uid ? 'requests' : 'sent');
+        return;
+      }
     }
     setDetailListing(null);
     setInviteTarget(listing);
   };
 
-  const handleSubmitInvite = async (listing: Listing, note: string) => {
-    if (!user) return;
+  const handleSubmitInvite = async (
+    listing: Listing,
+    note: string,
+    intent: InviteIntent = 'jam'
+  ) => {
+    if (!user) {
+      setPendingInviteTarget(listing);
+      setAuthReason(`Sign in with Google or Apple to send a ${intent} request to ${listing.title}.`);
+      setAuthModalOpen(true);
+      return;
+    }
     const existingInvite = listing.ownerUid ? inviteByTargetUid[listing.ownerUid] : undefined;
     const outcome = await sendJamInvite({
       fromUser: user,
       targetListing: listing,
       note,
+      intent,
       existingInvite,
     });
+    const intentLabel =
+      intent === 'session' ? 'session' : intent === 'lesson' ? 'lesson' : 'jam';
     if (outcome === 'already-accepted') {
       showToast(`You are already matched with ${listing.title} — opening Messages.`);
       handleOpenInvites(existingInvite?.threadId, 'inbox');
     } else if (outcome === 'incoming-pending') {
-      showToast(`${listing.title} already sent you a jam request — check Requests!`);
+      showToast(`${listing.title} already sent you a request — check Requests!`);
       handleOpenInvites(undefined, 'requests');
     } else if (outcome === 'already-pending') {
-      showToast(`Jam invite already pending for ${listing.title}.`);
+      showToast(`Request already pending for ${listing.title}.`);
     } else {
-      showToast(`Sent jam request to ${listing.title}. Track it in Messages.`);
+      showToast(`Sent ${intentLabel} request to ${listing.title}. Track it in Messages.`);
     }
   };
 
@@ -1405,7 +1427,10 @@ export function App() {
             allListings={allListings}
             allRegions={allRegions}
             user={user}
+            isFollowing={state.followedIds.includes(activeProfile.id)}
+            invites={visibleInvites}
             inviteByTargetUid={inviteByTargetUid}
+            onToggleFollow={handleToggleFollow}
             soundEnabled={soundEnabled}
             wallComments={liveWallNotes}
             onToggleSound={() => setSoundEnabled((s) => !s)}
@@ -1858,6 +1883,7 @@ export function App() {
                   discoveryRole={discoveryRole}
                   includeRemoteFriendly={state.includeRemoteFriendly}
                   onToggleRemoteFriendly={toggleRemoteFriendly}
+                  followedIds={state.followedIds}
                   region={currentRegion}
                   allRegions={allRegions}
                   swiped={state.swiped}
@@ -1888,6 +1914,9 @@ export function App() {
                 invites={visibleInvites}
                 threads={effectiveThreads}
                 listings={allListings}
+                followedIds={state.followedIds}
+                onToggleFollow={handleToggleFollow}
+                onConnectListing={handleRequestInvite}
                 regions={allRegions}
                 activeFolder={inboxFolder}
                 onSelectFolder={setInboxFolder}
@@ -2101,7 +2130,19 @@ export function App() {
             inviteTarget.regionLabel
             : undefined
         }
+        defaultContext={
+          (discoveryRole === 'session'
+            ? 'session'
+            : discoveryRole === 'teacher'
+              ? 'lesson'
+              : inviteTarget?.ownerUid
+                ? 'jam'
+                : 'follow') as ConnectionContext
+        }
+        isFollowing={Boolean(inviteTarget && state.followedIds.includes(inviteTarget.id))}
+        isSignedIn={Boolean(user)}
         onClose={() => setInviteTarget(null)}
+        onFollow={handleToggleFollow}
         onSubmit={handleSubmitInvite}
       />
 

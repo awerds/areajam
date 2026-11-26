@@ -7,13 +7,16 @@ import {
   Clock,
   Flag,
   Flame,
+  GraduationCap,
   Inbox,
   MessageCircle,
+  Mic2,
   Search,
   Send,
   ShieldBan,
   ShieldCheck,
   Sparkles,
+  UserCheck,
   UserRound,
   X,
 } from 'lucide-react';
@@ -35,6 +38,9 @@ interface MatchesViewProps {
   invites: JamInvite[];
   threads: PrivateThread[];
   listings: Listing[];
+  followedIds: string[];
+  onToggleFollow: (listing: Listing) => void;
+  onConnectListing: (listing: Listing) => void;
   regions: Region[];
   activeFolder: InboxFolder;
   onSelectFolder: (folder: InboxFolder) => void;
@@ -156,11 +162,48 @@ function AvatarBadge({
   );
 }
 
+function IntentBadge({ intent }: { intent?: JamInvite['intent'] }) {
+  if (intent === 'session') {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full border border-amber-500/35 bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold"
+        style={{ color: 'light-dark(#b45309, #fcd34d)' }}
+      >
+        <Mic2 className="h-2.5 w-2.5" aria-hidden="true" />
+        <span>Session</span>
+      </span>
+    );
+  }
+  if (intent === 'lesson') {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold"
+        style={{ color: 'light-dark(#047857, #6ee7b7)' }}
+      >
+        <GraduationCap className="h-2.5 w-2.5" aria-hidden="true" />
+        <span>Lesson</span>
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+      style={{ backgroundColor: 'var(--jam-soft)', color: 'var(--jam-text)' }}
+    >
+      <Flame className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
+      <span>Jam</span>
+    </span>
+  );
+}
+
 export function MatchesView({
   user,
   invites,
   threads,
   listings,
+  followedIds,
+  onToggleFollow,
+  onConnectListing,
   regions,
   activeFolder,
   onSelectFolder,
@@ -191,11 +234,13 @@ export function MatchesView({
     inbox: null,
     requests: null,
     sent: null,
+    following: null,
   });
   const panelRefs = useRef<Record<InboxFolder, HTMLDivElement | null>>({
     inbox: null,
     requests: null,
     sent: null,
+    following: null,
   });
 
   const selectedThread = threads.find((t) => t.id === selectedThreadId) ?? null;
@@ -262,7 +307,7 @@ export function MatchesView({
 
   useEffect(() => {
     const cleanups: Array<() => void> = [];
-    (['inbox', 'requests', 'sent'] as InboxFolder[]).forEach((folder) => {
+    (['inbox', 'requests', 'sent', 'following'] as InboxFolder[]).forEach((folder) => {
       const panel = panelRefs.current[folder];
       if (!panel) return;
       const handleBeforeMatch = () => {
@@ -346,9 +391,73 @@ export function MatchesView({
     });
   }, [outgoingPending, normalizedQuery, regions]);
 
+  const followedListings = useMemo(() => {
+    const byId = new Map(listings.map((item) => [item.id, item]));
+    return followedIds
+      .map((id) => byId.get(id))
+      .filter((item): item is Listing => Boolean(item));
+  }, [followedIds, listings]);
+
+  const filteredFollowing = useMemo(() => {
+    if (!normalizedQuery) return followedListings;
+    return followedListings.filter((item) => {
+      const regionCity = regions.find((r) => r.id === item.regionId)?.city ?? item.regionId;
+      return `${item.title} ${item.subtitle} ${item.neighborhood} ${regionCity}`
+        .toLowerCase()
+        .includes(normalizedQuery);
+    });
+  }, [followedListings, normalizedQuery, regions]);
+
   if (!user) {
     return (
-      <section aria-label="Messages and Matches" className="mx-auto w-full max-w-3xl">
+      <section aria-label="Messages and Matches" className="mx-auto w-full max-w-3xl space-y-5">
+        {followedListings.length > 0 && (
+          <div className="glass-surface space-y-3 rounded-[2rem] p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-[var(--ok)]" aria-hidden="true" />
+                <h2 className="font-display text-lg font-bold text-[var(--ink)]">
+                  Following ({followedListings.length})
+                </h2>
+              </div>
+              <span className="text-xs text-[var(--muted)]">Saved musicians</span>
+            </div>
+
+            <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {followedListings.map((item) => {
+                const { avatarUrl } = resolveParticipantMeta(listings, item.id, item.ownerUid);
+                return (
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onInspectListing(item)}
+                      className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                    >
+                      <AvatarBadge name={item.title} avatarUrl={avatarUrl} sizeClass="h-10 w-10" />
+                      <div className="min-w-0">
+                        <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
+                          {item.title}
+                        </p>
+                        <p className="truncate text-xs text-[var(--muted)]">{item.subtitle}</p>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onToggleFollow(item)}
+                      className="shrink-0 rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--muted)] transition hover:text-[var(--ink)]"
+                    >
+                      Unfollow
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         <div className="glass-surface space-y-6 rounded-[2rem] p-6 sm:p-8">
           <div className="space-y-3 text-center">
             <AreaJamMark className="mx-auto h-10 w-10" />
@@ -454,7 +563,7 @@ export function MatchesView({
     }
   };
 
-  const folderOrder: InboxFolder[] = ['inbox', 'requests', 'sent'];
+  const folderOrder: InboxFolder[] = ['inbox', 'requests', 'sent', 'following'];
 
   const handleTabKeyDown = (
     e: React.KeyboardEvent<HTMLButtonElement>,
@@ -693,6 +802,7 @@ export function MatchesView({
                 accentCount: incomingPending.length > 0,
               },
               { id: 'sent', label: 'Sent', count: outgoingPending.length, accentCount: false },
+              { id: 'following', label: 'Following', count: followedListings.length, accentCount: false },
             ] as const
           ).map((tab) => {
             const isActive = activeFolder === tab.id;
@@ -944,10 +1054,13 @@ export function MatchesView({
                             highlighted
                           />
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-baseline justify-between gap-2">
-                              <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
-                                {inv.fromName}
-                              </p>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-1.5">
+                                <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
+                                  {inv.fromName}
+                                </p>
+                                <IntentBadge intent={inv.intent} />
+                              </div>
                               <span className="shrink-0 text-[11px] font-medium text-[var(--muted)]">
                                 {formatRelativeTime(inv.updatedAt)}
                               </span>
@@ -1078,10 +1191,13 @@ export function MatchesView({
                                 shapeClass="rounded-2xl"
                               />
                               <div className="min-w-0 flex-1">
-                                <div className="flex items-baseline justify-between gap-2">
-                                  <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
-                                    {inv.targetProfileTitle}
-                                  </p>
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex min-w-0 items-center gap-1.5">
+                                    <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
+                                      {inv.targetProfileTitle}
+                                    </p>
+                                    <IntentBadge intent={inv.intent} />
+                                  </div>
                                   <span className="shrink-0 text-[11px] font-medium text-[var(--muted)]">
                                     {formatRelativeTime(inv.updatedAt)}
                                   </span>
@@ -1154,6 +1270,93 @@ export function MatchesView({
                     </div>
                   )}
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Following tabpanel */}
+          <div
+            ref={(el) => {
+              panelRefs.current.following = el;
+            }}
+            role="tabpanel"
+            id="folder-panel-following"
+            aria-labelledby="folder-tab-following"
+            hidden={activeFolder === 'following' ? undefined : ('until-found' as unknown as boolean)}
+            tabIndex={activeFolder === 'following' && filteredFollowing.length === 0 ? 0 : undefined}
+            className="col-start-1 row-start-1 min-h-0"
+          >
+            <div className="app-scroll h-full overflow-y-auto p-3">
+              <p className="px-1 pb-2.5 text-xs text-[var(--muted)]">
+                Musicians you follow. Open their page or upgrade to a Jam, Session, or Lesson request anytime.
+              </p>
+
+              {filteredFollowing.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] px-5 py-10 text-center">
+                  <UserCheck className="h-7 w-7 text-[var(--muted)]" aria-hidden="true" />
+                  <p className="font-display mt-3 text-base font-bold text-[var(--ink)]">
+                    {normalizedQuery ? 'No matching followed musicians' : 'Not following anyone yet'}
+                  </p>
+                  <p className="mt-1 max-w-xs text-xs leading-relaxed text-[var(--muted)]">
+                    {normalizedQuery
+                      ? `Nothing in Following matches "${searchQuery.trim()}".`
+                      : 'Swipe right or tap Connect on any musician and choose Follow to bookmark them here.'}
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {filteredFollowing.map((item) => {
+                    const region = regions.find((r) => r.id === item.regionId);
+                    const { avatarUrl } = resolveParticipantMeta(listings, item.id, item.ownerUid);
+                    return (
+                      <li
+                        key={item.id}
+                        className="space-y-2.5 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5"
+                      >
+                        <div className="flex items-start gap-3">
+                          <AvatarBadge
+                            name={item.title}
+                            avatarUrl={avatarUrl}
+                            sizeClass="h-11 w-11"
+                            shapeClass="rounded-2xl"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-display truncate text-sm font-bold text-[var(--ink)]">
+                              {item.title}
+                            </p>
+                            <p className="truncate text-xs text-[var(--muted)]">
+                              {item.subtitle} · {item.neighborhood || region?.city}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => onInspectListing(item)}
+                            className="rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:bg-[var(--surface-hover)]"
+                          >
+                            Profile
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onConnectListing(item)}
+                            className="rounded-xl px-2.5 py-1.5 text-xs font-bold transition hover:opacity-90"
+                            style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
+                          >
+                            Connect
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onToggleFollow(item)}
+                            className="rounded-xl border border-[var(--border)] bg-[var(--pill-bg)] px-2.5 py-1.5 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--err)]"
+                          >
+                            Unfollow
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Flame, Globe, GraduationCap, MessageCircle, Mic2, Pause, Play, Search } from 'lucide-react';
+import { Flame, Globe, GraduationCap, MessageCircle, Mic2, Pause, Play, Search, UserCheck, UserPlus } from 'lucide-react';
 import { getPlayingListingId, subscribeAudioState, toggleCardPreview } from '../lib/audioPreview';
 import { getProfileActionState } from '../lib/firestorePilot';
 import { estimateRoughDistanceMiles, formatRoughDistance } from '../lib/location';
@@ -23,6 +23,7 @@ interface BrowseGridProps {
   discoveryRole?: DiscoveryRole;
   includeRemoteFriendly?: boolean;
   onToggleRemoteFriendly?: () => void;
+  followedIds?: string[];
   region: Region;
   allRegions: Region[];
   swiped: Record<string, SwipeDecision>;
@@ -47,6 +48,7 @@ export function BrowseGrid({
   discoveryRole = 'musician',
   includeRemoteFriendly = false,
   onToggleRemoteFriendly,
+  followedIds = [],
   region,
   allRegions,
   showingNearestFallback = false,
@@ -325,18 +327,45 @@ export function BrowseGrid({
                     <InstrumentBadgeRow instruments={item.instruments} compact max={2} />
                   </div>
 
-                  {action.kind !== 'unavailable' && action.kind !== 'self' && (
+                  {action.kind !== 'self' && (
                     <div className="flex items-center gap-2 border-t border-[var(--border)] pt-2.5">
-                      {action.kind === 'invite' ? (
-                        <button
-                          type="button"
-                          onClick={() => onInvite(item)}
-                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition hover:opacity-90"
-                          style={{ backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }}
-                        >
-                          <Flame className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                          <span>Invite to jam</span>
-                        </button>
+                      {action.kind === 'invite' || action.kind === 'unavailable' ? (
+                        (() => {
+                          const isFollowing = followedIds.includes(item.id);
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => onInvite(item)}
+                              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
+                                isFollowing
+                                  ? 'border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink)] hover:bg-[var(--surface-hover)]'
+                                  : 'hover:opacity-90'
+                              }`}
+                              style={
+                                isFollowing
+                                  ? undefined
+                                  : { backgroundColor: 'var(--jam)', color: 'var(--jam-ink)' }
+                              }
+                            >
+                              {isFollowing ? (
+                                <UserCheck className="h-3.5 w-3.5 text-[var(--ok)]" aria-hidden="true" />
+                              ) : action.kind === 'unavailable' ? (
+                                <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                              ) : (
+                                <Flame className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                              )}
+                              <span>
+                                {isFollowing
+                                  ? 'Following'
+                                  : discoveryRole === 'session'
+                                    ? 'Connect'
+                                    : discoveryRole === 'teacher'
+                                      ? 'Connect'
+                                      : 'Connect'}
+                              </span>
+                            </button>
+                          );
+                        })()
                       ) : (
                         <button
                           type="button"
