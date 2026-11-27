@@ -10,6 +10,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
+import { ShortFirstFrameCoverLogo, WatermarkLogo } from './BrandLogoOverlay';
 import { CaptionOverlay } from './CaptionOverlay';
 import { ProfileScrollDemo } from './ProfileScrollDemo';
 import { SwipeHandDemo, getHookCard2VideoStart, getSwipeClipAudioWindow } from './SwipeHandDemo';
@@ -518,6 +519,12 @@ export const AreaJamPromo: React.FC<TimelineManifest> = (props) => {
           </Sequence>
         );
       })}
+
+      {/* Centered AreaJam logo on Frame 0 of vertical shorts (for frozen first-frame embeds) */}
+      {isPortrait && frame === 0 ? <ShortFirstFrameCoverLogo /> : null}
+
+      {/* Persistent corner watermark across all videos (hidden on Frame 0 of portrait shorts to avoid double logo) */}
+      {(!isPortrait || frame >= 1) ? <WatermarkLogo isPortrait={isPortrait} /> : null}
     </AbsoluteFill>
   );
 };
