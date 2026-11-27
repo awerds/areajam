@@ -1,4 +1,4 @@
-const CACHE_NAME = 'areajam-shell-v55';
+const CACHE_NAME = 'areajam-shell-v56';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    const isStaticLegalPage = /^\/(privacy|terms|support)(\/|$)/.test(url.pathname);
+    const isStaticSubpage = /^\/(privacy|terms|support|promo)(\/|$)/.test(url.pathname);
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -41,12 +41,16 @@ self.addEventListener('fetch', (event) => {
             const clone = response.clone();
             caches
               .open(CACHE_NAME)
-              .then((cache) => cache.put(isStaticLegalPage ? request : './index.html', clone));
+              .then((cache) => cache.put(isStaticSubpage ? request : './index.html', clone));
           }
           return response;
         })
-        .catch(() => caches.match(isStaticLegalPage ? request : './index.html'))
+        .catch(() => caches.match(isStaticSubpage ? request : './index.html'))
     );
+    return;
+  }
+
+  if (/\.(mp4|webm|mov|pdf)$/i.test(url.pathname)) {
     return;
   }
 
