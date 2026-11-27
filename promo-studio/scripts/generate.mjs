@@ -161,23 +161,24 @@ function resolvePythonBin() {
 }
 
 const SAMPLE_CLIPS = [
-  {
-    filename: 'la-36-darius-cole.mp4',
-    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-36-darius-cole.mp4'),
-  },
-  {
-    filename: 'la-32-jaylen-scott.mp4',
-    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-32-jaylen-scott.mp4'),
-  },
-  {
-    filename: 'la-40-sam-whitaker.mp4',
-    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-40-sam-whitaker.mp4'),
-  },
-  {
-    filename: 'la-23-noah-kim.mp4',
-    url: path.join(repoRoot, 'public', 'profiles', 'la', 'la-23-noah-kim.mp4'),
-  },
-];
+  'la-01-maya-delgado.mp4',
+  'la-02-devon-cruz.mp4',
+  'la-04-marcus-bell.mp4',
+  'la-08-chloe-park.mp4',
+  'la-11-tariq-mansour.mp4',
+  'la-13-amara-okafor.mp4',
+  'la-22-naomi-carter.mp4',
+  'la-23-noah-kim.mp4',
+  'la-24-claire-dupont.mp4',
+  'la-28-miles-benjamin.mp4',
+  'la-30-hannah-choi.mp4',
+  'la-34-ethan-park.mp4',
+  'la-36-darius-cole.mp4',
+  'la-37-audrey-hall.mp4',
+].map((filename) => ({
+  filename,
+  url: path.join(repoRoot, 'public', 'profiles', 'la', filename),
+}));
 
 function ensureMusicDir() {
   const musicDir = path.join(studioRoot, 'music');

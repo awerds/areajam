@@ -33,7 +33,7 @@ interface SwipeHandDemoProps {
   mode?: 'single-right' | 'full-demo';
 }
 
-const CARD_CLIP = 'inset(8.9% 3.1% 18.8% 3.1% round 24px)';
+const CARD_CLIP = 'inset(12.1% 2.6% 18.8% 2.6% round 28px)';
 
 /** Ensure interpolation input knots stay strictly increasing even on tight TTS timings. */
 function monotonicRange(knots: number[]): number[] {
@@ -136,15 +136,15 @@ const CardContent: React.FC<CardContentProps> = ({
     <div
       style={{
         position: 'absolute',
-        top: '8.9%',
+        top: '12.1%',
         bottom: '18.8%',
-        left: '3.1%',
-        right: '3.1%',
+        left: '2.6%',
+        right: '2.6%',
         overflow: 'hidden',
-        borderRadius: 24,
-        maskImage: 'linear-gradient(180deg, #000 0%, #000 60%, rgba(0,0,0,0.45) 71%, transparent 80%)',
+        borderRadius: 28,
+        maskImage: 'linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0.45) 70%, transparent 80%)',
         WebkitMaskImage:
-          'linear-gradient(180deg, #000 0%, #000 60%, rgba(0,0,0,0.45) 71%, transparent 80%)',
+          'linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0.45) 70%, transparent 80%)',
       }}
     >
       <Loop durationInFrames={loopDuration}>
@@ -195,7 +195,7 @@ const CardContent: React.FC<CardContentProps> = ({
         <div
           style={{
             position: 'absolute',
-            top: '10.9%',
+            top: '13.6%',
             left: '6.8%',
             right: '6.8%',
             height: isPortrait ? 4 : 3,
@@ -630,7 +630,6 @@ export const SwipeHandDemo: React.FC<SwipeHandDemoProps> = ({
               <Audio
                 src={staticFile(secondaryAudio)}
                 startFrom={hookAudioStartFrom}
-                loop
                 volume={(f) =>
                   bridgeToNext
                     ? interpolate(f, monotonicRange([0, 12]), [0, 0.52], {
@@ -775,11 +774,11 @@ export const SwipeHandDemo: React.FC<SwipeHandDemoProps> = ({
           <div
             style={{
               position: 'absolute',
-              top: '8.0%',
-              left: '2.2%',
-              right: '2.2%',
+              top: '11.6%',
+              left: '2.0%',
+              right: '2.0%',
               bottom: '18.2%',
-              borderRadius: 24,
+              borderRadius: 28,
               backgroundColor: '#10131d',
             }}
           />

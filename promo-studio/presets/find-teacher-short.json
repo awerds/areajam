@@ -1,0 +1,66 @@
+{
+  "title": "AreaJam Find a Local Music Teacher (Vertical Short)",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "ctaUrl": "areajam.com",
+  "ctaTagline": "Learn directly from working local musicians.",
+  "scenes": [
+    {
+      "id": "hook",
+      "badge": "Find a Teacher",
+      "headline": "Learn from real working musicians nearby",
+      "subline": "Hear how they actually play before you book",
+      "media": "screenshots/mobile-teacher-swipe-marcus.png",
+      "secondaryMedia": "screenshots/mobile-teacher-swipe-hannah.png",
+      "primaryVideo": "generated/clips/la-04-marcus-bell.mp4",
+      "secondaryVideo": "generated/clips/la-30-hannah-choi.mp4",
+      "secondaryAudio": "generated/clips/la-30-hannah-choi.wav",
+      "mediaType": "phone-swipe",
+      "motion": "zoom-in",
+      "narration": "Want a music teacher who actually plays the style you love? On AreaJam, you hear local players in action before you ever book a lesson."
+    },
+    {
+      "id": "browse",
+      "badge": "Transparent Hourly Rates",
+      "headline": "See local teachers & rates up front",
+      "subline": "Guitar, drums, cello, vocals & keys",
+      "media": "screenshots/mobile-teacher-browse-la.png",
+      "mediaType": "phone",
+      "motion": "tilt-left",
+      "narration": "Tap Find a Teacher to browse verified local instructors right in your city with transparent hourly rates right on the card."
+    },
+    {
+      "id": "profile",
+      "badge": "Lessons & Gear Locker",
+      "headline": "Check their focus, schedule & studio",
+      "subline": "In-person locally or online",
+      "media": "screenshots/mobile-teacher-profile-marcus.png",
+      "clipAudio": "generated/clips/la-04-marcus-bell.wav",
+      "mediaType": "phone-scroll",
+      "scrollEndPct": 65,
+      "motion": "zoom-in",
+      "narration": "Open their full page to see lesson rates, what techniques they teach, their gear setup, and their weekly availability."
+    },
+    {
+      "id": "connect",
+      "badge": "Direct Lesson Request",
+      "headline": "Follow or request a lesson in one tap",
+      "subline": "Zero middleman fees",
+      "media": "screenshots/mobile-teacher-connect-modal.png",
+      "mediaType": "phone",
+      "motion": "zoom-out",
+      "narration": "Tap Connect to follow their profile or send a direct lesson request with your goals—completely free with zero middleman markup."
+    },
+    {
+      "id": "cta",
+      "badge": "Free on AreaJam",
+      "headline": "Level up with a local teacher.",
+      "subline": "Find a Teacher at areajam.com",
+      "media": "",
+      "mediaType": "endcard",
+      "motion": "pulse",
+      "narration": "Find your next teacher at areajam dot com—or add a free Teacher badge to your own musician profile today."
+    }
+  ]
+}

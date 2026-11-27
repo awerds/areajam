@@ -1,0 +1,65 @@
+{
+  "title": "AreaJam Find a Musician to Jam With (Vertical Short)",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "ctaUrl": "areajam.com",
+  "ctaTagline": "Find local musicians to jam with today.",
+  "scenes": [
+    {
+      "id": "hook",
+      "badge": "Find a Musician Nearby",
+      "headline": "Find local musicians ready to jam",
+      "subline": "Real neighborhood clips. Zero guesswork.",
+      "media": "screenshots/mobile-musician-swipe-devon.png",
+      "secondaryMedia": "screenshots/mobile-musician-swipe-audrey.png",
+      "primaryVideo": "generated/clips/la-02-devon-cruz.mp4",
+      "secondaryVideo": "generated/clips/la-37-audrey-hall.mp4",
+      "secondaryAudio": "generated/clips/la-37-audrey-hall.wav",
+      "mediaType": "phone-swipe",
+      "motion": "zoom-in",
+      "narration": "Stop scrolling silent classifieds to find a bandmate. On AreaJam, you hear real local players right on the card."
+    },
+    {
+      "id": "browse",
+      "badge": "Local Scene Directory",
+      "headline": "Browse your city free — no sign-up",
+      "subline": "Filter by neighborhood, instrument & genre",
+      "media": "screenshots/mobile-musician-browse-la.png",
+      "mediaType": "phone",
+      "motion": "tilt-left",
+      "narration": "Filter by city, instrument, and genre to explore everyone playing in your metro—completely free with zero account required."
+    },
+    {
+      "id": "profile",
+      "badge": "Gear, Clips & Followers",
+      "headline": "Check their rig & vibe before rehearsal",
+      "subline": "Full artist page + followers list",
+      "media": "screenshots/mobile-musician-profile-amara.png",
+      "mediaType": "phone-scroll",
+      "scrollEndPct": 68,
+      "motion": "zoom-in",
+      "narration": "Tap any player to inspect their gear locker, weekly availability, and followers before you ever message."
+    },
+    {
+      "id": "connect",
+      "badge": "Follow or Jam",
+      "headline": "Follow in one tap or send a jam invite",
+      "subline": "Direct chat once they accept",
+      "media": "screenshots/mobile-session-connect-modal.png",
+      "mediaType": "phone",
+      "motion": "zoom-out",
+      "narration": "Tap Connect to follow their profile in one tap or send a direct jam invite—then lock in a rehearsal hour in your inbox."
+    },
+    {
+      "id": "cta",
+      "badge": "Free Web App",
+      "headline": "Find your tribe. Jam this week.",
+      "subline": "Drop your city & instrument below",
+      "media": "",
+      "mediaType": "endcard",
+      "motion": "pulse",
+      "narration": "Try it free at areajam dot com, and drop your city and instrument in the comments."
+    }
+  ]
+}

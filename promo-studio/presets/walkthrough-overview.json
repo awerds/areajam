@@ -1,0 +1,112 @@
+{
+  "title": "AreaJam Complete Site Walkthrough & Onboarding",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "ctaUrl": "areajam.com",
+  "ctaTagline": "Find musicians, teachers & session pros.",
+  "scenes": [
+    {
+      "id": "landing",
+      "badge": "Welcome to AreaJam",
+      "headline": "Find musicians, teachers & session players",
+      "subline": "Real clips. Local scenes. Remote studio work.",
+      "media": "screenshots/desktop-landing-dark.png",
+      "mediaType": "desktop",
+      "motion": "zoom-in",
+      "narration": "Welcome to AreaJam — the free web platform built around real performance clips so you can find local bandmates, music teachers, and remote session players."
+    },
+    {
+      "id": "musicians",
+      "badge": "Find a Musician",
+      "headline": "Explore your local music scene instantly",
+      "subline": "Filter by instrument, genre & neighborhood",
+      "media": "screenshots/desktop-musicians-dark.png",
+      "mediaType": "desktop",
+      "motion": "tilt-left",
+      "narration": "Start in Find a Musician to browse local players in your metro. Filter by instrument or genre, hear their clips, and browse completely free with no account required."
+    },
+    {
+      "id": "teachers",
+      "badge": "Find a Teacher",
+      "headline": "Local teachers with transparent pricing",
+      "subline": "Hear how they play before you book",
+      "media": "screenshots/desktop-teachers-light.png",
+      "mediaType": "desktop",
+      "motion": "zoom-out",
+      "narration": "Switch to Find a Teacher to discover working musicians offering lessons nearby—with hourly rates displayed cleanly right on their profile card."
+    },
+    {
+      "id": "session-remote",
+      "badge": "Find a Session Player",
+      "headline": "Include remote-friendly pros from any city",
+      "subline": "Local first — remote studio tracking right after",
+      "media": "screenshots/desktop-session-remote-dark.png",
+      "mediaType": "desktop",
+      "motion": "tilt-right",
+      "narration": "Need studio stems or production? Open Find a Session Player and toggle Include remote-friendly to unlock remote studio pros sorted neatly after local players."
+    },
+    {
+      "id": "profile",
+      "badge": "Full Artist Page",
+      "headline": "Clips, pricing, gear locker & followers",
+      "subline": "Everything you need to vet the vibe",
+      "media": "screenshots/desktop-profile-marcus-full.png",
+      "clipAudio": "generated/clips/la-04-marcus-bell.wav",
+      "mediaType": "desktop-scroll",
+      "scrollEndPct": 48,
+      "motion": "zoom-in",
+      "narration": "Every musician gets a clean, shareable page featuring their performance clips, lessons and session pricing, full gear locker, and public followers list."
+    },
+    {
+      "id": "connect",
+      "badge": "Contextual Connect",
+      "headline": "Follow, Jam, Session or Lesson — your call",
+      "subline": "1-tap Follow or direct tagged requests",
+      "media": "screenshots/desktop-connect-modal-dark.png",
+      "mediaType": "desktop",
+      "motion": "zoom-out",
+      "narration": "When you tap Connect, choose exactly how you want to reach out: a one-tap Follow to bookmark them, or a direct Jam, Session, or Lesson request."
+    },
+    {
+      "id": "studio-yt",
+      "badge": "Step 1: YouTube Import",
+      "headline": "Build your profile straight from YouTube",
+      "subline": "Paste your @handle to pull up to 4 clips",
+      "media": "screenshots/desktop-studio-step1-yt.png",
+      "mediaType": "desktop",
+      "motion": "tilt-left",
+      "narration": "Ready to join? Open Profile and Studio, type your YouTube handle to import your performance videos and Shorts, and auto-fill your artist details in seconds."
+    },
+    {
+      "id": "studio-services",
+      "badge": "Step 2: Badges & Pricing",
+      "headline": "Add free Teacher, Session & Remote badges",
+      "subline": "Set optional rates & service notes",
+      "media": "screenshots/desktop-studio-step2-services.png",
+      "mediaType": "desktop",
+      "motion": "zoom-in",
+      "narration": "In Step two, pick your instruments and genres, then optionally toggle Session Player, Teacher, or Remote-friendly with your own rates—100% free."
+    },
+    {
+      "id": "studio-preview",
+      "badge": "Step 3: Live Preview",
+      "headline": "Preview your card and publish live",
+      "subline": "Go live in under 60 seconds",
+      "media": "screenshots/desktop-studio-step3-preview.png",
+      "mediaType": "desktop",
+      "motion": "tilt-right",
+      "narration": "Check your live preview card with all your badges and pricing in Step three, sign in with Google or Apple, and publish straight to your local scene."
+    },
+    {
+      "id": "cta",
+      "badge": "areajam.com",
+      "headline": "Find your tribe. Match with musicians today.",
+      "subline": "Free on desktop & mobile — areajam.com",
+      "media": "",
+      "mediaType": "endcard",
+      "motion": "pulse",
+      "narration": "Head to areajam dot com right now to explore your local music scene and build your profile in under a minute."
+    }
+  ]
+}

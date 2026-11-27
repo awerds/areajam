@@ -1,0 +1,65 @@
+{
+  "title": "AreaJam Remote Session Musicians (Vertical Short)",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "ctaUrl": "areajam.com",
+  "ctaTagline": "Book remote session pros directly.",
+  "scenes": [
+    {
+      "id": "hook",
+      "badge": "Remote Session Work",
+      "headline": "Need real studio tracks on your song?",
+      "subline": "Hire remote-friendly session players direct",
+      "media": "screenshots/mobile-session-swipe-claire.png",
+      "secondaryMedia": "screenshots/mobile-session-swipe-miles.png",
+      "primaryVideo": "generated/clips/la-24-claire-dupont.mp4",
+      "secondaryVideo": "generated/clips/la-28-miles-benjamin.mp4",
+      "secondaryAudio": "generated/clips/la-28-miles-benjamin.wav",
+      "mediaType": "phone-swipe",
+      "motion": "zoom-in",
+      "narration": "Need vintage Rhodes, live tenor sax, or studio stems on your track? Book remote-friendly session pros direct on AreaJam."
+    },
+    {
+      "id": "remote",
+      "badge": "Include Remote-Friendly",
+      "headline": "Toggle Remote to unlock studio pros anywhere",
+      "subline": "Local first — remote pros right after",
+      "media": "screenshots/mobile-session-remote-browse.png",
+      "mediaType": "phone",
+      "motion": "tilt-left",
+      "narration": "Open Find a Session Player and toggle Remote on. Even from another city, you instantly unlock remote-ready players with clear per-track rates."
+    },
+    {
+      "id": "profile",
+      "badge": "Real Gear & Fast Stems",
+      "headline": "Check their preamps, mics & turnaround",
+      "subline": "Vintage Rhodes, tube amps & Neve rigs",
+      "media": "screenshots/mobile-session-profile-claire.png",
+      "mediaType": "phone-scroll",
+      "scrollEndPct": 65,
+      "motion": "zoom-in",
+      "narration": "Inspect their exact studio rig, hear how their stems sound, and check their turnaround time before you send a rough mix."
+    },
+    {
+      "id": "connect",
+      "badge": "Direct Session Inquiry",
+      "headline": "Send a Session request in seconds",
+      "subline": "Keep 100% direct with the player",
+      "media": "screenshots/mobile-session-connect-modal.png",
+      "mediaType": "phone",
+      "motion": "zoom-out",
+      "narration": "Tap Connect, pick Session, and drop your track vibe and timeline. No platform commission—just direct collaboration."
+    },
+    {
+      "id": "cta",
+      "badge": "areajam.com",
+      "headline": "Real players. Real stems. Anywhere.",
+      "subline": "Find a Session Player at areajam.com",
+      "media": "",
+      "mediaType": "endcard",
+      "motion": "pulse",
+      "narration": "Book your next remote session player—or list your own studio rig for free—at areajam dot com."
+    }
+  ]
+}

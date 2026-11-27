@@ -37,32 +37,48 @@ async def synthesize_edge(
     import edge_tts
     from mutagen.mp3 import MP3
 
-    communicate = edge_tts.Communicate(
-        text, voice=voice, rate=rate, boundary="WordBoundary"
-    )
-    words: list[dict] = []
-    audio_bytes = bytearray()
+    last_err: Exception | None = None
+    for attempt in range(1, 5):
+        try:
+            communicate = edge_tts.Communicate(
+                text, voice=voice, rate=rate, boundary="WordBoundary"
+            )
+            words: list[dict] = []
+            audio_bytes = bytearray()
 
-    async for chunk in communicate.stream():
-        chunk_type = chunk.get("type")
-        if chunk_type == "audio":
-            data = chunk.get("data")
-            if data:
-                audio_bytes.extend(data)
-        elif chunk_type == "WordBoundary":
-            word_text = str(chunk.get("text", "")).strip()
-            offset = chunk.get("offset")
-            duration = chunk.get("duration")
-            if word_text and isinstance(offset, (int, float)) and isinstance(duration, (int, float)):
-                start_ms = int(offset / 10_000)
-                end_ms = max(start_ms + 40, int((offset + duration) / 10_000))
-                words.append({"word": word_text, "startMs": start_ms, "endMs": end_ms})
+            async for chunk in communicate.stream():
+                chunk_type = chunk.get("type")
+                if chunk_type == "audio":
+                    data = chunk.get("data")
+                    if data:
+                        audio_bytes.extend(data)
+                elif chunk_type == "WordBoundary":
+                    word_text = str(chunk.get("text", "")).strip()
+                    offset = chunk.get("offset")
+                    duration = chunk.get("duration")
+                    if (
+                        word_text
+                        and isinstance(offset, (int, float))
+                        and isinstance(duration, (int, float))
+                    ):
+                        start_ms = int(offset / 10_000)
+                        end_ms = max(start_ms + 40, int((offset + duration) / 10_000))
+                        words.append({"word": word_text, "startMs": start_ms, "endMs": end_ms})
 
-    mp3_path.write_bytes(bytes(audio_bytes))
-    duration_sec = float(MP3(mp3_path).info.length)
-    if not words:
-        words = fallback_word_timings(text, duration_sec)
-    return duration_sec, words
+            if not audio_bytes:
+                raise RuntimeError("Empty audio buffer from edge-tts")
+
+            mp3_path.write_bytes(bytes(audio_bytes))
+            duration_sec = float(MP3(mp3_path).info.length)
+            if not words:
+                words = fallback_word_timings(text, duration_sec)
+            return duration_sec, words
+        except Exception as exc:
+            last_err = exc
+            if attempt < 4:
+                await asyncio.sleep(1.2 * attempt)
+    assert last_err is not None
+    raise last_err
 
 
 def synthesize_elevenlabs(text: str, mp3_path: Path, voice_id: str) -> tuple[float, list[dict]]:

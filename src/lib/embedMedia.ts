@@ -20,6 +20,7 @@ export function sanitizeInstagramHandle(raw?: string): string | undefined {
   cleaned = cleaned.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '');
   cleaned = cleaned.split(/[/?#]/)[0]?.replace(/^@+/, '') ?? '';
   if (!/^[a-zA-Z0-9._]{1,30}$/.test(cleaned)) return undefined;
+  if (cleaned === '.' || cleaned === '..' || cleaned.includes('..')) return undefined;
   return cleaned;
 }
 
