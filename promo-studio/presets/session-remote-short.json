@@ -11,14 +11,14 @@
       "badge": "Remote Session Work",
       "headline": "Need real studio tracks on your song?",
       "subline": "Hire remote-friendly session players direct",
-      "media": "screenshots/mobile-session-swipe-claire.png",
-      "secondaryMedia": "screenshots/mobile-session-swipe-miles.png",
-      "primaryVideo": "generated/clips/la-24-claire-dupont.mp4",
-      "secondaryVideo": "generated/clips/la-28-miles-benjamin.mp4",
-      "secondaryAudio": "generated/clips/la-28-miles-benjamin.wav",
+      "media": "screenshots/mobile-session-swipe-miles.png",
+      "secondaryMedia": "screenshots/mobile-session-swipe-claire.png",
+      "primaryVideo": "generated/clips/la-28-miles-benjamin.mp4",
+      "secondaryVideo": "generated/clips/la-24-claire-dupont.mp4",
+      "secondaryAudio": "generated/clips/la-24-claire-dupont.wav",
       "mediaType": "phone-swipe",
       "motion": "zoom-in",
-      "narration": "Need vintage Rhodes, live tenor sax, or studio stems on your track? Book remote-friendly session pros direct on AreaJam."
+      "narration": "Need a Rhodes player or studio stems on your track? Book remote session pros direct on AreaJam."
     },
     {
       "id": "remote",

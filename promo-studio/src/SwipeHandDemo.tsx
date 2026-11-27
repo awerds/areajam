@@ -142,9 +142,9 @@ const CardContent: React.FC<CardContentProps> = ({
         right: '2.6%',
         overflow: 'hidden',
         borderRadius: 28,
-        maskImage: 'linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0.45) 70%, transparent 80%)',
+        maskImage: 'linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.5) 79%, transparent 85%)',
         WebkitMaskImage:
-          'linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0.45) 70%, transparent 80%)',
+          'linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.5) 79%, transparent 85%)',
       }}
     >
       <Loop durationInFrames={loopDuration}>
