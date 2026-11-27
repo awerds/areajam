@@ -21,6 +21,7 @@ const SceneStage: React.FC<{
   isPortrait: boolean;
   ctaUrl: string;
   hasGlobalMusic: boolean;
+  isFirstScene?: boolean;
   bridgeToNext?: boolean;
   bridgeFromPrev?: boolean;
   bridgeStartFrom?: number;
@@ -29,6 +30,7 @@ const SceneStage: React.FC<{
   isPortrait,
   ctaUrl,
   hasGlobalMusic,
+  isFirstScene = false,
   bridgeToNext = false,
   bridgeFromPrev = false,
   bridgeStartFrom = 0,
@@ -360,7 +362,9 @@ const SceneStage: React.FC<{
         </div>
       )}
 
-      <CaptionOverlay words={scene.words} fps={fps} isPortrait={isPortrait} />
+      {!(isPortrait && isFirstScene && frame === 0) ? (
+        <CaptionOverlay words={scene.words} fps={fps} isPortrait={isPortrait} />
+      ) : null}
     </AbsoluteFill>
   );
 };
@@ -512,6 +516,7 @@ export const AreaJamPromo: React.FC<TimelineManifest> = (props) => {
               isPortrait={isPortrait}
               ctaUrl={props.ctaUrl}
               hasGlobalMusic={hasGlobalMusic}
+              isFirstScene={idx === 0}
               bridgeToNext={bridgeToNext}
               bridgeFromPrev={bridgeFromPrev}
               bridgeStartFrom={bridgeStartFrom}
